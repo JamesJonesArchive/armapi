@@ -1,0 +1,20 @@
+{
+    "name": "usf-it/armapi",
+    "description": "Description of project armapi.",
+    "authors": [
+        {
+            "name": "James Jones",
+            "email": "james@mail.usf.edu"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/USF-IT/usf-idm-database/"
+        }
+    ],
+    "require": {
+        "usf-it/usf-idm-database": "dev-master",
+        "usf-it/usf-idm-common": "dev-master"
+    }
+}
