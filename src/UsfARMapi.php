@@ -26,6 +26,13 @@ namespace USF\IdM;
  * 
  */
 class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
+    
+    private $version = "0.0.1";
+    
+    public function getVersion() {
+        return $this->version;
+    }
+    
     // Get Methods
     /**
      * Retrieves an array of accounts for a specified identity object
