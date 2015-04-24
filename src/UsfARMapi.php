@@ -41,7 +41,10 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
-        
+        return [
+            "rockybull",
+            "mollymock"
+        ];
     }
     /**
      * Retrieves an array of roles for a specified identity object
@@ -50,7 +53,10 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of roles
      */
     public function getRolesForIdentity($identity) {
-        
+        return [
+            "User",
+            "Student"
+        ];
     }
     /**
      * Retrieves an array of roles for a specified account object
@@ -59,7 +65,10 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of roles
      */
     public function getRolesForAccount($account) {
-        
+        return [
+            "User",
+            "Student"
+        ];
     }
     /**
      * Retrieves an identity associated with a specified account object
@@ -68,7 +77,9 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return object as an identity associated with the account
      */
     public function getIdentityForAccount($account) {
-        
+        return [
+            "name" => "Rocky Bull"
+        ];
     }
     /**
      * Retrieves an array of identities associated with a specified role object
@@ -77,7 +88,14 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of identities
      */
     public function getIdentitiesForRole($role) {
-        
+        return [
+            [
+                "name" => "Rocky Bull"
+            ],
+            [
+                "name" => "Molly Mock"
+            ]
+        ];
     }
     // POST methods
     /**
