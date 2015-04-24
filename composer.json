@@ -1,10 +1,13 @@
 {
     "name": "usf-it/armapi",
-    "description": "Description of project armapi.",
+    "description": "Native service methods supporting the ARM project.",
+    "type": "library",
+    "license": "Apache-2.0",
     "authors": [
         {
             "name": "James Jones",
-            "email": "james@mail.usf.edu"
+            "email": "james@usf.edu",
+            "role": "Developer"
         }
     ],
     "minimum-stability": "dev",
