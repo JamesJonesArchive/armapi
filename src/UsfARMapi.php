@@ -18,6 +18,8 @@
 
 namespace USF\IdM;
 
+use \JSend\JSendResponse;
+
 /**
  * UsfARMapi is an class that performs
  * the ARM service methods
@@ -41,10 +43,12 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
-        return [
-            "rockybull",
-            "mollymock"
-        ];
+        return new JSendResponse('success', [ 
+            "accounts" => [
+                "rockybull",
+                "mollymock"
+            ]
+        ]);
     }
     /**
      * Retrieves an array of roles for a specified identity object
@@ -53,10 +57,12 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of roles
      */
     public function getRolesForIdentity($identity) {
-        return [
-            "User",
-            "Student"
-        ];
+        return new JSendResponse('success', [ 
+            "roles" => [
+                "User",
+                "Student"
+            ]
+        ]);
     }
     /**
      * Retrieves an array of roles for a specified account object
@@ -65,10 +71,12 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of roles
      */
     public function getRolesForAccount($account) {
-        return [
-            "User",
-            "Student"
-        ];
+        return new JSendResponse('success', [ 
+            "roles" => [
+                "User",
+                "Student"
+            ]
+        ]);
     }
     /**
      * Retrieves an identity associated with a specified account object
@@ -77,9 +85,9 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return object as an identity associated with the account
      */
     public function getIdentityForAccount($account) {
-        return [
+        return new JSendResponse('success', [ 
             "name" => "Rocky Bull"
-        ];
+        ]);
     }
     /**
      * Retrieves an array of identities associated with a specified role object
@@ -88,14 +96,16 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return array of identities
      */
     public function getIdentitiesForRole($role) {
-        return [
-            [
-                "name" => "Rocky Bull"
-            ],
-            [
-                "name" => "Molly Mock"
+        return new JSendResponse('success', [ 
+            "identities" => [
+                [
+                    "name" => "Rocky Bull"
+                ],
+                [
+                    "name" => "Molly Mock"
+                ]
             ]
-        ];
+        ]);
     }
     // POST methods
     /**
@@ -106,7 +116,27 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return object with the status of the assignment
      */
     public function setAccountForIdentity($identity,$account) {
-        
+        $armdb = $this->getMongoConnection()->arm;
+        $identities = $armdb->identities;
+        $accountidentity = $identities->findOne(["name" => $identity.id ]);
+        if(is_null($accountidentity)) {
+            return new JSendResponse('fail',[
+                "identity" => "Specified Identity does not exist"
+            ]);
+        }
+        $accounts = $armdb->accounts;
+        $assignaccount = $accounts->findOne([ "name" => $account.name ]);
+        if(is_null($assignaccount)) {
+            return new JSendResponse('fail',[
+                "account" => "Specified Account does not exist"
+            ]);
+        }
+        $status = $accounts->update([ "name" => $account.name ],[ "identity" => $identity.id ]);
+        if($status) {
+            return new JSendResponse('success', [ "status" => "Update Successful!" ]);
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
     }
     /**
      * Assigns a specified role object with an existing account
@@ -116,6 +146,35 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return object with the status of the assignment
      */
     public function setRoleForAccount($account,$role) {
-        
+        $armdb = $this->getMongoConnection()->arm;
+        $accounts = $armdb->accounts;
+        $assignaccount = $accounts->findOne([ "name" => $account["name"] ]);
+        if(is_null($assignaccount)) {
+            return new JSendResponse('fail',[
+                "account" => "Specified Account does not exist"
+            ]);
+        }
+        $roles = $armdb->roles;
+        $assignrole = $roles->findOne([ "name" => $role["name"] ]);
+        if(is_null($assignrole)) {
+            return new JSendResponse('fail',[
+                "account" => "Specified Role does not exist"
+            ]);
+        }
+        if(!isset($assignaccount["roles"])) {
+            $assignaccount["roles"] = [];
+        }
+        if (in_array($role["name"], $assignaccount["roles"])) {
+            return new JSendResponse('fail',[
+                "account" => "Role already set for this account"
+            ]);
+        }
+        $assignaccount["roles"][] = $role["name"];
+        $status = $accounts->update([ "name" => $account["name"] ],[ "roles" => $assignrole["roles"] ]);
+        if($status) {
+            return new JSendResponse('success', [ "status" => "Update Successful!" ]);
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
     }
 }

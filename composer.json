@@ -7,6 +7,8 @@
             "email": "james@mail.usf.edu"
         }
     ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "repositories": [
         {
             "type": "vcs",
@@ -15,6 +17,7 @@
     ],
     "require": {
         "usf-it/usf-idm-database": "dev-master",
-        "usf-it/usf-idm-common": "dev-master"
+        "usf-it/usf-idm-common": "dev-master",
+        "shkm/jsend": ">1.2.0"
     }
 }
