@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * Copyright 2015 University of South Florida
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace USF\IdM;
+
+/**
+ * UsfARMapiTest tests the UsfARMapi
+ * ARM service methods
+ *
+ * @author James Jones <james@mail.usf.edu>
+ * 
+ */
+class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
+
+    use \Zumba\PHPUnit\Extensions\Mongo\TestTrait;
+
+    const DEFAULT_DATABASE = 'mongounit_test';
+
+    protected $connection;
+    protected $dataset;
+    protected $fixture = [
+        'some_collection' => [
+            ['name' => 'Document 1'],
+            ['name' => 'Document 2']
+        ]
+    ];
+
+    /**
+     * Get the mongo connection for this test.
+     *
+     * @return Zumba\PHPUnit\Extensions\Mongo\Client\Connector
+     */
+    public function getMongoConnection() {
+        // return new \MongoClient();
+        if (empty($this->connection)) {
+            $this->connection = new \Zumba\PHPUnit\Extensions\Mongo\Client\Connector(new \MongoClient());
+            $this->connection->setDb(static::DEFAULT_DATABASE);
+        }
+        return $this->connection;
+    }
+
+    /**
+     * Get the dataset to be used for this test.
+     *
+     * @return Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet
+     */
+    public function getMongoDataSet() {
+        if (empty($this->dataSet)) {
+            $this->dataSet = new \Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet($this->getMongoConnection());
+            $this->dataSet->setFixture($this->fixture);
+        }
+        return $this->dataSet;
+    }
+
+    public function testRead() {
+        $result = $this->getMongoConnection()->collection('some_collection')->findOne(['name' => 'Document 2']);
+        $this->assertEquals('Document 2', $result['name']);
+    }
+
+}
