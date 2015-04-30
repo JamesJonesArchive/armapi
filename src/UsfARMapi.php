@@ -116,20 +116,17 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
      * @return object with the status of the assignment
      */
     public function setAccountForIdentity($identity,$account) {
-        $armdb = $this->getMongoConnection()->arm;
-        $identities = $armdb->identities;
-        $accountidentity = $identities->findOne(["name" => $identity.id ]);
-        if(is_null($accountidentity)) {
-            return new JSendResponse('fail',[
-                "identity" => "Specified Identity does not exist"
-            ]);
-        }
+        $armdb = $this->getMongoConnection()->arm;                
         $accounts = $armdb->accounts;
         $assignaccount = $accounts->findOne([ "name" => $account.name ]);
         if(is_null($assignaccount)) {
             return new JSendResponse('fail',[
                 "account" => "Specified Account does not exist"
             ]);
+        } elseif ((!is_null($assignaccount.identity))?($assignaccount.identity.id == $identity.id):false) {
+            return new JSendResponse('fail',[
+                "account" => "Identity already set for this account"
+            ]);            
         }
         $status = $accounts->update([ "name" => $account.name ],[ "identity" => $identity.id ]);
         if($status) {
@@ -160,16 +157,15 @@ class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
             return new JSendResponse('fail',[
                 "account" => "Specified Role does not exist"
             ]);
-        }
-        if(!isset($assignaccount["roles"])) {
+        } elseif (!isset($assignaccount["roles"])) {
             $assignaccount["roles"] = [];
         }
-        if (in_array($role["name"], $assignaccount["roles"])) {
+        if (in_array($assignrole["_id"], $assignaccount["roles"])) {
             return new JSendResponse('fail',[
                 "account" => "Role already set for this account"
             ]);
         }
-        $assignaccount["roles"][] = $role["name"];
+        $assignaccount["roles"][] = $assignrole["_id"];
         $status = $accounts->update([ "name" => $account["name"] ],[ "roles" => $assignrole["roles"] ]);
         if($status) {
             return new JSendResponse('success', [ "status" => "Update Successful!" ]);
