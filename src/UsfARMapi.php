@@ -27,7 +27,7 @@ use \JSend\JSendResponse;
  * @author James Jones <james@mail.usf.edu>
  * 
  */
-class UsfARMapi extends USF\IdM\UsfAbstractMongoConnection {
+class UsfARMapi extends UsfAbstractMongoConnection {
     
     private $version = "0.0.1";
     
