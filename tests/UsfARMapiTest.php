@@ -45,7 +45,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      *
      * @return Zumba\PHPUnit\Extensions\Mongo\Client\Connector
      */
-    public function getMongoConnection() {
+    protected function getMongoConnection() {
         // return new \MongoClient();
         if (empty($this->connection)) {
             $this->connection = new \Zumba\PHPUnit\Extensions\Mongo\Client\Connector(new \MongoClient());
@@ -59,7 +59,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      *
      * @return Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet
      */
-    public function getMongoDataSet() {
+    protected function getMongoDataSet() {
         if (empty($this->dataSet)) {
             $this->dataSet = new \Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet($this->getMongoConnection());
             $this->dataSet->setFixture($this->fixture);
@@ -71,5 +71,54 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $result = $this->getMongoConnection()->collection('some_collection')->findOne(['name' => 'Document 2']);
         $this->assertEquals('Document 2', $result['name']);
     }
+    /**
+     * @covers UsfARMapi::getVersion
+     */
+    public function testGetVersion() {
+        $version = "0.0.1";
+        $this->assertEquals('0.0.1', $version);
+    }
 
+    /**
+     * @covers UsfARMapi::getAccountsForIdentity
+     */
+    public function testGetAccountsForIdentity() {
+        
+    }
+    /**
+     * @covers UsfARMapi::getRolesForIdentity
+     */
+    public function testGetRolesForIdentity() {
+        
+    }
+    /**
+     * @covers UsfARMapi::getRolesForAccount
+     */
+    public function testGetRolesForAccount() {
+        
+    }
+    /**
+     * @covers UsfARMapi::getIdentityForAccount
+     */
+    public function testGetIdentityForAccount() {
+        
+    }
+    /**
+     * @covers UsfARMapi::getIdentitiesForRole
+     */
+    public function testGetIdentitiesForRole() {
+        
+    }
+    /**
+     * @covers UsfARMapi::setAccountForIdentity
+     */
+    public function testSetAccountForIdentity() {
+        
+    }
+    /**
+     * @covers UsfARMapi::setRoleForAccount
+     */
+    public function testSetRoleForAccount() {
+        
+    }
 }
