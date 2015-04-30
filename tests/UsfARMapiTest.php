@@ -66,7 +66,9 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         }
         return $this->dataSet;
     }
-
+    /**
+     * @coversNothing
+     */
     public function testRead() {
         $result = $this->getMongoConnection()->collection('some_collection')->findOne(['name' => 'Document 2']);
         $this->assertEquals('Document 2', $result['name']);
