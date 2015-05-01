@@ -30,157 +30,254 @@ use \JSend\JSendResponse;
 class UsfARMapi extends UsfAbstractMongoConnection {
 
     private $version = "0.0.1";
-
+    private $armdb = null;
+    
     public function getVersion() {
         return $this->version;
     }
+    
+    private function getARMdb() {
+        if ($this->armdb === null) {
+            $this->armdb = $this->getMongoConnection()->arm;
+        }
 
+        return $this->armdb;
+    }
     // New stuff
+    /**
+     * Returns all accounts of all types
+     * 
+     * @return JSendResponse
+     */
     public function getAllAccounts() {
-        return new JSendResponse('success', [
-            "GEMS" => [
-                [ "href" => "/accounts/GEMS/000000123456"],
-                [ "href" => "/accounts/GEMS/000000123457"],
-                [ "href" => "/accounts/GEMS/000000123457"],
-                [ "href" => "/accounts/GEMS/000000123458"],
-                [ "href" => "/accounts/GEMS/mmock"],
-                [ "href" => "/accounts/GEMS/jsmith"]
-            ],
-            "FAST" => [
-                [ "href" => "/accounts/FAST/U12345678"],
-                [ "href" => "/accounts/FAST/U23456789"],
-                [ "href" => "/accounts/FAST/U34567890"]
-            ],
-            "Active Directory" => [
-                [ "href" => "/accounts/AD/mmock@usf.edu"],
-                [ "href" => "/accounts/AD/jsmith@usf.edu"],
-                [ "href" => "/accounts/AD/jsmith12@usf.edu"]
-            ]
-        ]);
+        $accounts = $this->getARMdb()->accounts;
+        $accountlist = $accounts->find();
+        $result = [];
+        foreach($accountlist as $act) {
+            if (!isset($result[$act['type']])) {
+                $result[$act['type']] = [];
+            }
+            $result[$act['type']][] = $act["href"];
+        }
+        return new JSendResponse('success', $result);
     }
 
-    // End New Stuff
-    // Get Methods
     /**
-     * Retrieves an array of accounts for a specified identity object
+     * Retrieves an array of accounts for a specified identity 
      * 
      * @param object $identity
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
-        return new JSendResponse('success', [
-            "identity" => "U12345678",
-            "accounts" => [
-                [
-                    "type" => "GEMS",
-                    "identifier" => "00000012345",
-                    "employeeID" => "00000012345",
-                    "created_date" => "2015-05-08T00:00:00.000Z",
-                    "passwd_change" => "2015-01-08T13:20:11.000Z",
-                    "href" => "/accounts/GEMS/00000012345",
-                    "roles" => [
-                        [
-                            "name" => "Self-Service",
-                            "description" => "This role allows the user to access GEMS self-service",
-                            "added_date" => "2015-05-08T00:00:00.000Z",
-                            "href" => "/roles/1"
-                        ]
-                    ]
-                ],
-                [
-                    "type" => "GEMS",
-                    "identifier" => "jsmith",
-                    "employeeID" => "00000012345",
-                    "created_date" => "2015-05-08T00:00:00.000Z",
-                    "passwd_change" => "2015-01-08T13:20:11.000Z",
-                    "href" => "/accounts/GEMS/jsmith",
-                    "roles" => [
-                        [
-                            "name" => "Self-Service",
-                            "description" => "This role allows the user to access GEMS",
-                            "added_date" => "2015-05-08T00:00:00.000Z",
-                            "href" => "/roles/1"
-                        ]
-                    ]
-                ],
-                [
-                    "type" => "FAST",
-                    "identifier" => "U12345678",
-                    "employeeID" => "00000012345",
-                    "created_date" => "2014-01-09T10:15:52.000Z",
-                    "passwd_change" => "2015-01-08T13:20:11.000Z",
-                    "href" => "/accounts/FAST/U12345678",
-                    "roles" => [
-                        [
-                            "name" => "Traveler",
-                            "description" => "This role allows the user to acces the travel application",
-                            "added_date" => "2014-01-09T10:15:52.000Z",
-                            "href" => "/roles/3"
-                        ]
-                    ]
-                ],
-                [
-                    "type" => "Active Directory",
-                    "identifier" => "mmock@usf.edu",
-                    "dn" => "CN=Mock\\, Molly [mmock],OU=affiliated,DC=forest,DC=usf,DC=edu",
-                    "created_date" => "2012-04-23T18:25:43.000Z",
-                    "modified_date" => "2015-01-08T13:20:11.000Z",
-                    "passwd_change" => "2015-01-08T13:20:11.000Z",
-                    "href" => "/accounts/AD/mmock@usf.edu",
-                    "primary_address" => "mmock@usf.edu",
-                    "email_addresses" => [
-                        "mmock@usf.edu",
-                        "mmock@admin.usf.edu",
-                        "molly.m.mock@honors.usf.edu",
-                        "mmock@usfedu.onmicrosoft.com"
-                    ],
-                    "roles" => [
-                        [
-                            "name" => "AD-Affiliated",
-                            "description" => "Standard AD access (Can login to desktops, can mount drives, etc)",
-                            "added_date" => "2012-04-23T18:25:43.000Z",
-                            "href" => "/roles/4"
-                        ],
-                        [
-                            "name" => "Office 365",
-                            "description" => "Cloud-based Exchange account.",
-                            "added_date" => "2012-04-23T18:25:43.000Z",
-                            "href" => "/roles/5"
-                        ],
-                        [
-                            "name" => "Lync",
-                            "description" => "On-prem Lync account.",
-                            "added_date" => "2012-04-23T18:25:43.000Z",
-                            "href" => "/roles/6"
-                        ]
-                    ]
-                ],
-                [
-                    "type" => "Active Directory",
-                    "identifier" => "it-example@usf.edu",
-                    "dn" => "CN=Service Account\\, IT Example [it-example],OU=service accounts,DC=forest,DC=usf,DC=edu",
-                    "created_date" => "2012-04-23T18:25:43.000Z",
-                    "modified_date" => "2015-01-08T13:20:11.000Z",
-                    "passwd_change" => "2015-01-08T13:20:11.000Z",
-                    "href" => "/accounts/AD/it-example@usf.edu",
-                    "owner" => "mmock",
-                    "notify_list" => [
-                        "mmock@usf.edu",
-                        "somebody@usf.edu"
-                    ],
-                    "roles" => [
-                        [
-                            "name" => "AD-Service Account",
-                            "description" => "Ative Directory Service account.",
-                            "added_date" => "2012-04-23T18:25:43.000Z",
-                            "href" => "/roles/7"
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+        $accounts = $this->getARMdb()->accounts;
+        $accountlist = $accounts->find([ "identity" => $identity ]);
+        $result = ["identity" => $identity,"accounts" => []];
+        foreach($accountlist as $act) {
+            unset($act['identity']);
+            $result['accounts'][] = $act;
+        }
+        return new JSendResponse('success', $result);
     }
 
+    /**
+     * Return all accounts of a specified type
+     * 
+     * @param type $type
+     * @return JSendResponse
+     */
+    public function getAccountsByType($type) {
+        $accounts = $this->getARMdb()->accounts;
+        $accountlist = $accounts->find([ "type" => $type ]);
+        $result = [ 'account_type' => $type, 'accounts' => [] ];
+        foreach($accountlist as $act) {
+            $result['accounts'][] = $act;
+        }
+        return new JSendResponse('success', $result);
+    }
+    
+    /**
+     * Add a new account
+     * 
+     * @param type $type
+     * @param array $account
+     * @return JSendResponse
+     */
+    public function createAccountByType($type,$account) {
+        $accounts = $this->getARMdb()->accounts;
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account info missing"
+            ]);
+        }
+        // Check to make sure the account itself has enough valid info
+        if(!isset($account["account_type"]) || !isset($account["account_identifier"]) || !isset($account["account_data"])) {
+            return new JSendResponse('fail', [
+                "account" => "Account info missing one of these keys: account_type,account_identifier,account_data"
+            ]);
+        }
+        // Make sure the account_data is not empty
+        if(empty($account["account_data"])) {
+            return new JSendResponse('fail', [
+                "account" => "Account info is empty!"
+            ]);
+        }
+        // Check to make sure the type is set the same in the account data as indicated from the call
+        if(strcasecmp($account["account_type"], $type) != 0) {
+            return new JSendResponse('fail', [
+                "account" => "Account type is mismatched in the request!"
+            ]);
+        }
+        // Check to see if it exists already
+        if($this->getAccountByTypeAndIdentifier($type, $account["account_identifier"])->isSuccess()) {
+            return new JSendResponse('fail', [
+                "account" => "Account of this type already exists!"
+            ]);
+        }
+        // Add on the href
+        $account["href"] = "/accounts/{$type}/{$account['account_identifier']}";
+        $insert_status = $accounts->insert($account);
+        if(!$insert_status) {
+            return new JSendResponse('error', "Account creation could not be performed!");
+        } else {
+            return new JSendResponse('success', [
+                "href" => $account["href"]
+            ]);
+        }
+    }
+
+    /**
+     * Retrieve the account by type and identity (using the identifier)
+     * 
+     * @param type $type
+     * @param type $identifier
+     * @return JSendResponse
+     */
+    public function getAccountByTypeAndIdentifier($type,$identifier) {
+        $accounts = $this->getARMdb()->accounts;
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account not found!"
+            ]);
+        }
+        return new JSendResponse('success', $account);
+    }
+    /**
+     * Modify an account by type and identity (using the identifier)
+     * 
+     * @param type $type
+     * @param type $identifier
+     * @param array $accountmods
+     * @return JSendResponse
+     */
+    public function modifyAccountByTypeAndIdentifier($type,$identifier,$accountmods) {
+        $accounts = $this->getARMdb()->accounts;
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account not found!"
+            ]);
+        }
+        $accountmods["href"] = "/accounts/{$type}/{$identifier}";
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], $accountmods);
+        if ($status) {
+            return new JSendResponse('success', [ "href" => $accountmods["href"] ]);
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
+    }
+    
+    /**
+     * Get roles for a specific account by type and identity (using the identifier)
+     * 
+     * @param type $type
+     * @param type $identifier
+     * @return JSendResponse
+     */
+    public function getRolesForAccountByTypeAndIdentifier($type,$identifier) {
+        $accounts = $this->getARMdb()->accounts;
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ],[ "type" => true, "identifier" => true, "roles" => true ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account not found!"
+            ]);
+        }
+        if (!isset($account['roles'])) {
+            $account['roles'] = [];
+        }
+        return new JSendResponse('success', $account);
+    }
+    
+    public function modifyRolesForAccountByTypeAndIdentifier($type,$identifier,$rolechanges) {
+        $accounts = $this->getARMdb()->accounts;
+        $roles = $this->getARMdb()->roles;
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ],[ "type" => true, "identifier" => true, "roles" => true ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account not found!"
+            ]);
+        }
+        if(!isset($rolechanges['role_list'])) {
+            return new JSendResponse('fail', [
+                "roles" => "No role list specified!"
+            ]);
+        }
+        // See if all the roles specified are available
+        $rolesupdate = [];
+        $validroles = true;
+        foreach($rolechanges['role_list'] as $roleref) {
+            $role = $roles->findOne([ 'href' => $roleref ],['href' => true, 'name' => true,'short_description'=> true]);
+            if (is_null($role)) {
+                $validroles = false;
+                break;
+            } else {
+                $rolesupdate[] = $role;
+            }
+        }
+        if(!$validroles) {
+            return new JSendResponse('fail', [
+                "role_list" => "Role list contains invalid roles!"
+            ]);
+        }
+        if(!isset($account['roles'])) {
+            $account['roles'] = [];
+        }
+        // Remove any missing roles from the account
+        $removemissing = function ($r) use($rolechanges) {
+            $match = false;
+            foreach($rolechanges['role_list'] as $rc) {
+                if(strcasecmp($rc['href'], $r['href']) == 0) {
+                    $match = true;
+                    break;
+                }
+            }
+            return $match;
+        };
+        $account['roles'] = array_filter($account['roles'],$removemissing);
+        // Add new roles from the role change update
+        foreach($rolesupdate as $ru) {
+            $addrole = true;
+            foreach($account['roles'] as $r) {
+                if(strcasecmp($ru['href'], $r['href']) == 0) {
+                    $addrole = false;
+                    break;
+                }
+            }
+            if($addrole) {
+                $ru['added_date'] = new MongoDate();
+                $account['roles'][] = $ru;
+            }
+        }
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ "roles" => $account['roles'] ]);
+        if ($status) {
+            return new JSendResponse('success', $account );
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
+    }
+    // End New Stuff
+    // Get Methods    
+    
     /**
      * Retrieves an array of roles for a specified identity object
      * 
@@ -251,8 +348,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return object with the status of the assignment
      */
     public function setAccountForIdentity($identity, $account) {
-        $armdb = $this->getMongoConnection()->arm;
-        $accounts = $armdb->accounts;
+        $accounts = $this->getARMdb()->accounts;
         $assignaccount = $accounts->findOne([ "name" => $account . name]);
         if (is_null($assignaccount)) {
             return new JSendResponse('fail', [
@@ -279,15 +375,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return object with the status of the assignment
      */
     public function setRoleForAccount($account, $role) {
-        $armdb = $this->getMongoConnection()->arm;
-        $accounts = $armdb->accounts;
+        $accounts = $this->getARMdb()->accounts;
         $assignaccount = $accounts->findOne([ "name" => $account["name"]]);
         if (is_null($assignaccount)) {
             return new JSendResponse('fail', [
                 "account" => "Specified Account does not exist"
             ]);
         }
-        $roles = $armdb->roles;
+        $roles = $this->getARMdb()->roles;
         $assignrole = $roles->findOne([ "name" => $role["name"]]);
         if (is_null($assignrole)) {
             return new JSendResponse('fail', [
