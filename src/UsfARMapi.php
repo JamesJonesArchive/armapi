@@ -356,6 +356,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $insert_status = $roles->insert(array_merge([
             'name' => $newrole['name'],
             'href' => $href,
+            'account_type' => $newrole['account_type'],
             'created_date' => new \MongoDate(),
             'modified_date' => new \MongoDate()
         ],(array) $newrole["role_data"]));
