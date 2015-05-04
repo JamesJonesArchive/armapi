@@ -356,8 +356,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $insert_status = $roles->insert(array_merge([
             'name' => $newrole['name'],
             'href' => $href,
-            'created_date' => new MongoDate(),
-            'modified_date' => new MongoDate()
+            'created_date' => new \MongoDate(),
+            'modified_date' => new \MongoDate()
         ],$newrole["role_data"]));
         if(!$insert_status) {
             return new JSendResponse('error', "Role creation could not be performed!");
