@@ -207,7 +207,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', $account);
     }
-    
+    /**
+     * Modify the role list for an accounty by it's type and identity (using the identifier)
+     * 
+     * @param type $type
+     * @param type $identifier
+     * @param type $rolechanges
+     * @return JSendResponse
+     */
     public function modifyRolesForAccountByTypeAndIdentifier($type,$identifier,$rolechanges) {
         $accounts = $this->getARMdb()->accounts;
         $roles = $this->getARMdb()->roles;
@@ -271,6 +278,162 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ "roles" => $account['roles'] ]);
         if ($status) {
             return new JSendResponse('success', $account );
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
+    }
+    
+    /**
+     * Get all accounts of a certain type for a user 
+     * 
+     * @param type $type
+     * @param type $identity
+     * @return JSendResponse
+     */
+    public function getAccountsByTypeAndIdentity($type,$identity) {
+        $accounts = $this->getARMdb()->accounts;
+        $accountlist = $accounts->find([ "type" => $type,"identity" => $identity ]);
+        $result = [ "identity" => $identity, 'accounts' => [] ];
+        foreach($accountlist as $act) {
+            $result['accounts'][] = $act;
+        }
+        return new JSendResponse('success', $result);
+    }
+    /**
+     * Get all roles
+     * 
+     * @return JSendResponse
+     */
+    public function getAllRoles() {
+        $roles = $this->getARMdb()->roles;
+        $rolelist = $roles->find([],[ 'href' => true,'name' => true,'account_type' => true ]);
+        $result = [];
+        foreach($rolelist as $role) {
+            if (!isset($result[$role['account_type']])) {
+                $result[$role['account_type']] = [];
+            }
+            $result[$role['account_type']][] = [
+                'href' => $role['href'],
+                'name' => $role['name']
+            ];
+        }
+        return new JSendResponse('success', $result);
+    }
+    /**
+     * Create a new role of a specific account type
+     * 
+     * @param type $newrole
+     * @return JSendResponse
+     */
+    public function createRoleByType($newrole) {
+        $roles = $this->getARMdb()->roles;
+        if (is_null($newrole)) {
+            return new JSendResponse('fail', [
+                "role" => "Role info missing"
+            ]);
+        }
+        // Check to make sure the account itself has enough valid info
+        if(!isset($newrole["account_type"]) || !isset($newrole["name"]) || !isset($newrole["role_data"])) {
+            return new JSendResponse('fail', [
+                "role" => "Role info missing one of these keys: account_type,name,role_data"
+            ]);
+        }
+        // Make sure the account_data is not empty
+        if(empty($newrole["role_data"])) {
+            return new JSendResponse('fail', [
+                "role" => "Role info is empty!"
+            ]);
+        }        
+        $role = $roles.findOne([ 'name' => $newrole['name'], 'account_type' => $newrole['account_type'] ]);
+        if (!is_null($role)) {
+            return new JSendResponse('fail', [
+                "role" => "Role already exists!"
+            ]);
+        }
+        // Add on the href
+        $formattedName = str_replace(" ","+",$newrole['name']);
+        $href = "/roles/{$newrole['account_type']}/{$formattedName}";
+        $insert_status = $roles->insert(array_merge([
+            'name' => $newrole['name'],
+            'href' => $href,
+            'created_date' => new MongoDate(),
+            'modified_date' => new MongoDate()
+        ],$newrole["role_data"]));
+        if(!$insert_status) {
+            return new JSendResponse('error', "Role creation could not be performed!");
+        } else {
+            return new JSendResponse('success', [
+                "href" => $href
+            ]);
+        }
+    }
+    /**
+     * Get all roles of a specific account type
+     * 
+     * @param type $type
+     * @return JSendResponse
+     */
+    public function getAllRolesByType($type) {
+        $roles = $this->getARMdb()->roles;
+        $rolelist = $roles->find([ 'account_type' => $type ]);        
+        return new JSendResponse('success', ['account_type' => $type,'roles' => $rolelist]);
+    }
+    /**
+     * Get a single role of a type by role name
+     * 
+     * @param type $type
+     * @param type $name
+     * @return JSendResponse
+     */
+    public function getRoleByTypeAndName($type,$name) {
+        $roles = $this->getARMdb()->roles;
+        $role = $roles->findOne([ 'account_type' => $type, 'name' => $name ]); 
+        if (is_null($role)) {
+            return new JSendResponse('fail', [
+                "role" => "Role does not exist!"
+            ]);
+        }
+        return new JSendResponse('success', ['account_type' => $type,'role_data' => $role]);
+    }
+    /**
+     * Modify a role of a type by role name
+     * 
+     * @param type $type
+     * @param type $name
+     * @param type $updatedrole
+     * @return JSendResponse
+     */
+    public function modifyRoleByTypeAndName($type,$name,$updatedrole) {
+        $roles = $this->getARMdb()->roles;
+        $role = $roles->findOne([ 'account_type' => $type, 'name' => $name ]); 
+        if (is_null($role)) {
+            return new JSendResponse('fail', [
+                "role" => "Role does not exist!"
+            ]);
+        }
+        // Check to make sure the account itself has enough valid info
+        if(!isset($updatedrole["account_type"]) || !isset($updatedrole["name"]) || !isset($updatedrole["role_data"])) {
+            return new JSendResponse('fail', [
+                "role" => "Role info missing one of these keys: account_type,name,role_data"
+            ]);
+        }
+        // Make sure the account_data is not empty when there's no name change
+        if(empty($updatedrole["role_data"]) && strcmp($updatedrole["name"], $name) == 0) {
+            return new JSendResponse('fail', [
+                "role" => "Role info is empty!"
+            ]);
+        }
+        // Update the href
+        $formattedName = str_replace(" ","+",$updatedrole['name']);
+        $href = "/roles/{$updatedrole['account_type']}/{$formattedName}";
+        $role = array_merge($role,$updatedrole["role_data"],[
+            'href' => $href,
+            'name' => $updatedrole["name"],
+            'account_type' => $type
+        ]);
+        $status = $roles->update([ 'account_type' => $type, 'name' => $name ], $role);
+        if ($status) {
+            return new JSendResponse('success', $role );
         } else {
             return new JSendResponse('error', "Update failed!");
         }
