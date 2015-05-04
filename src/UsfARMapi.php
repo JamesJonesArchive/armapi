@@ -344,7 +344,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "role" => "Role info is empty!"
             ]);
         }        
-        $role = $roles.findOne([ 'name' => $newrole['name'], 'account_type' => $newrole['account_type'] ]);
+        $role = $roles->findOne([ 'name' => $newrole['name'], 'account_type' => $newrole['account_type'] ]);
         if (!is_null($role)) {
             return new JSendResponse('fail', [
                 "role" => "Role already exists!"
