@@ -358,7 +358,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             'href' => $href,
             'created_date' => new \MongoDate(),
             'modified_date' => new \MongoDate()
-        ],$newrole["role_data"]));
+        ],(array) $newrole["role_data"]));
         if(!$insert_status) {
             return new JSendResponse('error', "Role creation could not be performed!");
         } else {
