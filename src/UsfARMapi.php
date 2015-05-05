@@ -428,7 +428,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function modifyRoleByTypeAndName($type,$name,$updatedrole) {
         $roles = $this->getARMdb()->roles;
-        $role = $roles->findOne([ 'account_type' => $type, 'name' => $name ]); 
+        $role = $roles->findOne([ 'type' => $type, 'name' => $name ]); 
         if (is_null($role)) {
             return new JSendResponse('fail', [
                 "role" => "Role does not exist!"
