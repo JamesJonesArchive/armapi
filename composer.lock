@@ -766,12 +766,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/shkm/JSend.git",
-                "reference": "b3e4af1de6a55eda41dc219325575e379c2d95e5"
+                "reference": "5d25f46cc2a40cc81131b2061b5533dc098e0dae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shkm/JSend/zipball/b3e4af1de6a55eda41dc219325575e379c2d95e5",
-                "reference": "b3e4af1de6a55eda41dc219325575e379c2d95e5",
+                "url": "https://api.github.com/repos/shkm/JSend/zipball/5d25f46cc2a40cc81131b2061b5533dc098e0dae",
+                "reference": "5d25f46cc2a40cc81131b2061b5533dc098e0dae",
                 "shasum": ""
             },
             "require": {
@@ -804,7 +804,7 @@
                 "jsend",
                 "json"
             ],
-            "time": "2014-01-05 10:12:53"
+            "time": "2015-05-01 15:50:51"
         },
         {
             "name": "swiftmailer/swiftmailer",
