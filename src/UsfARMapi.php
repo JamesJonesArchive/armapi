@@ -410,13 +410,13 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getRoleByTypeAndName($type,$name) {
         $roles = $this->getARMdb()->roles;
-        $role = $roles->findOne([ 'account_type' => $type, 'name' => $name ]); 
+        $role = $roles->findOne([ 'type' => $type, 'name' => $name ]); 
         if (is_null($role)) {
             return new JSendResponse('fail', [
                 "role" => "Role does not exist!"
             ]);
         }
-        return new JSendResponse('success', ['account_type' => $type,'role_data' => $role]);
+        return new JSendResponse('success', ['account_type' => $type,'role_data' => array_diff_key($role,["type" => true])]);
     }
     /**
      * Modify a role of a type by role name
