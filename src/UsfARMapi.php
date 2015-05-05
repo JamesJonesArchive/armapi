@@ -234,7 +234,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     public function modifyRolesForAccountByTypeAndIdentifier($type,$identifier,$rolechanges) {
         $accounts = $this->getARMdb()->accounts;
         $roles = $this->getARMdb()->roles;
-        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ],[ "type" => true, "identifier" => true, "roles" => true ]);
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
+        // ,[ "type" => true, "identifier" => true, "roles" => true ]
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => "Account not found!"
@@ -283,9 +284,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "role_list" => "Role list contains invalid roles!"
             ]);
         }
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ "roles" => $merged_roles ]);
+        $account['roles'] = $merged_roles;
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], $account);
         if ($status) {
-            return new JSendResponse('success', $account );
+            return new JSendResponse('success', [ 
+                'type' => $account['type'],
+                'identifier' => $account['identifier'],
+                'roles' => $account['roles']
+            ]);
         } else {
             return new JSendResponse('error', "Update failed!");
         }
