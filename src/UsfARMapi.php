@@ -151,13 +151,12 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 (isset($account["account_data"]["last_used"]))?["last_used" => new \MongoDate(strtotime($account["account_data"]["last_used"]))]:[],
                 (isset($account["account_data"]["last_update"]))?["last_update" => new \MongoDate(strtotime($account["account_data"]["last_update"]))]:[]
             )
-        );
-        
+        );        
         if(!$insert_status) {
             return new JSendResponse('error', "Account creation could not be performed!");
         } else {
             return new JSendResponse('success', [
-                "href" => $account["href"]
+                "href" => $href
             ]);
         }
     }
