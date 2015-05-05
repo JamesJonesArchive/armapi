@@ -370,13 +370,18 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         // Add on the href
         $formattedName = str_replace(" ","+",$newrole['name']);
         $href = "/roles/{$newrole['account_type']}/{$formattedName}";
-        $insert_status = $roles->insert(array_merge([
-            'name' => $newrole['name'],
-            'href' => $href,
-            'account_type' => $newrole['account_type'],
-            'created_date' => new \MongoDate(),
-            'modified_date' => new \MongoDate()
-        ],(array) $newrole["role_data"]));
+        $insert_status = $roles->insert(
+            array_merge(
+                (array) $newrole["role_data"],
+                [
+                    'name' => $newrole['name'],
+                    'href' => $href,
+                    'type' => $newrole['account_type'],
+                    'created_date' => new \MongoDate(),
+                    'modified_date' => new \MongoDate()
+                ]
+            )
+        );
         if(!$insert_status) {
             return new JSendResponse('error', "Role creation could not be performed!");
         } else {
@@ -444,12 +449,31 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         // Update the href
         $formattedName = str_replace(" ","+",$updatedrole['name']);
         $href = "/roles/{$updatedrole['account_type']}/{$formattedName}";
-        $role = array_merge($role,$updatedrole["role_data"],[
-            'href' => $href,
-            'name' => $updatedrole["name"],
-            'account_type' => $type
-        ]);
-        $status = $roles->update([ 'account_type' => $type, 'name' => $name ], $role);
+//        $role = array_merge($role,$updatedrole["role_data"],[
+//            'href' => $href,
+//            'name' => $updatedrole["name"],
+//            'account_type' => $type
+//        ]);
+        //$status = $roles->update([ 'account_type' => $type, 'name' => $name ], $role);
+        
+        
+        $status = $roles->update(
+            [ 'account_type' => $type, 'name' => $name ],
+            array_merge(
+                (array) $updatedrole["role_data"],
+                [
+                    'name' => $updatedrole['name'],
+                    'href' => $href,
+                    'type' => $updatedrole['account_type'],
+                    'modified_date' => new \MongoDate()
+                ],
+                (isset($role['created_date']))?['created_date' => $role['created_date']]:['created_date' => new \MongoDate()]
+            )
+        );
+
+        
+        
+        
         if ($status) {
             return new JSendResponse('success', $role );
         } else {
