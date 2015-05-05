@@ -245,53 +245,45 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "roles" => "No role list specified!"
             ]);
         }
-        // See if all the roles specified are available
-        $rolesupdate = [];
-        $validroles = true;
-        foreach($rolechanges['role_list'] as $roleref) {
-            $role = $roles->findOne([ 'href' => $roleref ],['href' => true, 'name' => true,'short_description'=> true]);
-            if (is_null($role)) {
-                $validroles = false;
+        if(!isset($account['roles'])) {
+            $account['roles'] = [];
+        }
+        $invalidrole = false;
+        $merged_roles = [];
+        foreach ($rolechanges['role_list'] as $r) {
+            $role_obj = $roles->findOne([ 'href' => $r['href'] ],['href' => true, 'name' => true,'short_description'=> true]);
+            if(is_null($role_obj)) {
+                $invalidrole = true;
                 break;
+            }
+            $found = false;
+            $existing_role = null;
+            foreach($account['roles'] as $ar) {
+                if(strcmp($ar['href'], $r['href']) == 0) {
+                    $found=true;
+                    $existing_role = $ar;
+                    break;
+                }
+            }
+            if($found) {
+                $merged_roles[] = $existing_role;
             } else {
-                $rolesupdate[] = $role;
+                $merged_roles[] = array_merge(
+                    [
+                        "name" => $role_obj['name'],
+                        "short_description" => $role_obj['short_description'],
+                        "added_date" => new \MongoDate()
+                    ],
+                    $r
+                );
             }
         }
-        if(!$validroles) {
+        if($invalidrole) {
             return new JSendResponse('fail', [
                 "role_list" => "Role list contains invalid roles!"
             ]);
         }
-        if(!isset($account['roles'])) {
-            $account['roles'] = [];
-        }
-        // Remove any missing roles from the account
-        $removemissing = function ($r) use($rolechanges) {
-            $match = false;
-            foreach($rolechanges['role_list'] as $rc) {
-                if(strcasecmp($rc['href'], $r['href']) == 0) {
-                    $match = true;
-                    break;
-                }
-            }
-            return $match;
-        };
-        $account['roles'] = array_filter($account['roles'],$removemissing);
-        // Add new roles from the role change update
-        foreach($rolesupdate as $ru) {
-            $addrole = true;
-            foreach($account['roles'] as $r) {
-                if(strcasecmp($ru['href'], $r['href']) == 0) {
-                    $addrole = false;
-                    break;
-                }
-            }
-            if($addrole) {
-                $ru['added_date'] = new MongoDate();
-                $account['roles'][] = $ru;
-            }
-        }
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ "roles" => $account['roles'] ]);
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ "roles" => $merged_roles ]);
         if ($status) {
             return new JSendResponse('success', $account );
         } else {
