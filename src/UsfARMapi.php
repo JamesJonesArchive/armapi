@@ -428,12 +428,17 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function modifyRoleByTypeAndName($type,$name,$updatedrole) {
         $roles = $this->getARMdb()->roles;
-        $role = $roles->findOne([ 'type' => $type, 'name' => $name ]); 
-        if (is_null($role)) {
-            return new JSendResponse('fail', [
-                "role" => "Role does not exist!"
-            ]);
+//        $role = $roles->findOne([ 'type' => $type, 'name' => $name ]); 
+//        if (is_null($role)) {
+//            return new JSendResponse('fail', [
+//                "role" => "Role does not exist!"
+//            ]);
+//        }
+        $roleresp = $this->getRoleByTypeAndName($type, $name);
+        if(!$roleresp->isSuccess()) {
+            return $roleresp;
         }
+        $role = $roleresp->getData();
         // Check to make sure the account itself has enough valid info
         if(!isset($updatedrole["account_type"]) || !isset($updatedrole["name"]) || !isset($updatedrole["role_data"])) {
             return new JSendResponse('fail', [
@@ -449,16 +454,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         // Update the href
         $formattedName = str_replace(" ","+",$updatedrole['name']);
         $href = "/roles/{$updatedrole['account_type']}/{$formattedName}";
-//        $role = array_merge($role,$updatedrole["role_data"],[
-//            'href' => $href,
-//            'name' => $updatedrole["name"],
-//            'account_type' => $type
-//        ]);
-        //$status = $roles->update([ 'account_type' => $type, 'name' => $name ], $role);
-        
-        
         $status = $roles->update(
-            [ 'account_type' => $type, 'name' => $name ],
+            [ 'type' => $type, 'name' => $name ],
             array_merge(
                 (array) $updatedrole["role_data"],
                 [
@@ -467,15 +464,12 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     'type' => $updatedrole['account_type'],
                     'modified_date' => new \MongoDate()
                 ],
-                (isset($role['created_date']))?['created_date' => $role['created_date']]:['created_date' => new \MongoDate()]
+                (isset($role['role_data']['created_date']))?['created_date' => $role['role_data']['created_date']]:['created_date' => new \MongoDate()]
             )
         );
-
-        
-        
-        
         if ($status) {
-            return new JSendResponse('success', $role );
+            return $this->getRoleByTypeAndName($type, $updatedrole['name']);
+            //return new JSendResponse('success', $role );
         } else {
             return new JSendResponse('error', "Update failed!");
         }
