@@ -134,8 +134,25 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]);
         }
         // Add on the href
-        $account["href"] = "/accounts/{$type}/{$account['account_identifier']}";
-        $insert_status = $accounts->insert($account);
+        $href = "/accounts/{$type}/{$account['account_identifier']}";
+        
+        $insert_status = $accounts->insert(
+            array_merge(
+                (array) $account["account_data"],
+                [
+                    'href' => $href,
+                    'type' => $account['account_type'],
+                    'identifier' => $account['account_identifier'],
+                    'created_date' => new \MongoDate(),
+                    'modified_date' => new \MongoDate()
+                ],
+                (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[],
+                (isset($account["account_data"]["password_change"]))?["password_change" => new \MongoDate(strtotime($account["account_data"]["password_change"]))]:[],
+                (isset($account["account_data"]["last_used"]))?["last_used" => new \MongoDate(strtotime($account["account_data"]["last_used"]))]:[],
+                (isset($account["account_data"]["last_update"]))?["last_update" => new \MongoDate(strtotime($account["account_data"]["last_update"]))]:[]
+            )
+        );
+        
         if(!$insert_status) {
             return new JSendResponse('error', "Account creation could not be performed!");
         } else {
