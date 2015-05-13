@@ -112,6 +112,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         return new JSendResponse('success',[ 
             'account_type' => $type, 
             'accounts' => \array_map(function($act) use(&$roles) {
+                unset($act['_id']);
                 if((isset($act['roles']))?  \is_array($act['roles']):false) {
                     $act['roles'] = \array_map(function($a) use(&$roles) { 
                         if(isset($a['role_id'])) {
