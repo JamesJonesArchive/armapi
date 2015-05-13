@@ -43,7 +43,28 @@ class UsfARMapi extends UsfAbstractMongoConnection {
 
         return $this->armdb;
     }
-    // New stuff
+    /**
+     * Converts mongo dates to UTC date strings with one level of recursion
+     * 
+     * @param type $arr
+     * @return type
+     */
+    public static function convertMongoDatesToUTCstrings($arr) {
+        return \array_map(function($a) {
+            if($a instanceof \MongoDate) {
+                return $a->toDateTime()->format('Y-m-d\TH:i:s\Z');
+            } elseif (\is_array($a) && \array_diff_key($a,\array_keys(\array_keys($a)))) {
+                return \array_map(function ($b) {
+                    if($b instanceof \MongoDate) {
+                        return $b->toDateTime()->format('Y-m-d\TH:i:s\Z');
+                    }
+                    return $b;
+                }, $a);
+            }
+            return $a;
+        }, $arr);
+    }
+
     /**
      * Returns all accounts of all types
      * 
@@ -78,7 +99,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', $result);
     }
-
+    // EXPERIMENT!
     /**
      * Return all accounts of a specified type
      * 
@@ -87,12 +108,27 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAccountsByType($type) {
         $accounts = $this->getARMdb()->accounts;
-        $accountlist = $accounts->find([ "type" => $type ]);
-        $result = [ 'account_type' => $type, 'accounts' => [] ];
-        foreach($accountlist as $act) {
-            $result['accounts'][] = $act;
-        }
-        return new JSendResponse('success', $result);
+        $roles = $this->getARMdb()->roles;
+        return new JSendResponse('success',[ 
+            'account_type' => $type, 
+            'accounts' => \array_map(function($act) use(&$roles) {
+                if((isset($act['roles']))?  \is_array($act['roles']):false) {
+                    $act['roles'] = \array_map(function($a) use(&$roles) { 
+                        if(isset($a['role_id'])) {
+                            $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                            if (!is_null($role)) {
+                                unset($a['role_id']);
+                                return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
+                            }
+                        }
+                        return self::convertMongoDatesToUTCstrings($a); 
+                    },$act['roles']); 
+                } else {
+                    $act['roles'] = [];
+                }
+                return self::convertMongoDatesToUTCstrings($act);
+            }, $accounts->find([ "type" => $type ])) 
+        ]);
     }
     
     /**
