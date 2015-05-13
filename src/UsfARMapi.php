@@ -210,7 +210,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]);
         }
     }
-    // EXPERIMENT!
     /**
      * Retrieve the account by type and identity (using the identifier)
      * 
@@ -244,6 +243,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', self::convertMongoDatesToUTCstrings($account));
     }
+    // May need some revisions
     /**
      * Modify an account by type and identity (using the identifier)
      * 
@@ -268,7 +268,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return new JSendResponse('error', "Update failed!");
         }
     }
-    
+    // EXPERIMENT!
     /**
      * Get roles for a specific account by type and identity (using the identifier)
      * 
@@ -278,16 +278,29 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getRolesForAccountByTypeAndIdentifier($type,$identifier) {
         $accounts = $this->getARMdb()->accounts;
+        $roles = $this->getARMdb()->roles;
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ],[ "type" => true, "identifier" => true, "roles" => true ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => "Account not found!"
             ]);
         }
-        if (!isset($account['roles'])) {
+        unset($account['_id']);
+        if((isset($account['roles']))?  \is_array($account['roles']):false) {
+            $account['roles'] = \array_map(function($a) use(&$roles) { 
+                if(isset($a['role_id'])) {
+                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                    if (!is_null($role)) {
+                        unset($a['role_id']);
+                        return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
+                    }
+                }
+                return self::convertMongoDatesToUTCstrings($a); 
+            },$account['roles']); 
+        } else {
             $account['roles'] = [];
         }
-        return new JSendResponse('success', $account);
+        return new JSendResponse('success', self::convertMongoDatesToUTCstrings($account));
     }
     /**
      * Modify the role list for an accounty by it's type and identity (using the identifier)
