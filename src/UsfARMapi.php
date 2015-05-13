@@ -82,7 +82,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', $result);
     }
-
+    // EXPERIMENT!
     /**
      * Retrieves an array of accounts for a specified identity 
      * 
@@ -91,15 +91,29 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAccountsForIdentity($identity) {
         $accounts = $this->getARMdb()->accounts;
-        $accountlist = $accounts->find([ "identity" => $identity ]);
-        $result = ["identity" => $identity,"accounts" => []];
-        foreach($accountlist as $act) {
+        $roles = $this->getARMdb()->roles;
+        return new JSendResponse('success', [
+            "identity" => $identity,
+            "accounts" => \array_map(function($act) use(&$roles) {
+            unset($act['_id']);
             unset($act['identity']);
-            $result['accounts'][] = $act;
-        }
-        return new JSendResponse('success', $result);
+            if((isset($act['roles']))?  \is_array($act['roles']):false) {
+                $act['roles'] = \array_map(function($a) use(&$roles) { 
+                    if(isset($a['role_id'])) {
+                        $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                        if (!is_null($role)) {
+                            unset($a['role_id']);
+                            return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
+                        }
+                    }
+                    return self::convertMongoDatesToUTCstrings($a); 
+                },$act['roles']); 
+            } else {
+                $act['roles'] = [];
+            }
+            return self::convertMongoDatesToUTCstrings($act);
+        },iterator_to_array($accounts->find([ "identity" => $identity ])),[])]);
     }
-    // EXPERIMENT!
     /**
      * Return all accounts of a specified type
      * 
@@ -131,7 +145,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             },iterator_to_array($accounts->find([ "type" => $type ])),[]) 
         ]);
     }
-    
+    // DONE    
     /**
      * Add a new account
      * 
