@@ -99,7 +99,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             if((isset($act['roles']))?  \is_array($act['roles']):false) {
                 $act['roles'] = \array_map(function($a) use(&$roles) { 
                     if(isset($a['role_id'])) {
-                        $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                        $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
                         if (!is_null($role)) {
                             unset($a['role_id']);
                             return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
@@ -129,7 +129,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 if((isset($act['roles']))?  \is_array($act['roles']):false) {
                     $act['roles'] = \array_map(function($a) use(&$roles) { 
                         if(isset($a['role_id'])) {
-                            $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                            $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
                             if (!is_null($role)) {
                                 unset($a['role_id']);
                                 return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
@@ -230,7 +230,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if((isset($account['roles']))?  \is_array($account['roles']):false) {
             $account['roles'] = \array_map(function($a) use(&$roles) { 
                 if(isset($a['role_id'])) {
-                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
                     if (!is_null($role)) {
                         unset($a['role_id']);
                         return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
@@ -268,7 +268,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return new JSendResponse('error', "Update failed!");
         }
     }
-    // EXPERIMENT!
     /**
      * Get roles for a specific account by type and identity (using the identifier)
      * 
@@ -289,7 +288,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if((isset($account['roles']))?  \is_array($account['roles']):false) {
             $account['roles'] = \array_map(function($a) use(&$roles) { 
                 if(isset($a['role_id'])) {
-                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
                     if (!is_null($role)) {
                         unset($a['role_id']);
                         return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
@@ -302,6 +301,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', self::convertMongoDatesToUTCstrings($account));
     }
+    // EXPERIMENT! PICK UP HERE IN THE MORNING!!!
     /**
      * Modify the role list for an accounty by it's type and identity (using the identifier)
      * 
