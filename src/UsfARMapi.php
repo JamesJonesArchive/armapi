@@ -82,7 +82,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', $result);
     }
-    // EXPERIMENT!
     /**
      * Retrieves an array of accounts for a specified identity 
      * 
@@ -145,7 +144,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             },iterator_to_array($accounts->find([ "type" => $type ])),[]) 
         ]);
     }
-    // DONE    
+    // ALERT: May need work    
     /**
      * Add a new account
      * 
@@ -211,7 +210,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]);
         }
     }
-
+    // EXPERIMENT!
     /**
      * Retrieve the account by type and identity (using the identifier)
      * 
@@ -221,13 +220,29 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAccountByTypeAndIdentifier($type,$identifier) {
         $accounts = $this->getARMdb()->accounts;
+        $roles = $this->getARMdb()->roles;
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => "Account not found!"
             ]);
+        }        
+        unset($account['_id']);
+        if((isset($account['roles']))?  \is_array($account['roles']):false) {
+            $account['roles'] = \array_map(function($a) use(&$roles) { 
+                if(isset($a['role_id'])) {
+                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'description' => true, 'href' => true, '_id' => false ]);
+                    if (!is_null($role)) {
+                        unset($a['role_id']);
+                        return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
+                    }
+                }
+                return self::convertMongoDatesToUTCstrings($a); 
+            },$account['roles']); 
+        } else {
+            $account['roles'] = [];
         }
-        return new JSendResponse('success', $account);
+        return new JSendResponse('success', self::convertMongoDatesToUTCstrings($account));
     }
     /**
      * Modify an account by type and identity (using the identifier)
