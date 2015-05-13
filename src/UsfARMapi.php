@@ -127,7 +127,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     $act['roles'] = [];
                 }
                 return self::convertMongoDatesToUTCstrings($act);
-            }, $accounts->find([ "type" => $type ])) 
+            },iterator_to_array($accounts->find([ "type" => $type ]))) 
         ]);
     }
     
