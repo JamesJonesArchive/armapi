@@ -52,11 +52,11 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     public static function convertMongoDatesToUTCstrings($arr) {
         return \array_map(function($a) {
             if($a instanceof \MongoDate) {
-                return $a->toDateTime()->format('Y-m-d\TH:i:s\Z');
+                return $a->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
             } elseif (\is_array($a) && \array_diff_key($a,\array_keys(\array_keys($a)))) {
                 return \array_map(function ($b) {
                     if($b instanceof \MongoDate) {
-                        return $b->toDateTime()->format('Y-m-d\TH:i:s\Z');
+                        return $b->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
                     }
                     return $b;
                 }, $a);
