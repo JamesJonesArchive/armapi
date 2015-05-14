@@ -265,20 +265,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         });
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']]]);
         if ($status) {
-            return new JSendResponse('success', [ 
-                'type' => $account['type'],
-                'identifier' => $account['identifier'],
-                'roles' => \array_map(function($a) use(&$roles) { 
-                    if(isset($a['role_id'])) {
-                        $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
-                        if (!is_null($role)) {
-                            unset($a['role_id']);
-                            return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
-                        }
-                    }
-                    return self::convertMongoDatesToUTCstrings($a); 
-                },$account['roles'])
-            ]);
+            return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
         } else {
             return new JSendResponse('error', "Update failed!");
         }
