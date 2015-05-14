@@ -439,7 +439,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         );
         if ($status) {
             return $this->getRoleByTypeAndName($type, $updatedrole['name']);
-            //return new JSendResponse('success', $role );
         } else {
             return new JSendResponse('error', "Update failed!");
         }
