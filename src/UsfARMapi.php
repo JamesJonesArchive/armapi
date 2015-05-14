@@ -85,7 +85,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $roles = $this->getARMdb()->roles;
         return new JSendResponse('success',[ 
             'account_type' => $type, 
-            'accounts' => \array_map(function($act) use(&$roles) {
+            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type ]))),
+            'accounts2' => \array_map(function($act) use(&$roles) {
                 unset($act['_id']);
                 if((isset($act['roles']))?  \is_array($act['roles']):false) {
                     $act['roles'] = \array_map(function($a) use(&$roles) { 
