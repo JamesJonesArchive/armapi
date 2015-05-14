@@ -28,7 +28,8 @@ use \JSend\JSendResponse;
  * 
  */
 class UsfARMapi extends UsfAbstractMongoConnection {
-
+    use UsfARMformatter;
+    
     private $version = "0.0.1";
     private $armdb = null;
     
@@ -36,14 +37,13 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         return $this->version;
     }
     
-    private function getARMdb() {
+    public function getARMdb() {
         if ($this->armdb === null) {
             $this->armdb = $this->getMongoConnection()->arm;
         }
 
         return $this->armdb;
     }
-    // New stuff
     /**
      * Returns all accounts of all types
      * 
@@ -61,7 +61,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', $result);
     }
-
     /**
      * Retrieves an array of accounts for a specified identity 
      * 
@@ -70,15 +69,11 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAccountsForIdentity($identity) {
         $accounts = $this->getARMdb()->accounts;
-        $accountlist = $accounts->find([ "identity" => $identity ]);
-        $result = ["identity" => $identity,"accounts" => []];
-        foreach($accountlist as $act) {
-            unset($act['identity']);
-            $result['accounts'][] = $act;
-        }
-        return new JSendResponse('success', $result);
+        return new JSendResponse('success', [
+            "identity" => $identity,
+            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
+        ]);
     }
-
     /**
      * Return all accounts of a specified type
      * 
@@ -87,14 +82,12 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAccountsByType($type) {
         $accounts = $this->getARMdb()->accounts;
-        $accountlist = $accounts->find([ "type" => $type ]);
-        $result = [ 'account_type' => $type, 'accounts' => [] ];
-        foreach($accountlist as $act) {
-            $result['accounts'][] = $act;
-        }
-        return new JSendResponse('success', $result);
+        return new JSendResponse('success',[ 
+            'account_type' => $type, 
+            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type ])))
+        ]);
     }
-    
+    // ALERT: May need work    
     /**
      * Add a new account
      * 
@@ -160,7 +153,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]);
         }
     }
-
     /**
      * Retrieve the account by type and identity (using the identifier)
      * 
@@ -175,9 +167,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return new JSendResponse('fail', [
                 "account" => "Account not found!"
             ]);
-        }
-        return new JSendResponse('success', $account);
+        }        
+        return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account));
     }
+    // May need some revisions
     /**
      * Modify an account by type and identity (using the identifier)
      * 
@@ -195,14 +188,13 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]);
         }
         $accountmods["href"] = "/accounts/{$type}/{$identifier}";
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], $accountmods);
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => $accountmods]);
         if ($status) {
             return new JSendResponse('success', [ "href" => $accountmods["href"] ]);
         } else {
             return new JSendResponse('error', "Update failed!");
         }
     }
-    
     /**
      * Get roles for a specific account by type and identity (using the identifier)
      * 
@@ -218,10 +210,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "account" => "Account not found!"
             ]);
         }
-        if (!isset($account['roles'])) {
-            $account['roles'] = [];
-        }
-        return new JSendResponse('success', $account);
+        return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account));
     }
     /**
      * Modify the role list for an accounty by it's type and identity (using the identifier)
@@ -249,54 +238,38 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if(!isset($account['roles'])) {
             $account['roles'] = [];
         }
-        $invalidrole = false;
-        $merged_roles = [];
-        foreach ($rolechanges['role_list'] as $r) {
-            $role_obj = $roles->findOne([ 'href' => $r['href'] ],['href' => true, 'name' => true,'short_description'=> true]);
-            if(is_null($role_obj)) {
-                $invalidrole = true;
-                break;
-            }
-            $found = false;
-            $existing_role = null;
-            foreach($account['roles'] as $ar) {
-                if(strcmp($ar['href'], $r['href']) == 0) {
-                    $found=true;
-                    $existing_role = $ar;
-                    break;
-                }
-            }
-            if($found) {
-                $merged_roles[] = $existing_role;
-            } else {
-                $merged_roles[] = array_merge(
-                    [
-                        "name" => $role_obj['name'],
-                        "short_description" => $role_obj['short_description'],
-                        "added_date" => new \MongoDate()
-                    ],
-                    $r
-                );
-            }
-        }
-        if($invalidrole) {
+        // Look for invalid roles
+        if(count(array_filter($rolechanges['role_list'],function($r) use(&$roles) {
+            return is_null($roles->findOne([ 'href' => $r['href'] ]));
+        })) > 0) {
             return new JSendResponse('fail', [
                 "role_list" => "Role list contains invalid roles!"
             ]);
         }
-        $account['roles'] = $merged_roles;
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], $account);
+        // Determine the actual new roles and add _only_ the matched existing roles
+        $account['roles'] = \array_map(function($r) use(&$roles) {
+            return array_merge([
+                "role_id" => $roles->findOne([ 'href' => $r['href'] ])['_id'],
+                "added_date" => new \MongoDate()
+            ], \array_diff_key($r,array_flip([
+                'href','short_description','name'
+            ])));
+        },\array_filter($rolechanges['role_list'],function($r) use(&$roles,&$account) { 
+            return !in_array($roles->findOne([ 'href' => $r['href'] ])['_id'], \array_map(function($a) { 
+                return $a['role_id'];
+            }, $account['roles']));
+        })) + \array_filter($account['roles'],function($ar) use(&$roles,&$rolechanges) { 
+            return in_array($ar['role_id'], \array_map(function($r) use(&$roles) { 
+                return $roles->findOne([ 'href' => $r['href'] ])['_id'];
+            },$rolechanges['role_list']));
+        });
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']]]);
         if ($status) {
-            return new JSendResponse('success', [ 
-                'type' => $account['type'],
-                'identifier' => $account['identifier'],
-                'roles' => $account['roles']
-            ]);
+            return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
         } else {
             return new JSendResponse('error', "Update failed!");
         }
     }
-    
     /**
      * Get all accounts of a certain type for a user 
      * 
@@ -306,12 +279,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAccountsByTypeAndIdentity($type,$identity) {
         $accounts = $this->getARMdb()->accounts;
-        $accountlist = $accounts->find([ "type" => $type,"identity" => $identity ]);
-        $result = [ "identity" => $identity, 'accounts' => [] ];
-        foreach($accountlist as $act) {
-            $result['accounts'][] = $act;
-        }
-        return new JSendResponse('success', $result);
+        return new JSendResponse('success',[ 
+            "identity" => $identity, 
+            'accounts' => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type,"identity" => $identity ])))
+        ]);
     }
     /**
      * Get all roles
@@ -395,8 +366,12 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAllRolesByType($type) {
         $roles = $this->getARMdb()->roles;
-        $rolelist = $roles->find([ 'account_type' => $type ]);        
-        return new JSendResponse('success', ['account_type' => $type,'roles' => $rolelist]);
+        return new JSendResponse('success', [
+            'account_type' => $type,
+            'roles' => \array_map(function($r) {                
+                return self::convertMongoDatesToUTCstrings(array_diff_key($r,["_id" => true]));
+            }, iterator_to_array($roles->find([ 'type' => $type ])),[])
+        ]);
     }
     /**
      * Get a single role of a type by role name
@@ -413,7 +388,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "role" => "Role does not exist!"
             ]);
         }
-        return new JSendResponse('success', ['account_type' => $type,'role_data' => array_diff_key($role,["type" => true])]);
+        return new JSendResponse('success', [
+            'account_type' => $type,
+            'role_data' => self::convertMongoDatesToUTCstrings(array_diff_key($role,["type" => true,"_id" => true]))
+        ]);
     }
     /**
      * Modify a role of a type by role name
@@ -447,20 +425,20 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $href = "/roles/{$updatedrole['account_type']}/{$formattedName}";
         $status = $roles->update(
             [ 'type' => $type, 'name' => $name ],
-            array_merge(
-                (array) $updatedrole["role_data"],
-                [
-                    'name' => $updatedrole['name'],
-                    'href' => $href,
-                    'type' => $updatedrole['account_type'],
-                    'modified_date' => new \MongoDate()
-                ],
-                (isset($role['role_data']['created_date']))?['created_date' => $role['role_data']['created_date']]:['created_date' => new \MongoDate()]
-            )
+            [ '$set' => array_merge(
+                    (array) $updatedrole["role_data"],
+                    [
+                        'name' => $updatedrole['name'],
+                        'href' => $href,
+                        'type' => $updatedrole['account_type'],
+                        'modified_date' => new \MongoDate()
+                    ],
+                    (isset($role['role_data']['created_date']))?['created_date' => new \MongoDate(strtotime($role['role_data']['created_date']))]:['created_date' => new \MongoDate()]
+                )
+            ]                
         );
         if ($status) {
             return $this->getRoleByTypeAndName($type, $updatedrole['name']);
-            //return new JSendResponse('success', $role );
         } else {
             return new JSendResponse('error', "Update failed!");
         }
