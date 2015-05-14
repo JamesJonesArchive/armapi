@@ -368,8 +368,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $roles = $this->getARMdb()->roles;
         return new JSendResponse('success', [
             'account_type' => $type,
-            'roles' => \array_map(function($r) {
-                return self::convertMongoDatesToUTCstrings($r);
+            'roles' => \array_map(function($r) {                
+                return self::convertMongoDatesToUTCstrings(array_diff_key($r,["_id" => true]));
             }, iterator_to_array($roles->find([ 'type' => $type ])),[])
         ]);
     }
@@ -390,7 +390,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', [
             'account_type' => $type,
-            'role_data' => self::convertMongoDatesToUTCstrings(array_diff_key($role,["type" => true]))
+            'role_data' => self::convertMongoDatesToUTCstrings(array_diff_key($role,["type" => true,"_id" => true]))
         ]);
     }
     /**
