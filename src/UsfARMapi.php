@@ -370,7 +370,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             'account_type' => $type,
             'roles' => \array_map(function($r) {
                 return self::convertMongoDatesToUTCstrings($r);
-            }, iterator_to_array($roles->find([ 'account_type' => $type ])),[])
+            }, iterator_to_array($roles->find([ 'type' => $type ])),[])
         ]);
     }
     /**
