@@ -328,48 +328,46 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if(!isset($account['roles'])) {
             $account['roles'] = [];
         }
-        $invalidrole = false;
-        $merged_roles = [];
-        foreach ($rolechanges['role_list'] as $r) {
-            $role_obj = $roles->findOne([ 'href' => $r['href'] ],['href' => true, 'name' => true,'short_description'=> true]);
-            if(is_null($role_obj)) {
-                $invalidrole = true;
-                break;
-            }
-            $found = false;
-            $existing_role = null;
-            foreach($account['roles'] as $ar) {
-                if(strcmp($ar['href'], $r['href']) == 0) {
-                    $found=true;
-                    $existing_role = $ar;
-                    break;
-                }
-            }
-            if($found) {
-                $merged_roles[] = $existing_role;
-            } else {
-                $merged_roles[] = array_merge(
-                    [
-                        "name" => $role_obj['name'],
-                        "short_description" => $role_obj['short_description'],
-                        "added_date" => new \MongoDate()
-                    ],
-                    $r
-                );
-            }
-        }
-        if($invalidrole) {
+        // Look for invalid roles
+        if(count(array_filter($rolechanges['role_list'],function($r) use(&$roles) {
+            return is_null($roles->findOne([ 'href' => $r['href'] ]));
+        })) > 0) {
             return new JSendResponse('fail', [
                 "role_list" => "Role list contains invalid roles!"
             ]);
         }
-        $account['roles'] = $merged_roles;
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], $account);
+        // Determine the actual new roles and add _only_ the matched existing roles
+        $account['roles'] = \array_map(function($r) use(&$roles) {
+            return array_merge([
+                "role_id" => $roles->findOne([ 'href' => $r['href'] ])['_id'],
+                "added_date" => new \MongoDate()
+            ], \array_diff_key($r,array_flip([
+                'href','short_description','name'
+            ])));
+        },\array_filter($rolechanges['role_list'],function($r) use(&$roles,&$account) { 
+            return !in_array($roles->findOne([ 'href' => $r['href'] ])['_id'], \array_map(function($a) { 
+                return $a['role_id'];
+            }, $account['roles']));
+        })) + \array_filter($account['roles'],function($ar) use(&$roles,&$rolechanges) { 
+            return in_array($ar['role_id'], \array_map(function($r) use(&$roles) { 
+                return $roles->findOne([ 'href' => $r['href'] ])['_id'];
+            },$rolechanges['role_list']));
+        });
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']]]);
         if ($status) {
             return new JSendResponse('success', [ 
                 'type' => $account['type'],
                 'identifier' => $account['identifier'],
-                'roles' => $account['roles']
+                'roles' => \array_map(function($a) use(&$roles) { 
+                    if(isset($a['role_id'])) {
+                        $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
+                        if (!is_null($role)) {
+                            unset($a['role_id']);
+                            return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
+                        }
+                    }
+                    return self::convertMongoDatesToUTCstrings($a); 
+                },$account['roles'])
             ]);
         } else {
             return new JSendResponse('error', "Update failed!");
