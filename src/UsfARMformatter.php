@@ -67,7 +67,7 @@ trait UsfARMformatter {
                     }
                 }
                 return self::convertMongoDatesToUTCstrings($a); 
-            },$mongoaccount['roles']); 
+            },$mongoaccount['roles'],[]); 
         } else {
             $mongoaccount['roles'] = [];
         }
