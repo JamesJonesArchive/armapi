@@ -37,7 +37,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         return $this->version;
     }
     
-    private function getARMdb() {
+    public function getARMdb() {
         if ($this->armdb === null) {
             $this->armdb = $this->getMongoConnection()->arm;
         }
@@ -68,6 +68,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
+        $accounts = $this->getARMdb()->accounts;
+        return new JSendResponse('success', [
+            "identity" => $identity,
+            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
+        ]);
+    }
+
+    public function getAccountsForIdentity2($identity) {
         $accounts = $this->getARMdb()->accounts;
         $roles = $this->getARMdb()->roles;
         return new JSendResponse('success', [

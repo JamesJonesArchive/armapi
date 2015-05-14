@@ -45,5 +45,32 @@ trait UsfARMformatter {
             return $a;
         }, $arr);
     }
-
+    
+    public function formatMongoAccountsListToAPIListing($mongoaccounts,$removekeys = []) {        
+        return \array_map(function($act) use(&$removekeys) {
+            return self::formatMongoAccountToAPIaccount($act,$removekeys);
+        },$mongoaccounts,[]);
+    }
+    
+    public function formatMongoAccountToAPIaccount($mongoaccount,$removekeys = []) {
+        $roles = parent::getARMdb()->roles;
+        if(!in_array('_id', $removekeys)) {
+            $removekeys[] = "_id";
+        }
+        if((isset($mongoaccount['roles']))?  \is_array($mongoaccount['roles']):false) {
+            $mongoaccount['roles'] = \array_map(function($a) use(&$roles) { 
+                if(isset($a['role_id'])) {
+                    $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
+                    if (!is_null($role)) {
+                        unset($a['role_id']);
+                        return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
+                    }
+                }
+                return self::convertMongoDatesToUTCstrings($a); 
+            },$mongoaccount['roles']); 
+        } else {
+            $mongoaccount['roles'] = [];
+        }
+        return self::convertMongoDatesToUTCstrings(\array_diff_key($mongoaccount,array_flip($removekeys)));
+    }
 }
