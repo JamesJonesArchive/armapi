@@ -366,8 +366,12 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAllRolesByType($type) {
         $roles = $this->getARMdb()->roles;
-        $rolelist = $roles->find([ 'account_type' => $type ]);        
-        return new JSendResponse('success', ['account_type' => $type,'roles' => $rolelist]);
+        return new JSendResponse('success', [
+            'account_type' => $type,
+            'roles' => \array_map(function($r) {
+                return self::convertMongoDatesToUTCstrings($r);
+            }, iterator_to_array($roles->find([ 'account_type' => $type ])),[])
+        ]);
     }
     /**
      * Get a single role of a type by role name
@@ -384,7 +388,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "role" => "Role does not exist!"
             ]);
         }
-        return new JSendResponse('success', ['account_type' => $type,'role_data' => array_diff_key($role,["type" => true])]);
+        return new JSendResponse('success', [
+            'account_type' => $type,
+            'role_data' => self::convertMongoDatesToUTCstrings(array_diff_key($role,["type" => true]))
+        ]);
     }
     /**
      * Modify a role of a type by role name
