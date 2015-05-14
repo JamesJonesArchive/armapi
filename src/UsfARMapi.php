@@ -284,7 +284,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             'accounts' => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type,"identity" => $identity ])))
         ]);
     }
-    // EXPERIMENT!
     /**
      * Get all roles
      * 
