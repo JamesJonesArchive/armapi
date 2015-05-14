@@ -85,25 +85,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $roles = $this->getARMdb()->roles;
         return new JSendResponse('success',[ 
             'account_type' => $type, 
-            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type ]))),
-            'accounts2' => \array_map(function($act) use(&$roles) {
-                unset($act['_id']);
-                if((isset($act['roles']))?  \is_array($act['roles']):false) {
-                    $act['roles'] = \array_map(function($a) use(&$roles) { 
-                        if(isset($a['role_id'])) {
-                            $role = $roles->find([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
-                            if (!is_null($role)) {
-                                unset($a['role_id']);
-                                return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
-                            }
-                        }
-                        return self::convertMongoDatesToUTCstrings($a); 
-                    },$act['roles']); 
-                } else {
-                    $act['roles'] = [];
-                }
-                return self::convertMongoDatesToUTCstrings($act);
-            },iterator_to_array($accounts->find([ "type" => $type ])),[]) 
+            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type ])))
         ]);
     }
     // ALERT: May need work    
