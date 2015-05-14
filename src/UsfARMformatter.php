@@ -45,13 +45,25 @@ trait UsfARMformatter {
             return $a;
         }, $arr);
     }
-    
+    /**
+     * Formats raw mongo account data into API compliant accounts
+     * 
+     * @param type $mongoaccounts an array of accounts from mongo
+     * @param type $removekeys an array of keys to remove
+     * @return type array of API formated accounts
+     */
     public function formatMongoAccountsListToAPIListing($mongoaccounts,$removekeys = []) {        
         return \array_map(function($act) use(&$removekeys) {
             return self::formatMongoAccountToAPIaccount($act,$removekeys);
         },$mongoaccounts,[]);
     }
-    
+    /**
+     * Formats a raw mongo account into API compliant account
+     * 
+     * @param type $mongoaccount an account from mongo
+     * @param string $removekeys an array of keys to remove
+     * @return type API formatted account
+     */
     public function formatMongoAccountToAPIaccount($mongoaccount,$removekeys = []) {
         $roles = UsfARMapi::getARMdb()->roles;
         if(!in_array('_id', $removekeys)) {
