@@ -425,16 +425,17 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $href = "/roles/{$updatedrole['account_type']}/{$formattedName}";
         $status = $roles->update(
             [ 'type' => $type, 'name' => $name ],
-            array_merge(
-                (array) $updatedrole["role_data"],
-                [
-                    'name' => $updatedrole['name'],
-                    'href' => $href,
-                    'type' => $updatedrole['account_type'],
-                    'modified_date' => new \MongoDate()
-                ],
-                (isset($role['role_data']['created_date']))?['created_date' => $role['role_data']['created_date']]:['created_date' => new \MongoDate()]
-            )
+            [ '$set' => array_merge(
+                    (array) $updatedrole["role_data"],
+                    [
+                        'name' => $updatedrole['name'],
+                        'href' => $href,
+                        'type' => $updatedrole['account_type'],
+                        'modified_date' => new \MongoDate()
+                    ],
+                    (isset($role['role_data']['created_date']))?['created_date' => new \MongoDate(strtotime($role['role_data']['created_date']))]:['created_date' => new \MongoDate()]
+                )
+            ]                
         );
         if ($status) {
             return $this->getRoleByTypeAndName($type, $updatedrole['name']);
