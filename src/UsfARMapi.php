@@ -136,8 +136,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     'href' => $href,
                     'type' => $account['account_type'],
                     'identifier' => $account['account_identifier'],
-                    'created_date' => new \MongoDate(),
-                    'modified_date' => new \MongoDate()
+                    'arm_created_date' => new \MongoDate(),
+                    'arm_modified_date' => new \MongoDate()
                 ],
                 (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[],
                 (isset($account["account_data"]["password_change"]))?["password_change" => new \MongoDate(strtotime($account["account_data"]["password_change"]))]:[],
@@ -187,7 +187,18 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "account" => "Account not found!"
             ]);
         }
-        $accountmods["href"] = "/accounts/{$type}/{$identifier}";
+        // Compare the mods with the change data
+        $accountmods = array_merge(
+            $accountmods,
+            (isset($accountmods["password_change"]))?["password_change" => new \MongoDate(strtotime($accountmods["password_change"]))]:[],
+            (isset($accountmods["last_used"]))?["last_used" => new \MongoDate(strtotime($accountmods["last_used"]))]:[],
+            (isset($accountmods["last_update"]))?["last_update" => new \MongoDate(strtotime($accountmods["last_update"]))]:[],
+            [ 'href' => "/accounts/{$type}/{$identifier}" ]
+        );
+        // Test for changes
+        if(empty(\array_diff_assoc(\array_diff_key($account,\array_flip(\array_keys($accountmods))), $accountmods))) {
+            return new JSendResponse('success', [ "href" => $accountmods["href"] ]);
+        }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => $accountmods]);
         if ($status) {
             return new JSendResponse('success', [ "href" => $accountmods["href"] ]);
@@ -250,9 +261,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $account['roles'] = \array_map(function($r) use(&$roles) {
             return array_merge([
                 "role_id" => $roles->findOne([ 'href' => $r['href'] ])['_id'],
-                "added_date" => new \MongoDate()
+                "arm_created_date" => new \MongoDate()
             ], \array_diff_key($r,array_flip([
-                'href','short_description','name'
+                'href','short_description','name','type'
             ])));
         },\array_filter($rolechanges['role_list'],function($r) use(&$roles,&$account) { 
             return !in_array($roles->findOne([ 'href' => $r['href'] ])['_id'], \array_map(function($a) { 
@@ -345,8 +356,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     'name' => $newrole['name'],
                     'href' => $href,
                     'type' => $newrole['account_type'],
-                    'created_date' => new \MongoDate(),
-                    'modified_date' => new \MongoDate()
+                    'arm_created_date' => new \MongoDate(),
+                    'arm_modified_date' => new \MongoDate()
                 ]
             )
         );
@@ -420,20 +431,29 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "role" => "Role info is empty!"
             ]);
         }
-        // Update the href
+        // Format the name for used in the href
         $formattedName = str_replace(" ","+",$updatedrole['name']);
-        $href = "/roles/{$updatedrole['account_type']}/{$formattedName}";
+        // Compare the mods with the change data
+        $updatedrolemerged = array_merge(
+            (array) $updatedrole["role_data"],
+            [
+                'name' => $updatedrole['name'],
+                'href' => "/roles/{$updatedrole['account_type']}/{$formattedName}",
+                'type' => $updatedrole['account_type']
+            ]
+        );
+        // Test for changes
+        if(empty(\array_diff_assoc(\array_diff_key($role,\array_flip(\array_keys($updatedrolemerged))), $updatedrolemerged))) {
+            return $this->getRoleByTypeAndName($type, $updatedrole['name']);
+        }
+        // Try to update if changes detected previously
         $status = $roles->update(
             [ 'type' => $type, 'name' => $name ],
             [ '$set' => array_merge(
-                    (array) $updatedrole["role_data"],
+                    $updatedrolemerged,
                     [
-                        'name' => $updatedrole['name'],
-                        'href' => $href,
-                        'type' => $updatedrole['account_type'],
-                        'modified_date' => new \MongoDate()
-                    ],
-                    (isset($role['role_data']['created_date']))?['created_date' => new \MongoDate(strtotime($role['role_data']['created_date']))]:['created_date' => new \MongoDate()]
+                        'arm_modified_date' => new \MongoDate()
+                    ]
                 )
             ]                
         );
