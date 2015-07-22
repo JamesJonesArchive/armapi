@@ -31,13 +31,13 @@ class UsfARMservice {
      */
     public function getAccountsForIdentityARM($identity) {
         // return $this->getAccountsForIdentity($identity);
-        $usfARMapi = new \USF\IdM\UsfARMapi();
+        $something = $this->usfARMapi->getAccountsForIdentity($identity);
         return new JSendResponse('success', [
             'test' => $identity,
-            'isset' => isset($usfARMapi),
+            // 'isset' => isset($usfARMapi),
             'exists' => method_exists($this,"getAccountsForIdentity"),
             // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
-            'data' => $this->usfARMapi->getAccountsForIdentity($identity)
+            'data' => $something
         ]);
     }
 }
