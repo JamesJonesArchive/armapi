@@ -37,7 +37,7 @@ class UsfARMservice {
             'isset' => isset($usfARMapi),
             'exists' => method_exists($this,"getAccountsForIdentity"),
             // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
-            // 'data' => (new \USF\IdM\UsfARMapi())->getAccountsForIdentity($identity)
+            'data' => $this->usfARMapi->getAccountsForIdentity($identity)
         ]);
     }
 }
