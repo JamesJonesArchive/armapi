@@ -16,6 +16,13 @@ use \JSend\JSendResponse;
  * @author james
  */
 class UsfARMservice {
+    private $usfARMapi;
+    public function __construct() {
+        $this->usfARMapi = new \USF\IdM\UsfARMapi();
+    }
+    public function getVersion() {
+        $this->usfARMapi->getVersion();
+    }
     /**
      * Retrieves an array of accounts for a specified identity 
      * 
