@@ -8,6 +8,8 @@
 
 namespace USF\IdM;
 
+use \JSend\JSendResponse;
+
 /**
  * Description of UsfARMservice
  *
