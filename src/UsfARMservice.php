@@ -30,7 +30,7 @@ class UsfARMservice extends \USF\IdM\UsfARMapi {
             // 'isset' => isset($usfARMapi),
             'exists' => method_exists($this,"getAccountsForIdentity"),
             // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
-            'data' => $this->getAccountsForIdentity($identity)
+            'data' => parent::getAccountsForIdentity($identity)
         ]);
     }
 }
