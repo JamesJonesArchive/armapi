@@ -24,13 +24,13 @@ class UsfARMservice {
      */
     public function getAccountsForIdentityARM($identity) {
         // return $this->getAccountsForIdentity($identity);
-        // $usfARMapi = new UsfARMapi();
+        $usfARMapi = new \USF\IdM\UsfARMapi();
         return new JSendResponse('success', [
             'test' => $identity,
-            // 'isset' => isset($usfARMapi),
+            'isset' => isset($usfARMapi),
             'exists' => method_exists($this,"getAccountsForIdentity"),
             // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
-            'data' => (new \USF\IdM\UsfARMapi())->getAccountsForIdentity($identity)
+            // 'data' => (new \USF\IdM\UsfARMapi())->getAccountsForIdentity($identity)
         ]);
     }
 }
