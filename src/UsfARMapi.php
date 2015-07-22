@@ -33,6 +33,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     private $version = "0.0.1";
     private $armdb = null;
     
+    public function __construct() { }
+    
     public function getVersion() {
         return $this->version;
     }
