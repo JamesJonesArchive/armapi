@@ -15,7 +15,7 @@ use \JSend\JSendResponse;
  *
  * @author james
  */
-class UsfARMservice extends \USF\IdM\UsfARMapi {
+class UsfARMservice {
     /**
      * Retrieves an array of accounts for a specified identity 
      * 
@@ -30,7 +30,7 @@ class UsfARMservice extends \USF\IdM\UsfARMapi {
             // 'isset' => isset($usfARMapi),
             'exists' => method_exists($this,"getAccountsForIdentity"),
             // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
-            'data' => parent::getAccountsForIdentity($identity)
+            'data' => (new \USF\IdM\UsfARMapi())->getAccountsForIdentity($identity)
         ]);
     }
 }
