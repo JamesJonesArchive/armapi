@@ -41,6 +41,7 @@ trait UsfARMfilter {
      * @return array of accounts
      */
     public function getAccountsForIdentityARM($identity) {
+        $accounts = $this->getARMdb()->accounts;
         // return self::getAccountsForIdentity($identity);
         return new JSendResponse('success', [
             'test' => $identity,
