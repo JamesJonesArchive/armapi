@@ -40,7 +40,12 @@ trait UsfARMfilter {
      * @return array of accounts
      */
     public function getAccountsForIdentityARM($identity) {
-        return self::getAccountsForIdentity($identity);
+        // return self::getAccountsForIdentity($identity);
+        return new JSendResponse('success', [
+            'test' => $identity,
+            // 'isset' => isset($usfARMapi),
+            // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
+        ]);
 //        $something = $this->usfARMapi->getAccountsForIdentity($identity);
 //        return new JSendResponse('success', [
 //            'test' => $identity,
