@@ -33,14 +33,14 @@ trait UsfARMfilter {
     public function getAllAccountsARM() {
         return $this->getAllAccounts();
     }
-//    /**
-//     * Retrieves an array of accounts for a specified identity 
-//     * 
-//     * @param object $identity
-//     * @return array of accounts
-//     */
-//    public function getAccountsForIdentityARM($identity) {
-//        // return $this->getAccountsForIdentity($identity);
+    /**
+     * Retrieves an array of accounts for a specified identity 
+     * 
+     * @param object $identity
+     * @return array of accounts
+     */
+    public function getAccountsForIdentityARM($identity) {
+        return $this->getAccountsForIdentity($identity);
 //        $something = $this->usfARMapi->getAccountsForIdentity($identity);
 //        return new JSendResponse('success', [
 //            'test' => $identity,
@@ -49,5 +49,5 @@ trait UsfARMfilter {
 //            // 'exists1' => method_exists($usfARMapi,"getAccountsForIdentity")
 //            'data' => $something
 //        ]);
-//    }
+    }
 }
