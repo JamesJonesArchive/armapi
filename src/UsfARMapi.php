@@ -29,6 +29,7 @@ use \JSend\JSendResponse;
  */
 class UsfARMapi extends UsfAbstractMongoConnection {
     use UsfARMformatter;
+    use UsfARMfilter;
     
     private $version = "0.0.1";
     private $armdb = null;
