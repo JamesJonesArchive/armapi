@@ -70,12 +70,19 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @param object $identity
      * @return array of accounts
      */
-    public function getAccountsForIdentity($identity) {
+    public function getAccountsForIdentity($identity,$filter=false) {
         $accounts = $this->getARMdb()->accounts;
-        return new JSendResponse('success', [
-            "identity" => $identity,
-            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
-        ]);
+        if($filter) {
+            return new JSendResponse('success', [
+                "identity" => $identity,
+                "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
+            ]);
+        } else {
+            return new JSendResponse('success', [
+                "identity" => $identity,
+                "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
+            ]);
+        }
     }
     /**
      * Return all accounts of a specified type
@@ -444,6 +451,365 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return $this->getRoleByTypeAndName($type, $updatedrole['name']);
         } else {
             return new JSendResponse('error', "Update failed!");
+        }
+    }
+    /** APPROVAL FUNCTIONS **/
+    
+    /**
+     * Sets the account state
+     * 
+     * @param type $type
+     * @param type $identifier
+     * @param type $state
+     * @param type $managerattributes
+     * @return JSendResponse
+     */
+    public function setAccountState($type, $identifier, $state, $managerattributes=[]) {
+        $accounts = $this->getARMdb()->accounts;
+        $updatedattributes = [];
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account not found!"
+            ]);
+        }        
+        if(!isset($account['state'])) {
+            $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
+        } else {
+            // Find existing match for manager
+            if(empty(\array_filter($account['state'], function($r) use($managerattributes) {
+                return ($r['usfid'] == $managerattributes['usfid']);
+            }))) {            
+                $updatedattributes['state'] = array_merge(
+                    $account['state'],
+                    [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ]
+                );
+            } else {
+                $updatedattributes['state'] = \array_map(function($s) use($managerattributes,$state) {                    
+                    if($s['usfid'] == $managerattributes['usfid']) {
+                        return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
+                    } else {
+                        return $s;                    
+                    }                    
+                },$account['state']);
+            }
+        }
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+        if ($status) {
+            return $this->getAccountByTypeAndIdentifier($type, $identifier);
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
+    }
+    /**
+     * Sets the role state on an account
+     * 
+     * @param type $type
+     * @param type $identifier
+     * @param type $rolename
+     * @param type $state
+     * @param type $managerattributes
+     * @return JSendResponse
+     */
+    public function setAccountRoleState($type, $identifier, $rolename, $state, $managerattributes=[]) {
+        $accounts = $this->getARMdb()->accounts;
+        $updatedattributes = [];
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => "Account not found!"
+            ]);
+        }
+        if(!isset($account['roles'])) {
+            return new JSendResponse('fail', [
+                "role" => "No roles exist for account specified!"
+            ]);
+        } else {
+            $roles = $this->getARMdb()->roles;
+            $role = $roles->findOne([ 'type' => $type, 'name' => $rolename ]); 
+            if (is_null($role)) {
+                return new JSendResponse('fail', [
+                    "role" => "Role does not exist!"
+                ]);
+            }            
+            // Find if matching role exists
+            if(empty(\array_filter($account['roles'], function($r) use($role) {
+                return ($r['role_id'] == $role['_id']);
+            }))) {
+                return new JSendResponse('fail', [
+                    "role" => "Role does not exist for account specified!"
+                ]);
+            } else {
+                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role) {  
+                    if($r['role_id'] == $role['_id']) {
+                        if(!isset($r['state'])) {
+                            $r['state'] = [ \array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
+                        } else {
+                            // Find existing match for manager
+                            if(empty(\array_filter($r['state'], function($s) use($managerattributes) {
+                                return ($s['usfid'] == $managerattributes['usfid']);
+                            }))) { 
+                                $r['state'][] = \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
+                            } else {
+                                $r['state'] = \array_map(function($s) use($managerattributes,$state) {
+                                    if($s['usfid'] == $managerattributes['usfid']) {
+                                        return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
+                                    } else {
+                                        return $s;                                        
+                                    }
+                                },$r['state']);
+                            }                            
+                        }
+                    }
+                    return $r;
+                },$account['roles']);
+            }            
+        }
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+        if ($status) {
+            return $this->getAccountByTypeAndIdentifier($type, $identifier);
+        } else {
+            return new JSendResponse('error', "Update failed!");
+        }
+    }
+    /**
+     * Updates accounts for an identity to the confirmed state
+     * 
+     * @param type $identity
+     * @param type $managerattributes
+     * @return JSendResponse
+     */
+    public function setConfirm($identity,$managerattributes=[]) {
+        $accounts = $this->getARMdb()->accounts;
+        $confirmaccounts = $accounts->find([ "identity" => $identity ]);
+        if(empty($confirmaccounts)) {
+            return new JSendResponse('fail', [
+                "identity" => "No accounts found for identity!"
+            ]);
+        }
+        foreach ($confirmaccounts as $account) {
+            $updatedattributes = [];
+            if(!isset($account['confirm'])) {
+                $account['confirm'] = [];
+            }
+            if(!isset($account['state'])) {
+                $account['state'] = [];
+            }
+            // Find the state indicated by the manager
+            if(empty(\array_filter($account['state'], function($r) use($managerattributes) {
+                return ($r['usfid'] == $managerattributes['usfid']);
+            }))) { 
+                return new JSendResponse('fail', [
+                    "account" => "Account does not have a state set by current manager!"
+                ]);
+            } else {
+                // Append the confirm
+                $confirm_state = \array_filter($account['state'], function($r) use($managerattributes) {
+                    return ($r['usfid'] == $managerattributes['usfid']);
+                });
+                if(empty($confirm_state)) {
+                    $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
+                    $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
+                        'state' => $confirm_state[0]['state'], 
+                        'timestamp' => new \MongoDate() 
+                    ]);
+                }
+                // Set the account review closed
+                $updatedattributes['review'] = \array_map(function($r) use($managerattributes) {
+                    if($r['usfid'] == $managerattributes['usfid']) {
+                        return \array_merge($r,$managerattributes,[ 'review' => 'closed', 'timestamp' => new \MongoDate() ]);
+                    } else {
+                        return $r;
+                    }
+                },((isset($account['review']))?$account['review']:[]));
+                // Iterate the role confirms and set those reviews closed as well 
+                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
+                    // Get the current state by manager
+                    $confirm_state = \array_filter(((!isset($r['state']))?$r['state']:[]), function($s) use($managerattributes) {
+                        return ($s['usfid'] == $managerattributes['usfid']);
+                    });
+                    if(!empty($confirm_state)) {
+                        if(!isset($r['confirm'])) {
+                            $r['confirm'] = [];
+                        }
+                        $r['confirm'][] = \array_merge($managerattributes,[ 
+                            'state' => $confirm_state[0]['state'], 
+                            'timestamp' => new \MongoDate() ]
+                        );
+                    }
+                    $r['review'] = \array_map(function($rv) use($managerattributes) {
+                        if($rv['usfid'] == $managerattributes['usfid']) {
+                            return \array_merge($rv,$managerattributes,[ 'review' => 'closed', 'timestamp' => new \MongoDate() ]);
+                        } else {
+                            return $rv;
+                        }
+                    },((isset($r['review']))?$r['review']:[]));
+                    return $r;
+                },((isset($account['roles']))?$account['roles']:[]));                
+                // Update the account
+                $status = $accounts->update([ "identity" => $identity ], [ '$set' => $updatedattributes ]);
+                if (!$status) {
+                    return new JSendResponse('error', "Update failed!");
+                }
+            }
+        }
+        return $this->getAccountsForIdentity($identity);
+    }
+    /**
+     * Updates accounts for an identity to the review state
+     * 
+     * @param type $identity
+     * @param type $managerattributes
+     * @return JSendResponse
+     */
+    public function setReview($identity,$managerattributes=[]) {
+        $accounts = $this->getARMdb()->accounts;
+        $reviewaccounts = $accounts->find([ "identity" => $identity ]);
+        if(empty($reviewaccounts)) {
+            return new JSendResponse('fail', [
+                "identity" => "No accounts found for identity!"
+            ]);
+        }
+        foreach ($reviewaccounts as $account) {
+            $updatedattributes = [];
+            if(!isset($account['review'])) {
+                $account['review'] = [];
+            }
+            // Find the review indicated by the manager
+            if(empty(\array_filter($account['review'], function($rv) use($managerattributes) {
+                return ($rv['usfid'] == $managerattributes['usfid']);
+            }))) { 
+                $updatedattributes['review'] = (isset($account['review']))?$account['review']:[];
+                $updatedattributes['review'][] = \array_merge($managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
+            } else {
+                $updatedattributes['review'] = \array_map(function($rv) use($managerattributes) {
+                    if($rv['usfid'] == $managerattributes['usfid']) {
+                        return \array_merge($rv,$managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
+                    } else {
+                        return $rv;
+                    }
+                },((isset($account['review']))?$account['review']:[]));
+            }
+            if(!isset($account['state'])) {
+                $account['state'] = [];
+            }
+            // Find the state indicated by the manager
+            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
+                return ($s['state'] == $managerattributes['state']);
+            }))) { 
+                $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
+                $updatedattributes['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+            } else {
+                $updatedattributes['state'] = \array_map(function($s) use($managerattributes) {
+                    if($s['usfid'] == $managerattributes['usfid']) {
+                        return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                    } else {
+                        return $s;
+                    }
+                },((isset($account['state']))?$account['state']:[]));
+            }
+            if(!isset($account['roles'])) {
+                $account['roles'] = [];
+            }
+            // Iterate the role reviews and set those reviews open as well 
+            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
+                if(!isset($r['review'])) {
+                    $r['review'] = [];
+                }
+                // Find the review indicated by the manager
+                if(empty(\array_filter($r['review'], function($rv) use($managerattributes) {
+                    return ($rv['usfid'] == $managerattributes['usfid']);
+                }))) { 
+                    $r['review'][] = \array_merge($managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
+                } else {
+                    $r['review'] = \array_map(function($rv) use($managerattributes) {
+                        if($rv['usfid'] == $managerattributes['usfid']) {
+                            return \array_merge($rv,$managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
+                        } else {
+                            return $rv;
+                        }
+                    },((isset($r['review']))?$r['review']:[]));
+                }
+                if(!isset($r['state'])) {
+                    $r['state'] = [];
+                }
+                // Find the state indicated by the manager
+                if(empty(\array_filter($r['state'], function($s) use($managerattributes) {
+                    return ($s['state'] == $managerattributes['state']);
+                }))) { 
+                    $r['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                } else {
+                    $r['state'] = \array_map(function($s) use($managerattributes) {
+                        if($s['usfid'] == $managerattributes['usfid']) {
+                            return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                        } else {
+                            return $s;
+                        }
+                    },((isset($r['state']))?$r['state']:[]));
+                }
+                return $r;
+            },((isset($account['roles']))?$account['roles']:[]));
+            // Update the account
+            $status = $accounts->update([ "identity" => $identity ], [ '$set' => $updatedattributes ]);
+            if (!$status) {
+                return new JSendResponse('error', "Update failed!");
+            }
+        }
+        return $this->getAccountsForIdentity($identity);
+    }
+    
+    /** IMPORT FUNCTIONS **/
+    
+    /**
+     * Takes SOR account in JSON format and imports it into ARM accounts
+     * 
+     * @param type $account
+     * @return \Api\JSendResponse
+     */
+    public function importAccount($account) {
+        $currentaccount = $this->getAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier']);
+        if($currentaccount->isSuccess()) {
+            // Update existing account
+            return $this->modifyAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier'],$account);
+        } else {
+            // Create new account
+            return $this->createAccountByType($account['account_type'], $account); 
+        }
+    }
+    /**
+     * Takes account roles from SOR in JSON format and imports it into ARM account roles
+     * 
+     * @param type $accountroles
+     * @return \Api\JSendResponse
+     */
+    public function importAccountRoles($accountroles) {
+        $currentaccount = $this->getAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier']);
+        if($currentaccount->isSuccess()) {
+            return $this->modifyRolesForAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier'],[
+                'account_type' => $accountroles['account_type'],
+                'account_identifier' => $accountroles['account_identifier'],
+                'role_list' => $accountroles['account_roles']
+            ]);
+        } else {
+            return new JSendResponse('fail', [
+                "account" => "Account info missing"
+            ]);
+        }
+    }
+    /**
+     * Takes SOR role in JSON format and imports it into ARM accounts
+     * 
+     * @param type $role
+     * @return \Api\JSendResponse
+     */
+    public function importRole($role) {
+        $currentrole = $this->getRoleByTypeAndName($role['account_type'],$role['name']);
+        if($currentrole->isSuccess()) {
+            // Update existing role
+            return $this->modifyRoleByTypeAndName($role['account_type'],$role['name'],$role);
+        } else {
+            // Create new role
+            return $this->createRoleByType($role);
         }
     }
 }
