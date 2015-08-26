@@ -703,25 +703,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             if(!isset($account['roles'])) {
                 $account['roles'] = [];
             }
-            // Iterate the role reviews and set those reviews open as well 
+            // Iterate the role states and set those states empty as well 
             $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
-                if(!isset($r['review'])) {
-                    $r['review'] = [];
-                }
-                // Find the review indicated by the manager
-                if(empty(\array_filter($r['review'], function($rv) use($managerattributes) {
-                    return ($rv['usfid'] == $managerattributes['usfid']);
-                }))) { 
-                    $r['review'][] = \array_merge($managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
-                } else {
-                    $r['review'] = \array_map(function($rv) use($managerattributes) {
-                        if($rv['usfid'] == $managerattributes['usfid']) {
-                            return \array_merge($rv,$managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
-                        } else {
-                            return $rv;
-                        }
-                    },((isset($r['review']))?$r['review']:[]));
-                }
                 if(!isset($r['state'])) {
                     $r['state'] = [];
                 }
