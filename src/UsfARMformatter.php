@@ -34,7 +34,7 @@ trait UsfARMformatter {
         return \array_map(function($a) {
             if($a instanceof \MongoDate) {
                 return $a->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
-            } elseif (\is_array($a) && \array_diff_key($a,\array_keys(\array_keys($a)))) {
+            } elseif (\is_array($a)) {
                 return \array_map(function ($b) {
                     if($b instanceof \MongoDate) {
                         return $b->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
