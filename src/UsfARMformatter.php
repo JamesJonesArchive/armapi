@@ -38,6 +38,13 @@ trait UsfARMformatter {
                 return \array_map(function ($b) {
                     if($b instanceof \MongoDate) {
                         return $b->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
+                    } elseif (\is_array($b)) {
+                        return \array_map(function ($c) {
+                            if($c instanceof \MongoDate) {
+                                return $c->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
+                            }
+                            return $c;
+                        },$b);
                     }
                     return $b;
                 }, $a);
