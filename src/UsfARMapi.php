@@ -599,7 +599,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 $confirm_state = \array_filter($account['state'], function($r) use($managerattributes) {
                     return ($r['usfid'] == $managerattributes['usfid']);
                 });
-                if(empty($confirm_state)) {
+                if(!empty($confirm_state)) {
                     $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
                     $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
                         'state' => $confirm_state[0]['state'], 
@@ -629,13 +629,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                             'timestamp' => new \MongoDate() ]
                         );
                     }
-                    $r['review'] = \array_map(function($rv) use($managerattributes) {
-                        if($rv['usfid'] == $managerattributes['usfid']) {
-                            return \array_merge($rv,$managerattributes,[ 'review' => 'closed', 'timestamp' => new \MongoDate() ]);
-                        } else {
-                            return $rv;
-                        }
-                    },((isset($r['review']))?$r['review']:[]));
                     return $r;
                 },((isset($account['roles']))?$account['roles']:[]));                
                 // Update the account
