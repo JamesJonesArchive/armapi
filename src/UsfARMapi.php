@@ -678,13 +678,13 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             if(!isset($account['state'])) {
                 $account['state'] = [];
             }
-//            // Find the state indicated by the manager
-//            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
-//                return ($s['state'] == $managerattributes['state']);
-//            }))) { 
+            // Find the state indicated by the manager
+            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
+                return ($s['state'] == $managerattributes['state']);
+            }))) { 
 //                $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
 //                $updatedattributes['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
-//            } else {
+            } else {
 //                $updatedattributes['state'] = \array_map(function($s) use($managerattributes) {
 //                    if($s['usfid'] == $managerattributes['usfid']) {
 //                        return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
@@ -692,7 +692,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
 //                        return $s;
 //                    }
 //                },((isset($account['state']))?$account['state']:[]));
-//            }
+            }
 //            if(!isset($account['roles'])) {
 //                $account['roles'] = [];
 //            }
