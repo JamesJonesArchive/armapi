@@ -680,18 +680,18 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             }
             // Find the state indicated by the manager
             if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
-                return ($s['state'] == $managerattributes['state']);
+                return ($s['usfid'] == $managerattributes['usfid']);
             }))) { 
-//                $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
-//                $updatedattributes['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
+                $updatedattributes['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
             } else {
-//                $updatedattributes['state'] = \array_map(function($s) use($managerattributes) {
-//                    if($s['usfid'] == $managerattributes['usfid']) {
-//                        return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
-//                    } else {
-//                        return $s;
-//                    }
-//                },((isset($account['state']))?$account['state']:[]));
+                $updatedattributes['state'] = \array_map(function($s) use($managerattributes) {
+                    if($s['usfid'] == $managerattributes['usfid']) {
+                        return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                    } else {
+                        return $s;
+                    }
+                },((isset($account['state']))?$account['state']:[]));
             }
 //            if(!isset($account['roles'])) {
 //                $account['roles'] = [];
@@ -703,7 +703,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
 //                }
 //                // Find the state indicated by the manager
 //                if(empty(\array_filter($r['state'], function($s) use($managerattributes) {
-//                    return ($s['state'] == $managerattributes['state']);
+//                    return ($s['usfid'] == $managerattributes['usfid']);
 //                }))) { 
 //                    $r['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
 //                } else {
