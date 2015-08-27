@@ -679,7 +679,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 $account['state'] = [];
             }
             // Find the state indicated by the manager
-            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
+            if(empty(\array_filter((isset($account['state']))?$account['state']:[], function($s) use($managerattributes) {
                 return ($s['state'] == $managerattributes['state']);
             }))) { 
                 $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
