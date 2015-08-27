@@ -675,33 +675,33 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     }
                 },((isset($account['review']))?$account['review']:[]));
             }
-            if(!isset($account['state'])) {
-                $account['state'] = [];
-            }
-            // Find the state indicated by the manager
-            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
-                return ($s['state'] == $managerattributes['state']);
-            }))) { 
-                $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
-                $updatedattributes['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
-            } else {
-                $updatedattributes['state'] = \array_map(function($s) use($managerattributes) {
-                    if($s['usfid'] == $managerattributes['usfid']) {
-                        return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
-                    } else {
-                        return $s;
-                    }
-                },((isset($account['state']))?$account['state']:[]));
-            }
-            if(!isset($account['roles'])) {
-                $account['roles'] = [];
-            }
+//            if(!isset($account['state'])) {
+//                $account['state'] = [];
+//            }
+//            // Find the state indicated by the manager
+//            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
+//                return ($s['state'] == $managerattributes['state']);
+//            }))) { 
+//                $updatedattributes['state'] = (isset($account['state']))?$account['state']:[];
+//                $updatedattributes['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+//            } else {
+//                $updatedattributes['state'] = \array_map(function($s) use($managerattributes) {
+//                    if($s['usfid'] == $managerattributes['usfid']) {
+//                        return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+//                    } else {
+//                        return $s;
+//                    }
+//                },((isset($account['state']))?$account['state']:[]));
+//            }
+//            if(!isset($account['roles'])) {
+//                $account['roles'] = [];
+//            }
             // Iterate the role states and set those states empty as well 
-            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
-                if(!isset($r['state'])) {
-                    $r['state'] = [];
-                }
-                // Find the state indicated by the manager
+//            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
+//                if(!isset($r['state'])) {
+//                    $r['state'] = [];
+//                }
+//                // Find the state indicated by the manager
 //                if(empty(\array_filter($r['state'], function($s) use($managerattributes) {
 //                    return ($s['state'] == $managerattributes['state']);
 //                }))) { 
@@ -715,8 +715,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
 //                        }
 //                    },((isset($r['state']))?$r['state']:[]));
 //                }
-                return $r;
-            },((isset($account['roles']))?$account['roles']:[]));
+//                return $r;
+//            },((isset($account['roles']))?$account['roles']:[]));
             // Update the account
             $status = $accounts->update([ "identity" => $identity ], [ '$set' => $updatedattributes ]);
             if (!$status) {
