@@ -675,9 +675,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     }
                 },((isset($account['review']))?$account['review']:[]));
             }
-//            if(!isset($account['state'])) {
-//                $account['state'] = [];
-//            }
+            if(!isset($account['state'])) {
+                $account['state'] = [];
+            }
 //            // Find the state indicated by the manager
 //            if(empty(\array_filter($account['state'], function($s) use($managerattributes) {
 //                return ($s['state'] == $managerattributes['state']);
