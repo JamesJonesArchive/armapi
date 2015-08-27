@@ -693,30 +693,30 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     }
                 },((isset($account['state']))?$account['state']:[]));
             }
-//            if(!isset($account['roles'])) {
-//                $account['roles'] = [];
-//            }
+            if(!isset($account['roles'])) {
+                $account['roles'] = [];
+            }
             // Iterate the role states and set those states empty as well 
-//            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
-//                if(!isset($r['state'])) {
-//                    $r['state'] = [];
-//                }
-//                // Find the state indicated by the manager
-//                if(empty(\array_filter($r['state'], function($s) use($managerattributes) {
-//                    return ($s['usfid'] == $managerattributes['usfid']);
-//                }))) { 
-//                    $r['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
-//                } else {
-//                    $r['state'] = \array_map(function($s) use($managerattributes) {
-//                        if($s['usfid'] == $managerattributes['usfid']) {
-//                            return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
-//                        } else {
-//                            return $s;
-//                        }
-//                    },((isset($r['state']))?$r['state']:[]));
-//                }
-//                return $r;
-//            },((isset($account['roles']))?$account['roles']:[]));
+            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
+                if(!isset($r['state'])) {
+                    $r['state'] = [];
+                }
+                // Find the state indicated by the manager
+                if(empty(\array_filter($r['state'], function($s) use($managerattributes) {
+                    return ($s['usfid'] == $managerattributes['usfid']);
+                }))) { 
+                    $r['state'][] = \array_merge($managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                } else {
+                    $r['state'] = \array_map(function($s) use($managerattributes) {
+                        if($s['usfid'] == $managerattributes['usfid']) {
+                            return \array_merge($s,$managerattributes,[ 'state' => '', 'timestamp' => new \MongoDate() ]);
+                        } else {
+                            return $s;
+                        }
+                    },((isset($r['state']))?$r['state']:[]));
+                }
+                return $r;
+            },((isset($account['roles']))?$account['roles']:[]));
             // Update the account
             $status = $accounts->update([ "identity" => $identity ], [ '$set' => $updatedattributes ]);
             if (!$status) {
