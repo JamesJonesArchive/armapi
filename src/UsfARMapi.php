@@ -698,6 +698,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             }
             // Iterate the role states and set those states empty as well 
             $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
+                if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
+                    return $r;
+                }
                 if(!isset($r['state'])) {
                     $r['state'] = [];
                 }
