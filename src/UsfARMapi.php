@@ -616,6 +616,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 },((isset($account['review']))?$account['review']:[]));
                 // Iterate the role confirms and set those reviews closed as well 
                 $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
+                    if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
+                        return $r;
+                    }
                     // Get the current state by manager
                     $confirm_state = \array_filter(((!isset($r['state']))?$r['state']:[]), function($s) use($managerattributes) {
                         return ($s['usfid'] == $managerattributes['usfid']);
