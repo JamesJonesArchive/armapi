@@ -20,6 +20,9 @@ namespace USF\IdM;
 
 use \JSend\JSendResponse;
 
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 /**
  * UsfARMapi is an class that performs
  * the ARM service methods
