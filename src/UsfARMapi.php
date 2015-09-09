@@ -70,11 +70,15 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
-        $accounts = $this->getARMdb()->accounts;
-        return new JSendResponse('success', [
-            "identity" => $identity,
-            "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
-        ]);
+        try {
+            $accounts = $this->getARMdb()->accounts;
+            return new JSendResponse('success', [
+                "identity" => $identity,
+                "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
+            ]);            
+        } catch (Exception $ex) {
+            return new JSendResponse('error', $ex->getMessage());
+        }
     }
     /**
      * Return all accounts of a specified type
