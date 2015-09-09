@@ -77,7 +77,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
             ]);            
         } catch (Exception $ex) {
-            return new JSendResponse('error', $ex->getMessage());
+            return new JSendResponse('error', $ex->getMessage(),$ex->getCode(),$ex->getTrace());
         }
     }
     /**
