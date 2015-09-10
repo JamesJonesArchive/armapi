@@ -81,9 +81,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return new JSendResponse('error', $ex->getMessage(),$ex->getCode(),$ex->getTrace());
         }
     }
-    public function getAccountsForIdentityTest($identity) {
-        return new JSendResponse('success', [ 'identity' => $identity ]);
-    }
     /**
      * Return all accounts of a specified type
      * 
