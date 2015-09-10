@@ -565,15 +565,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return new JSendResponse('error', "Update failed!");
         }
     }
-    public function setAccountRoleStateTest($type, $identifier, $rolename, $state, $managerattributes=[]) {
-        return new JSendResponse('success', [
-            'account_type' => $type,
-            'identifier' => $identifier, 
-            'rolename' => $rolename, 
-            'state' => $state,
-            'attributes' => $managerattributes
-        ]);
-    }
     /**
      * Updates accounts for an identity to the confirmed state
      * 
