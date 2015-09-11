@@ -527,14 +527,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             }            
             // Find if matching role exists
             if(empty(\array_filter($account['roles'], function($r) use($role) {
-                return ($r['role_id'] == $role['_id']);
+                return (isset($r['role_id'])?$r['role_id'] == $role['_id']:false);
             }))) {
                 return new JSendResponse('fail', [
                     "role" => "Role does not exist for account specified!"
                 ]);
             } else {
                 $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role) {  
-                    if($r['role_id'] == $role['_id']) {
+                    if(isset($r['role_id'])?$r['role_id'] == $role['_id']:false) {
                         if(!isset($r['state'])) {
                             $r['state'] = [ \array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
                         } else {
