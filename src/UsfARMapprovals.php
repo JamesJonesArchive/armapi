@@ -98,12 +98,13 @@ trait UsfARMapprovals {
                 ]);
             }   
             if($this->hasMatchingRole($account['roles'], $role['_id'])) {
-                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role,&$this) {  
+                $_hasStateForManager =& self::hasStateForManager;
+                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role,&$_hasStateForManager) {  
                     if(isset($r['role_id'])?$r['role_id'] == $role['_id']:false) {
                         if(!isset($r['state'])) {
                             $r['state'] = [ \array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
                         } else {
-                            if($this->hasStateForManager($r['state'], $managerattributes['usfid'])) {
+                            if($_hasStateForManager($r['state'], $managerattributes['usfid'])) {
                                 $r['state'] = \array_map(function($s) use($managerattributes,$state) {
                                     if($s['usfid'] == $managerattributes['usfid']) {
                                         return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
