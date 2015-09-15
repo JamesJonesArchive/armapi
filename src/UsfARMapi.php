@@ -29,6 +29,7 @@ use \JSend\JSendResponse;
  */
 class UsfARMapi extends UsfAbstractMongoConnection {
     use UsfARMformatter;
+    use UsfARMapprovals;
     
     private $version = "0.0.1";
     private $armdb = null;
@@ -457,7 +458,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @param type $managerattributes
      * @return JSendResponse
      */
-    public function setAccountState($type, $identifier, $state, $managerattributes=[]) {
+    public function setAccountStateOriginal($type, $identifier, $state, $managerattributes=[]) {
         $accounts = $this->getARMdb()->accounts;
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
@@ -504,7 +505,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @param type $managerattributes
      * @return JSendResponse
      */
-    public function setAccountRoleState($type, $identifier, $rolename, $state, $managerattributes=[]) {
+    public function setAccountRoleStateOriginal($type, $identifier, $rolename, $state, $managerattributes=[]) {
         $accounts = $this->getARMdb()->accounts;
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
