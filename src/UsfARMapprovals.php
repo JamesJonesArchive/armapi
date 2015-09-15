@@ -98,7 +98,7 @@ trait UsfARMapprovals {
                 ]);
             }   
             if($this->hasMatchingRole($account['roles'], $role['_id'])) {
-                $_hasStateForManager =& self::hasStateForManager;
+                $_hasStateForManager =& $this->hasStateForManager;
                 $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role,&$_hasStateForManager) {  
                     if(isset($r['role_id'])?$r['role_id'] == $role['_id']:false) {
                         if(!isset($r['state'])) {
