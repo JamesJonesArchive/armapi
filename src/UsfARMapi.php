@@ -573,7 +573,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @param type $managerattributes
      * @return JSendResponse
      */
-    public function setConfirm($identity,$managerattributes=[]) {
+    public function setConfirmOriginal($identity,$managerattributes=[]) {
         $accounts = $this->getARMdb()->accounts;
         $confirmaccounts = $accounts->find([ "identity" => $identity ]);
         if(empty($confirmaccounts)) {
@@ -652,7 +652,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @param type $managerattributes
      * @return JSendResponse
      */
-    public function setReviewByAccount($identifier,$managerattributes=[]) {
+    public function setReviewByAccountOriginal($identifier,$managerattributes=[]) {
         $accounts = $this->getARMdb()->accounts;
         $account = $accounts->findOne([ "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -731,55 +731,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
         }
-    }
-    /**
-     * Updates accounts for an identity to the review state
-     * 
-     * @param type $identity
-     * @param type $managerattributes
-     * @return type
-     */
-    public function setReviewByIdentity($identity,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
-        $reviewaccounts = $accounts->find([ "identity" => $identity ],[ "identifier" => true ]);
-        foreach ($reviewaccounts as $account) {
-            $resp = $this->setReviewByAccount($account['identifier'], $managerattributes);
-            if(!$resp->isSuccess()) {
-                return $resp;
-            }
-        }
-        return $this->getAccountsForIdentity($identity);
-    }
-    /**
-     * Sets the review for ALL accounts
-     * 
-     * @param type $func Anonymous function for Visor to run in to gather the managers
-     */
-    public function setReviewAll($func) {
-        $accounts = $this->getARMdb()->accounts;
-        $reviewaccounts = $accounts->find([ "identity" => [ '$exists' => true ] ],[ 'identity' => true, '_id' => false ]);
-        if(empty($reviewaccounts)) {
-            return new JSendResponse('fail', [
-                "identity" => "No accounts available for review!"
-            ]);
-        }
-        $resp = [
-            'usfids' => \array_unique(\array_map(function($a) { return $a['identity']; },$reviewaccounts)),
-            'reviewCount' => 0
-        ];
-        foreach ($resp['usfids'] as $usfid) {
-            $visor = $func($usfid);
-            if($visor['status'] === 'success' && (isset($svisor['data']['directory_info']))?!empty($svisor['data']['directory_info']):false) {
-                if((isset($visor['data']['directory_info']['supervisors']))?!empty($visor['data']['directory_info']['supervisors']):false) {
-                    foreach($visor['data']['directory_info']['supervisors'] as $s) {
-                        if($this->setReviewByIdentity($usfid, [ 'name' => $s['name'], 'usfid' => $s['usf_id'] ])['status'] === 'success') {
-                            $resp['reviewCount']++;
-                        }
-                    }
-                }
-            }
-        }
-        return new JSendResponse('success', $resp);
     }
     /** IMPORT FUNCTIONS **/
     
