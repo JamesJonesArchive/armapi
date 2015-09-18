@@ -348,7 +348,7 @@ trait UsfARMapprovals {
                         );
                     }
                     return $r;
-                },account['roles']); 
+                },$account['roles']); 
                 // Update the account
                 $status = $accounts->update([ "identity" => $identity ], [ '$set' => $updatedattributes ]);
                 if (!$status) {
