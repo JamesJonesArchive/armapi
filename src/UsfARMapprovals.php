@@ -44,7 +44,7 @@ trait UsfARMapprovals {
             $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
         } else {
             // Find existing match for manager
-            if($this->hasStateForManager($account['state'], $managerattributes['usfid'])) {
+            if(UsfARMapi::hasStateForManager($account['state'], $managerattributes['usfid'])) {
                 $updatedattributes['state'] = \array_map(function($s) use($managerattributes,$state) {                    
                     if($s['usfid'] == $managerattributes['usfid']) {
                         return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
@@ -97,14 +97,13 @@ trait UsfARMapprovals {
                     "role" => "Role does not exist!"
                 ]);
             }   
-            if($this->hasMatchingRole($account['roles'], $role['_id'])) {
-                $_hasStateForManager =& $this->hasStateForManager;
-                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role,&$_hasStateForManager) {  
+            if(UsfARMapi::hasMatchingRole($account['roles'], $role['_id'])) {
+                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role) {  
                     if(isset($r['role_id'])?$r['role_id'] == $role['_id']:false) {
                         if(!isset($r['state'])) {
                             $r['state'] = [ \array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
                         } else {
-                            if($_hasStateForManager($r['state'], $managerattributes['usfid'])) {
+                            if(UsfARMapi::hasStateForManager($r['state'], $managerattributes['usfid'])) {
                                 $r['state'] = \array_map(function($s) use($managerattributes,$state) {
                                     if($s['usfid'] == $managerattributes['usfid']) {
                                         return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
@@ -139,7 +138,7 @@ trait UsfARMapprovals {
      * @param type $usfid
      * @return boolean
      */
-    private function hasStateForManager($states,$id) {
+    public static function hasStateForManager($states,$id) {
         return !empty(\array_filter($states, function($s) use(&$id) {
             return ($s['usfid'] == $id);
         }));
@@ -151,7 +150,7 @@ trait UsfARMapprovals {
      * @param type $id
      * @return string
      */
-    private function getStateForManager($states,$id) {
+    public static function getStateForManager($states,$id) {
         $managerstate = \array_filter($states, function($s) use(&$id) {
             return ($s['usfid'] == $id);
         });
@@ -167,7 +166,7 @@ trait UsfARMapprovals {
      * @param type $id
      * @return boolean
      */
-    private function hasMatchingRole($roles,$id) {
+    public static function hasMatchingRole($roles,$id) {
         return !empty(\array_filter($roles, function($r) use($id) {
             return (isset($r['role_id'])?$r['role_id'] == $id:false);
         }));
@@ -179,7 +178,7 @@ trait UsfARMapprovals {
      * @param type $id
      * @return boolean
      */
-    private function hasReviewForManager($reviews,$id) {
+    public static function hasReviewForManager($reviews,$id) {
         return !empty(\array_filter($reviews, function($rv) use($id) {
             return ($rv['usfid'] == $id);
         }));
@@ -203,7 +202,7 @@ trait UsfARMapprovals {
         if(!isset($account['review'])) {
             $account['review'] = [];
         }
-        if($this->hasReviewForManager($account['review'], $managerattributes['usfid'])) {
+        if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
             $updatedattributes['review'] = \array_map(function($rv) use($managerattributes) {
                 if($rv['usfid'] == $managerattributes['usfid']) {
                     return \array_merge($rv,$managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
@@ -312,13 +311,13 @@ trait UsfARMapprovals {
         if(!isset($account['review'])) {
             $account['review'] = [];
         }
-        if($this->hasStateForManager($account['state'], $managerattributes['usfid'])) {
+        if(UsfARMapi::hasStateForManager($account['state'], $managerattributes['usfid'])) {
             $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
             $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
-                'state' => $this->getStateForManager($account['state'], $managerattributes['usfid']), 
+                'state' => UsfARMapi::getStateForManager($account['state'], $managerattributes['usfid']), 
                 'timestamp' => new \MongoDate() 
             ]);
-            if($this->hasReviewForManager($account['review'], $managerattributes['usfid'])) {
+            if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
                 // Set the account review closed
                 $updatedattributes['review'] = \array_map(function($r) use($managerattributes) {
                     if($r['usfid'] == $managerattributes['usfid']) {
@@ -330,20 +329,18 @@ trait UsfARMapprovals {
                 if(!isset($account['roles'])) {
                     $account['roles'] = [];
                 }
-                $_getStateForManager =& $this->getStateForManager($states, $id); // RETURN HERE
-                $_hasStateForManager =& $this->hasStateForManager;
                 // Iterate the role confirms and set those reviews closed as well 
-                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,&$_hasStateForManager,&$_getStateForManager) {
+                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
                     if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
                         return $r;
                     }
                     // See if a state exists for this manager and create a confirm
-                    if($_hasStateForManager(((!isset($r['state']))?$r['state']:[]), $managerattributes['usfid'])) {
+                    if(UsfARMapi::hasStateForManager(((!isset($r['state']))?$r['state']:[]), $managerattributes['usfid'])) {
                         if(!isset($r['confirm'])) {
                             $r['confirm'] = [];
                         }
                         $r['confirm'][] = \array_merge($managerattributes,[ 
-                            'state' => $_getStateForManager($r['state'],$managerattributes['usfid']), 
+                            'state' => UsfARMapi::getStateForManager($r['state'],$managerattributes['usfid']), 
                             'timestamp' => new \MongoDate() ]
                         );
                     }
