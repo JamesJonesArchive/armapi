@@ -34,9 +34,12 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     protected $connection;
     protected $dataset;
     protected $fixture = [
-        'some_collection' => [
+        'accounts' => [
             ['name' => 'Document 1'],
             ['name' => 'Document 2']
+        ],
+        'roles' => [
+            
         ]
     ];
 
@@ -70,7 +73,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      * @coversNothing
      */
     public function testRead() {
-        $result = $this->getMongoConnection()->collection('some_collection')->findOne(['name' => 'Document 2']);
+        $result = $this->getMongoConnection()->collection('accounts')->findOne(['name' => 'Document 2']);
         $this->assertEquals('Document 2', $result['name']);
     }
     /**
