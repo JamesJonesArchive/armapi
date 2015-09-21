@@ -30,9 +30,9 @@ use \JSend\JSendResponse;
 class UsfARMapi extends UsfAbstractMongoConnection {
     use UsfARMformatter;
     use UsfARMapprovals;
+    use UsfARMimport;
     
     private $version = "0.0.1";
-    private $armdb = null;
     
     public function __construct() { }
     
@@ -732,58 +732,5 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
         }
     }
-    /** IMPORT FUNCTIONS **/
     
-    /**
-     * Takes SOR account in JSON format and imports it into ARM accounts
-     * 
-     * @param type $account
-     * @return \Api\JSendResponse
-     */
-    public function importAccount($account) {
-        $currentaccount = $this->getAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier']);
-        if($currentaccount->isSuccess()) {
-            // Update existing account
-            return $this->modifyAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier'],$account);
-        } else {
-            // Create new account
-            return $this->createAccountByType($account['account_type'], $account); 
-        }
-    }
-    /**
-     * Takes account roles from SOR in JSON format and imports it into ARM account roles
-     * 
-     * @param type $accountroles
-     * @return \Api\JSendResponse
-     */
-    public function importAccountRoles($accountroles) {
-        $currentaccount = $this->getAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier']);
-        if($currentaccount->isSuccess()) {
-            return $this->modifyRolesForAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier'],[
-                'account_type' => $accountroles['account_type'],
-                'account_identifier' => $accountroles['account_identifier'],
-                'role_list' => $accountroles['account_roles']
-            ]);
-        } else {
-            return new JSendResponse('fail', [
-                "account" => "Account info missing"
-            ]);
-        }
-    }
-    /**
-     * Takes SOR role in JSON format and imports it into ARM accounts
-     * 
-     * @param type $role
-     * @return \Api\JSendResponse
-     */
-    public function importRole($role) {
-        $currentrole = $this->getRoleByTypeAndName($role['account_type'],$role['name']);
-        if($currentrole->isSuccess()) {
-            // Update existing role
-            return $this->modifyRoleByTypeAndName($role['account_type'],$role['name'],$role);
-        } else {
-            // Create new role
-            return $this->createRoleByType($role);
-        }
-    }
 }
