@@ -42,11 +42,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     
     public function getARMdb() {
         return parent::getMongoConnection()->arm;
-//        if ($this->armdb === null) {
-//            $this->armdb = $this->getMongoConnection()->arm;
-//        }
-//
-//        return $this->armdb;
     }
     /**
      * Returns all accounts of all types
