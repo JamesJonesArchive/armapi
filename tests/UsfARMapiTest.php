@@ -37,7 +37,13 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     protected $fixture = [
         'accounts' => [
             ['name' => 'Document 1','type' => 'GEMS','href' => 'kdfjkdf'],
-            ['name' => 'Document 2','type' => 'GEMS','href' => 'jkldfsjkldfs']
+            ['name' => 'Document 2','type' => 'GEMS','href' => 'jkldfsjkldfs'],
+            
+
+            
+            
+            
+            
         ],
         'roles' => [
             
@@ -71,6 +77,10 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         }
         return $this->dataSet;
     }
+    /**
+     * Prepares the environment for mocking the mongo connection and the modified collection access functions
+     * 
+     */
     public function setUp() {
         $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
         ->setMethods(array('getARMdb','getARMaccounts','getARMroles'))
@@ -95,7 +105,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      * @coversNothing
      */
     public function testRead() {
+        // Test a connection based read
         $result = $this->getMongoConnection()->collection('accounts')->findOne(['name' => 'Document 2']);
+        $this->assertEquals('Document 2', $result['name']);
+        // Test the mocked method based read
+        $result = $this->usfARMapi->getARMaccounts()->findOne(['name' => 'Document 2']);
         $this->assertEquals('Document 2', $result['name']);
     }
     /**
@@ -106,8 +120,9 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('0.0.1', $version);
     }
     public function testGetAllAccounts() {
-        var_dump($this->usfARMapi->getAllAccounts());
-        
+        $response = $this->usfARMapi->getAllAccounts();
+        var_dump($response);
+        $this->assertCount(2,$response->getData()['GEMS']);
     }
     /**
      * @covers UsfARMapi::getAccountsForIdentity
