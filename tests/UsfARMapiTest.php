@@ -18,6 +18,7 @@
 
 namespace USF\IdM;
 
+use \USF\IdM\UsfARMapi;
 /**
  * UsfARMapiTest tests the UsfARMapi
  * ARM service methods
@@ -35,13 +36,14 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     protected $dataset;
     protected $fixture = [
         'accounts' => [
-            ['name' => 'Document 1'],
-            ['name' => 'Document 2']
+            ['name' => 'Document 1','type' => 'GEMS','href' => 'kdfjkdf'],
+            ['name' => 'Document 2','type' => 'GEMS','href' => 'jkldfsjkldfs']
         ],
         'roles' => [
             
         ]
     ];
+    protected $usfARMapi;
 
     /**
      * Get the mongo connection for this test.
@@ -69,6 +71,26 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         }
         return $this->dataSet;
     }
+    public function setUp() {
+        $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
+        ->setMethods(array('getARMdb','getARMaccounts','getARMroles'))
+        ->getMock();
+        
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMdb')
+        ->will($this->returnValue($this->getMongoConnection()));
+        
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMaccounts')
+        ->will($this->returnValue($this->getMongoConnection()->collection('accounts')));
+
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMroles')
+        ->will($this->returnValue($this->getMongoConnection()->collection('roles')));
+        
+        parent::setUp();
+    }
+    
     /**
      * @coversNothing
      */
@@ -83,7 +105,10 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $version = "0.0.1";
         $this->assertEquals('0.0.1', $version);
     }
-
+    public function testGetAllAccounts() {
+        var_dump($this->usfARMapi->getAllAccounts());
+        
+    }
     /**
      * @covers UsfARMapi::getAccountsForIdentity
      */

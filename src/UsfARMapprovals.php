@@ -32,7 +32,7 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function setAccountState($type, $identifier, $state, $managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -77,7 +77,7 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function setAccountRoleState($type, $identifier, $rolename, $state, $managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -90,7 +90,7 @@ trait UsfARMapprovals {
                 "role" => "No roles exist for account specified!"
             ]);
         } else {
-            $roles = $this->getARMdb()->roles;
+            $roles = $this->getARMroles();
             $role = $roles->findOne([ 'type' => $type, 'name' => $rolename ]); 
             if (is_null($role)) {
                 return new JSendResponse('fail', [
@@ -191,7 +191,7 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function setReviewByAccount($identifier,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
@@ -227,7 +227,7 @@ trait UsfARMapprovals {
             if(!isset($account['roles'])) {
                 $account['roles'] = [];
             }
-            $roles = $this->getARMdb()->roles;
+            $roles = $this->getARMroles();
             foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
                 $rolestateresp = $this->setAccountRoleState($account['type'], $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], '', $managerattributes);
                 if(!$rolestateresp->isSuccess()) {
@@ -245,7 +245,7 @@ trait UsfARMapprovals {
      * @return type
      */
     public function setReviewByIdentity($identity,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->find([ "identity" => $identity ],[ "identifier" => true ]);
         foreach ($reviewaccounts as $account) {
             $resp = $this->setReviewByAccount($account['identifier'], $managerattributes);
@@ -261,7 +261,7 @@ trait UsfARMapprovals {
      * @param type $func Anonymous function for Visor to run in to gather the managers
      */
     public function setReviewAll($func) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->find([ "identity" => [ '$exists' => true ] ],[ 'identity' => true, '_id' => false ]);
         if(empty($reviewaccounts)) {
             return new JSendResponse('fail', [
@@ -294,7 +294,7 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function setConfirmByAccount($identifier,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
@@ -372,7 +372,7 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function setConfirm($identity,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $confirmaccounts = $accounts->find([ "identity" => $identity ]);
         if(empty($confirmaccounts)) {
             return new JSendResponse('fail', [

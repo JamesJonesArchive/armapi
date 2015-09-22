@@ -43,13 +43,19 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     public function getARMdb() {
         return parent::getMongoConnection()->arm;
     }
+    public function getARMaccounts() {
+        return $this->getARMdb()->accounts;
+    }
+    public function getARMroles() {
+        return $this->getARMdb()->roles;
+    }
     /**
      * Returns all accounts of all types
      * 
      * @return JSendResponse
      */
     public function getAllAccounts() {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $accountlist = $accounts->find();
         $result = [];
         foreach($accountlist as $act) {
@@ -67,7 +73,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         return new JSendResponse('success', [
             "identity" => $identity,
             "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "identity" => $identity ])), ['identity'])
@@ -80,7 +86,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getAccountsByType($type) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         return new JSendResponse('success',[ 
             'account_type' => $type, 
             "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type ])))
@@ -95,7 +101,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function createAccountByType($type,$account) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => "Account info missing"
@@ -160,7 +166,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getAccountByTypeAndIdentifier($type,$identifier) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
@@ -179,7 +185,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function modifyAccountByTypeAndIdentifier($type,$identifier,$accountmods) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
@@ -202,7 +208,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getRolesForAccountByTypeAndIdentifier($type,$identifier) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ],[ "type" => true, "identifier" => true, "roles" => true ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
@@ -220,8 +226,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function modifyRolesForAccountByTypeAndIdentifier($type,$identifier,$rolechanges) {
-        $accounts = $this->getARMdb()->accounts;
-        $roles = $this->getARMdb()->roles;
+        $accounts = $this->getARMaccounts();
+        $roles = $this->getARMroles();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         // ,[ "type" => true, "identifier" => true, "roles" => true ]
         if (is_null($account)) {
@@ -277,7 +283,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getAccountsByTypeAndIdentity($type,$identity) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         return new JSendResponse('success',[ 
             "identity" => $identity, 
             'accounts' => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type,"identity" => $identity ])))
@@ -289,7 +295,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getAllRoles() {
-        $roles = $this->getARMdb()->roles;
+        $roles = $this->getARMroles();
         $rolelist = $roles->find([],[ 'href' => true,'name' => true,'account_type' => true ]);
         $result = [];
         foreach($rolelist as $role) {
@@ -310,7 +316,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function createRoleByType($newrole) {
-        $roles = $this->getARMdb()->roles;
+        $roles = $this->getARMroles();
         if (is_null($newrole)) {
             return new JSendResponse('fail', [
                 "role" => "Role info missing"
@@ -364,7 +370,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getAllRolesByType($type) {
-        $roles = $this->getARMdb()->roles;
+        $roles = $this->getARMroles();
         return new JSendResponse('success', [
             'account_type' => $type,
             'roles' => \array_map(function($r) {                
@@ -380,7 +386,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function getRoleByTypeAndName($type,$name) {
-        $roles = $this->getARMdb()->roles;
+        $roles = $this->getARMroles();
         $role = $roles->findOne([ 'type' => $type, 'name' => $name ]); 
         if (is_null($role)) {
             return new JSendResponse('fail', [
@@ -401,7 +407,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function modifyRoleByTypeAndName($type,$name,$updatedrole) {
-        $roles = $this->getARMdb()->roles;
+        $roles = $this->getARMroles();
         $roleresp = $this->getRoleByTypeAndName($type, $name);
         if(!$roleresp->isSuccess()) {
             return $roleresp;
@@ -454,7 +460,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function setAccountStateOriginal($type, $identifier, $state, $managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -501,7 +507,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function setAccountRoleStateOriginal($type, $identifier, $rolename, $state, $managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -514,7 +520,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "role" => "No roles exist for account specified!"
             ]);
         } else {
-            $roles = $this->getARMdb()->roles;
+            $roles = $this->getARMroles();
             $role = $roles->findOne([ 'type' => $type, 'name' => $rolename ]); 
             if (is_null($role)) {
                 return new JSendResponse('fail', [
@@ -569,7 +575,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function setConfirmOriginal($identity,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $confirmaccounts = $accounts->find([ "identity" => $identity ]);
         if(empty($confirmaccounts)) {
             return new JSendResponse('fail', [
@@ -648,7 +654,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return JSendResponse
      */
     public function setReviewByAccountOriginal($identifier,$managerattributes=[]) {
-        $accounts = $this->getARMdb()->accounts;
+        $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
