@@ -34,21 +34,6 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
 
     protected $connection;
     protected $dataset;
-    protected $fixture = [
-        'accounts' => [
-            ['name' => 'Document 1','type' => 'GEMS','href' => 'kdfjkdf'],
-            ['name' => 'Document 2','type' => 'GEMS','href' => 'jkldfsjkldfs'],
-            
-
-            
-            
-            
-            
-        ],
-        'roles' => [
-            
-        ]
-    ];
     protected $usfARMapi;
 
     /**
@@ -73,7 +58,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     protected function getMongoDataSet() {
         if (empty($this->dataSet)) {
             $this->dataSet = new \Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet($this->getMongoConnection());
-            $this->dataSet->setFixture($this->fixture);
+            $this->dataSet->setFixture(json_decode(ARMTESTDATA,true));
         }
         return $this->dataSet;
     }
@@ -106,11 +91,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      */
     public function testRead() {
         // Test a connection based read
-        $result = $this->getMongoConnection()->collection('accounts')->findOne(['name' => 'Document 2']);
-        $this->assertEquals('Document 2', $result['name']);
+        $result = $this->getMongoConnection()->collection('accounts')->findOne(['employeeID' => '00000012345']);
+        $this->assertEquals('U12345678', $result['identity']);
         // Test the mocked method based read
-        $result = $this->usfARMapi->getARMaccounts()->findOne(['name' => 'Document 2']);
-        $this->assertEquals('Document 2', $result['name']);
+        $result = $this->usfARMapi->getARMaccounts()->findOne(['employeeID' => '00000012345']);
+        $this->assertEquals('U12345678', $result['identity']);
     }
     /**
      * @covers UsfARMapi::getVersion

@@ -16,6 +16,8 @@
  * limitations under the License.
  */
 namespace USF\IdM;
+
+use \JSend\JSendResponse;
 /**
  * Description of UsfARMapprovals
  *
