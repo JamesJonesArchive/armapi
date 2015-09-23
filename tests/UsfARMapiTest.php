@@ -58,7 +58,8 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     protected function getMongoDataSet() {
         if (empty($this->dataSet)) {
             $this->dataSet = new \Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet($this->getMongoConnection());
-            $this->dataSet->setFixture(json_decode(ARMTESTDATA,true));
+            global $fixture;
+            $this->dataSet->setFixture($fixture);
         }
         return $this->dataSet;
     }
