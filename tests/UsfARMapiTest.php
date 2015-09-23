@@ -215,6 +215,56 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $account3['roles']));
     }
     /**
+     * @covers UsfARMapi::getAccountsByType
+     */
+    public function testGetAccountsByType() {
+        $response = $this->usfARMapi->getAccountsByType('GEMS');
+        print_r($response);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());      
+        // Confirming the account_type key exists
+        $this->assertArrayHasKey('account_type',$response->getData());
+        // Confirming the value of account_type is not empty
+        $this->assertNotEmpty($response->getData()['account_type']);
+        // Confirming the value of the account_type key is GEMS
+        $this->assertEquals('GEMS', $response->getData()['account_type']);
+        // Confirming the accounts key exists
+        $this->assertArrayHasKey('accounts',$response->getData());
+        // Confirming the value of accounts is not empty
+        $this->assertNotEmpty($response->getData()['accounts']);
+        // Confirming the count of the values in the accounts key
+        $this->assertCount(2,$response->getData()['accounts']);
+        // Getting each account for testing
+        $account1 = \array_values(\array_filter($response->getData()['accounts'], function($a) { return ($a['href'] == '/accounts/GEMS/RBULL'); }))[0];
+        $account2 = \array_values(\array_filter($response->getData()['accounts'], function($a) { return ($a['href'] == '/accounts/GEMS/00000012345'); }))[0];
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$account1);
+        // Confirming that the value of the roles key is not empty
+        $this->assertNotEmpty($account1['roles']);
+        // Confirming the count of the values in the roles key
+        $this->assertCount(3,$account1['roles']);
+        // Matching all 3 role href values       
+        $this->assertContains('/roles/GEMS/RPT2_ROLE',array_map(function($a) { return $a['href']; }, $account1['roles']));
+        $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $account1['roles']));
+        $this->assertContains('/roles/GEMS/INQUIRE_ROLE',array_map(function($a) { return $a['href']; }, $account1['roles']));
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$account2);
+        // Confirming that the value of the roles key is not empty
+        $this->assertNotEmpty($account2['roles']);
+        // Confirming the count of the values in the roles key
+        $this->assertCount(6,$account2['roles']);
+        // Matching all 6 role href values
+        $this->assertContains('/roles/GEMS/USF_APPLICANT',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/SELFSALL_ROLE',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/USF_EMPLOYEE',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/USF_WF_APPROVALS_USER',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $account2['roles']));
+    }
+    
+    
+    
+    /**
      * @covers UsfARMapi::getRolesForIdentity
      */
     public function testGetRolesForIdentity() {
