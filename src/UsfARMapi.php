@@ -599,9 +599,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 ]);
             } else {
                 // Append the confirm
-                $confirm_state = \array_filter($account['state'], function($r) use($managerattributes) {
+                $confirm_state = \array_values(\array_filter($account['state'], function($r) use($managerattributes) {
                     return ($r['usfid'] == $managerattributes['usfid']);
-                });
+                }));
                 if(!empty($confirm_state)) {
                     $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
                     $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
@@ -623,9 +623,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                         return $r;
                     }
                     // Get the current state by manager
-                    $confirm_state = \array_filter(((!isset($r['state']))?$r['state']:[]), function($s) use($managerattributes) {
+                    $confirm_state = \array_values(\array_filter(((!isset($r['state']))?$r['state']:[]), function($s) use($managerattributes) {
                         return ($s['usfid'] == $managerattributes['usfid']);
-                    });
+                    }));
                     if(!empty($confirm_state)) {
                         if(!isset($r['confirm'])) {
                             $r['confirm'] = [];

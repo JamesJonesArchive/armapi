@@ -153,9 +153,9 @@ trait UsfARMapprovals {
      * @return string
      */
     public static function getStateForManager($states,$id) {
-        $managerstate = \array_filter($states, function($s) use(&$id) {
+        $managerstate = \array_values(\array_filter($states, function($s) use(&$id) {
             return ($s['usfid'] == $id);
-        });
+        }));
         if(!empty($managerstate)) {
             return $managerstate[0]['state'];
         }
