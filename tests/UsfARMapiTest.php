@@ -19,6 +19,7 @@
 namespace USF\IdM;
 
 use \USF\IdM\UsfARMapi;
+use USF\IdM\UsfConfig;
 /**
  * UsfARMapiTest tests the UsfARMapi
  * ARM service methods
@@ -44,7 +45,21 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     protected function getMongoConnection() {
         // return new \MongoClient();
         if (empty($this->connection)) {
-            $this->connection = new \Zumba\PHPUnit\Extensions\Mongo\Client\Connector(new \MongoClient());
+            $this->connection = new \Zumba\PHPUnit\Extensions\Mongo\Client\Connector(call_user_func(function() {
+                //Access configuration values from default location (/usr/local/etc/idm_config)
+                $config = new UsfConfig();
+
+                // The DBAL connection configuration
+                $mongoConfig = $config->mongoConfig;
+
+                if(empty($mongoConfig)) {
+                    return new \MongoClient();
+                } elseif (!isset($mongoConfig['options'])) {
+                    return new \MongoClient($mongoConfig['server']);
+                } else {
+                    return new \MongoClient($mongoConfig['server'],$mongoConfig['options']);
+                }                
+            }));
             $this->connection->setDb(static::DEFAULT_DATABASE);
         }
         return $this->connection;
