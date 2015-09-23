@@ -160,7 +160,6 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetAccountsForIdentity() {
         $response = $this->usfARMapi->getAccountsForIdentity('U12345678');
-        print_r($response);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());        
         // Confirming the identity key exists
@@ -179,10 +178,41 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/accounts/GEMS/RBULL',array_map(function($a) { return $a['href']; }, $response->getData()['accounts']));
         $this->assertContains('/accounts/GEMS/00000012345',array_map(function($a) { return $a['href']; }, $response->getData()['accounts']));
         $this->assertContains('/accounts/FAST/U12345678',array_map(function($a) { return $a['href']; }, $response->getData()['accounts']));
-        
-        print_r(array_filter($response->getData()['accounts'], function($a) { return ($a['href'] == '/accounts/GEMS/RBULL'); }));
+        // Getting each account for testing
         $account1 = \array_values(\array_filter($response->getData()['accounts'], function($a) { return ($a['href'] == '/accounts/GEMS/RBULL'); }))[0];
-        print_r($account1);
+        $account2 = \array_values(\array_filter($response->getData()['accounts'], function($a) { return ($a['href'] == '/accounts/GEMS/00000012345'); }))[0];
+        $account3 = \array_values(\array_filter($response->getData()['accounts'], function($a) { return ($a['href'] == '/accounts/FAST/U12345678'); }))[0];
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$account1);
+        // Confirming that the value of the roles key is not empty
+        $this->assertNotEmpty($account1['roles']);
+        // Confirming the count of the values in the roles key
+        $this->assertCount(3,$account1['roles']);
+        // Matching all 3 role href values       
+        $this->assertContains('/roles/GEMS/RPT2_ROLE',array_map(function($a) { return $a['href']; }, $account1['roles']));
+        $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $account1['roles']));
+        $this->assertContains('/roles/GEMS/INQUIRE_ROLE',array_map(function($a) { return $a['href']; }, $account1['roles']));
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$account2);
+        // Confirming that the value of the roles key is not empty
+        $this->assertNotEmpty($account2['roles']);
+        // Confirming the count of the values in the roles key
+        $this->assertCount(6,$account2['roles']);
+        // Matching all 6 role href values
+        $this->assertContains('/roles/GEMS/USF_APPLICANT',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/SELFSALL_ROLE',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/USF_EMPLOYEE',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/USF_WF_APPROVALS_USER',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $account2['roles']));
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$account3);
+        // Confirming that the value of the roles key is not empty
+        $this->assertNotEmpty($account3['roles']);
+        // Confirming the count of the values in the roles key
+        $this->assertCount(1,$account3['roles']);
+        // Matching all 1 role href values
+        $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $account3['roles']));
     }
     /**
      * @covers UsfARMapi::getRolesForIdentity
