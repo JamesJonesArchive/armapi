@@ -117,8 +117,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      * @covers UsfARMapi::getVersion
      */
     public function testGetVersion() {
-        $version = "0.0.1";
-        $this->assertEquals('0.0.1', $version);
+        $this->assertEquals($_SERVER['ARMAPI_VERSION'], $this->usfARMapi->getVersion());
     }
     public function testGetAllAccounts() {
         $response = $this->usfARMapi->getAllAccounts();
