@@ -192,10 +192,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "account" => "Account not found!"
             ]);
         }
-        $accountmods["href"] = "/accounts/{$type}/{$identifier}";
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => $accountmods]);
+        $href = "/accounts/{$type}/{$identifier}";
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => \array_merge(array_diff_key($accountmods,array_flip(['type','identifier'])),["href" => $href ]) ]);
         if ($status) {
-            return new JSendResponse('success', [ "href" => $accountmods["href"] ]);
+            return new JSendResponse('success', [ "href" => $href ]);
         } else {
             return new JSendResponse('error', "Update failed!");
         }

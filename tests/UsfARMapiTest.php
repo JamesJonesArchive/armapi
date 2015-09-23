@@ -219,7 +219,6 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetAccountsByType() {
         $response = $this->usfARMapi->getAccountsByType('GEMS');
-        print_r($response);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());      
         // Confirming the account_type key exists
@@ -261,9 +260,189 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $account2['roles']));
         $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $account2['roles']));
     }
+    /**
+     * @covers UsfARMapi::createAccountByType
+     */
+    public function testCreateAccountByType_NullAccount() {        
+        $response = $this->usfARMapi->createAccountByType('GEMS',null);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account info missing', $response->getData()['account']);
+    }
+    /**
+     * @covers UsfARMapi::createAccountByType
+     */
+    public function testCreateAccountByType_ValidAccountInfo() {
+        // Testing account with no key value pairs
+        $response = $this->usfARMapi->createAccountByType('GEMS',[]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account info missing one of these keys: account_type,account_identifier,account_data', $response->getData()['account']);
+
+        // Testing account with 2 missing key value pairs
+        $response2 = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS' ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response2->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response2->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response2->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account info missing one of these keys: account_type,account_identifier,account_data', $response2->getData()['account']);        
+        
+        // Testing account with 1 missing key value pairs
+        $response3 = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345' ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response3->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response3->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response3->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account info missing one of these keys: account_type,account_identifier,account_data', $response3->getData()['account']);                
+    }
+    /**
+     * @covers UsfARMapi::createAccountByType
+     */
+    public function testCreateAccountByType_AccountDataEmpty() {
+        $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345', 'account_data' => [] ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account info is empty!', $response->getData()['account']);                        
+    }
+    /**
+     * @covers UsfARMapi::createAccountByType
+     */
+    public function testCreateAccountByType_AccountTypeMismatch() {
+        $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS_bad','account_identifier' => '00000012345', 'account_data' => [ 'anything' => 'myvalue' ] ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account type is mismatched in the request!', $response->getData()['account']);                                
+    }
+    /**
+     * @covers UsfARMapi::createAccountByType
+     */
+    public function testCreateAccountByType_AccountExists() {
+        $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345', 'account_data' => [ 'anything' => 'myvalue' ] ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account of this type already exists!', $response->getData()['account']);                                
+    }
+    /**
+     * @covers UsfARMapi::createAccountByType
+     */
+    public function testCreateAccountByType() {
+        $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012340', 'account_data' => [ 'anything' => 'myvalue' ] ]);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());    
+        // Confirming the href key exists
+        $this->assertArrayHasKey('href',$response->getData());
+        // Confirming the value of href is not empty
+        $this->assertNotEmpty($response->getData()['href']);
+        // Confirming the value of the href key is the error message
+        $this->assertEquals('/accounts/GEMS/00000012340', $response->getData()['href']); 
+    }
+    /**
+     * @covers UsfARMapi::getAccountByTypeAndIdentifier
+     */
+    public function testGetAccountByTypeAndIdentifier_AccountNotFound() {
+        $response = $this->usfARMapi->getAccountByTypeAndIdentifier('GEMS','00000012340');
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account not found!', $response->getData()['account']);
+    }
+    /**
+     * @covers UsfARMapi::getAccountByTypeAndIdentifier
+     */
+    public function testGetAccountByTypeAndIdentifier() {
+        $response = $this->usfARMapi->getAccountByTypeAndIdentifier('GEMS','00000012345');
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess()); 
+        // Confirming the href key exists
+        $this->assertArrayHasKey('href',$response->getData());
+        // Confirming the value of href is not empty
+        $this->assertNotEmpty($response->getData()['href']);
+        // Confirming the value of the href key is the error message
+        $this->assertEquals('/accounts/GEMS/00000012345', $response->getData()['href']);
+        
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$response->getData());
+        // Confirming the value of roles is not empty
+        $this->assertNotEmpty($response->getData()['roles']);
+        // Confirming the count of the values in the roles key
+        $this->assertCount(6,$response->getData()['roles']);
+        
+        // Matching all 6 role href values
+        $this->assertContains('/roles/GEMS/USF_APPLICANT',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+        $this->assertContains('/roles/GEMS/SELFSALL_ROLE',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+        $this->assertContains('/roles/GEMS/USF_EMPLOYEE',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+        $this->assertContains('/roles/GEMS/USF_WF_APPROVALS_USER',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+        $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+        $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+    }
+    /**
+     * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
+     */
+    public function testModifyAccountByTypeAndIdentifier_AccountNotFound() {
+        $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012340',[ 'anything' => 'myvalue' ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals('Account not found!', $response->getData()['account']);
+    }
+    /**
+     * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
+     */
+    public function testModifyAccountByTypeAndIdentifier() {
+        $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012345',[ 'anything' => 'myvalue' ]);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());    
+        // Confirming the href key exists
+        $this->assertArrayHasKey('href',$response->getData());
+        // Confirming the value of href is not empty
+        $this->assertNotEmpty($response->getData()['href']);
+        // Confirming the value of the href key is the error message
+        $this->assertEquals('/accounts/GEMS/00000012345', $response->getData()['href']);        
+    }
     
     
     
+    
+    // **************** STOPPING PLACE **********************
     /**
      * @covers UsfARMapi::getRolesForIdentity
      */
