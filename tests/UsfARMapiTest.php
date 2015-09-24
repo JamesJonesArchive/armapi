@@ -272,7 +272,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account info missing', $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['account']);
     }
     /**
      * @covers UsfARMapi::createAccountByType
@@ -287,7 +287,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account info missing one of these keys: account_type,account_identifier,account_data', $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['account']);
 
         // Testing account with 2 missing key value pairs
         $response2 = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS' ]);
@@ -298,7 +298,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response2->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account info missing one of these keys: account_type,account_identifier,account_data', $response2->getData()['account']);        
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response2->getData()['account']);        
         
         // Testing account with 1 missing key value pairs
         $response3 = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345' ]);
@@ -309,7 +309,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response3->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account info missing one of these keys: account_type,account_identifier,account_data', $response3->getData()['account']);                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response3->getData()['account']);                
     }
     /**
      * @covers UsfARMapi::createAccountByType
@@ -323,7 +323,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account info is empty!', $response->getData()['account']);                        
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['account']);                        
     }
     /**
      * @covers UsfARMapi::createAccountByType
@@ -337,7 +337,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account type is mismatched in the request!', $response->getData()['account']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_TYPE_MISMATCH'], $response->getData()['account']);                                
     }
     /**
      * @covers UsfARMapi::createAccountByType
@@ -351,7 +351,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account of this type already exists!', $response->getData()['account']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_EXISTS'], $response->getData()['account']);                                
     }
     /**
      * @covers UsfARMapi::createAccountByType
@@ -379,7 +379,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account not found!', $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
      * @covers UsfARMapi::getAccountByTypeAndIdentifier
@@ -422,7 +422,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account not found!', $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
      * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
@@ -450,7 +450,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account not found!', $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
      * @covers UsfARMapi::getRolesForAccountByTypeAndIdentifier
@@ -531,7 +531,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('Account not found!', $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
      * @covers UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
@@ -545,7 +545,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['roles']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals('No role list specified!', $response->getData()['roles']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'], $response->getData()['roles']);
     }
     /**
      * @covers UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
@@ -563,14 +563,13 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of role_list is not empty
         $this->assertNotEmpty($response->getData()['role_list']);
         // Confirming the value of the role_list key is the error message
-        $this->assertEquals('Role list contains invalid roles!', $response->getData()['role_list']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID'], $response->getData()['role_list']);
     }
     /**
      * @covers UsfARMapi::getAccountsByTypeAndIdentity
      */
     public function testGetAccountsByTypeAndIdentity() {
         $response = $this->usfARMapi->getAccountsByTypeAndIdentity('GEMS','U12345678');
-        print_r($response->getData());
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess()); 
         // Confirming the identity key exists
@@ -612,7 +611,284 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $account2['roles']));
         $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $account2['roles']));
     }
-    
+    /**
+     * @covers UsfARMapi::getAllRoles
+     */
+    public function testGetAllRoles() {
+        $response = $this->usfARMapi->getAllRoles();
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the GEMS key exists
+        $this->assertArrayHasKey('GEMS',$response->getData());
+        // Confirming that the value of the GEMS key is not empty
+        $this->assertNotEmpty($response->getData()['GEMS']);
+        // Confirming the count of the values in the GEMS key
+        $this->assertCount(8,$response->getData()['GEMS']);
+        // Matching all 8 role href values
+        $this->assertContains('/roles/GEMS/USF_APPLICANT',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/SELFSALL_ROLE',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/USF_EMPLOYEE',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/USF_WF_APPROVALS_USER',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/PeopleSoft+User',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/RPT2_ROLE',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));
+        $this->assertContains('/roles/GEMS/INQUIRE_ROLE',array_map(function($a) { return $a['href']; }, $response->getData()['GEMS']));        
+        // Confirming the FAST key exists
+        $this->assertArrayHasKey('FAST',$response->getData());
+        // Confirming that the value of the FAST key is not empty
+        $this->assertNotEmpty($response->getData()['FAST']);
+        // Confirming the count of the values in the FAST key
+        $this->assertCount(1,$response->getData()['FAST']);
+        // Match single role href value
+        $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $response->getData()['FAST']));
+    }
+    /**
+     * @covers UsfARMapi::createRoleByType
+     */
+    public function testCreateRoleByType() {
+        $response = $this->usfARMapi->createRoleByType([
+            'account_type' => 'FAST',
+            'name' => 'My Test Role',
+            'role_data' => [
+                'arbitrary_stuff' => 'Any key you need to add'
+            ]
+        ]);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the href key exists
+        $this->assertArrayHasKey('href',$response->getData());
+        // Confirming that the value of the href key is not empty
+        $this->assertNotEmpty($response->getData()['href']);
+        // Confirming the value of the identity key is U12345678
+        $this->assertEquals('/roles/FAST/My+Test+Role', $response->getData()['href']);
+    }
+    /**
+     * @covers UsfARMapi::createRoleByType
+     */
+    public function testCreateRoleByType_Null() {
+        $response = $this->usfARMapi->createRoleByType(null);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING'], $response->getData()['role']);        
+    }
+    /**
+     * @covers UsfARMapi::createRoleByType
+     */
+    public function testCreateRoleByType_MissingRequiredKeys() {
+        $response = $this->usfARMapi->createRoleByType([]);
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['role']);                
+    }
+    /**
+     * @covers UsfARMapi::createRoleByType
+     */
+    public function testCreateRoleByType_MissingRoleData() {
+        $response = $this->usfARMapi->createRoleByType([
+            'account_type' => 'FAST',
+            'name' => 'My Test Role',
+            'role_data' => []
+        ]);
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['role']);                                
+    }
+    /**
+     * @covers UsfARMapi::createRoleByType
+     */
+    public function testCreateRoleByType_RoleAlreadyExists() {
+        $response = $this->usfARMapi->createRoleByType([
+            'account_type' => 'FAST',
+            'name' => 'USF_TR_TRAVELER',
+            'role_data' => [
+                'arbitrary_stuff' => 'Any key you need to add'
+            ]
+        ]);
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS'], $response->getData()['role']);                                
+    }
+    /**
+     * @covers UsfARMapi::getAllRolesByType
+     */
+    public function testGetAllRolesByType() {
+        $response = $this->usfARMapi->getAllRolesByType('FAST');
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the account_type key exists
+        $this->assertArrayHasKey('account_type',$response->getData());
+        // Confirming that the value of the account_type key is not empty
+        $this->assertNotEmpty($response->getData()['account_type']);        
+        // Confirming the value of the account_type key is FAST
+        $this->assertEquals('FAST', $response->getData()['account_type']);
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$response->getData());
+        // Confirming that the value of the account_type key is not empty
+        $this->assertNotEmpty($response->getData()['roles']);    
+        // Confirming the count of the values in the GEMS key
+        $this->assertCount(1,$response->getData()['roles']);
+        // Match single role href value
+        $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
+    }
+    /**
+     * @covers UsfARMapi::getRoleByTypeAndName
+     */
+    public function testGetRoleByTypeAndName() {
+        $response = $this->usfARMapi->getRoleByTypeAndName('FAST','USF_TR_TRAVELER');
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the account_type key exists
+        $this->assertArrayHasKey('account_type',$response->getData());
+        // Confirming that the value of the account_type key is not empty
+        $this->assertNotEmpty($response->getData()['account_type']);
+        // Confirming the value of the account_type key is FAST
+        $this->assertEquals('FAST', $response->getData()['account_type']);
+
+        // Confirming the role_data key exists
+        $this->assertArrayHasKey('role_data',$response->getData());
+        // Confirming that the value of the role_data key is not empty
+        $this->assertNotEmpty($response->getData()['role_data']);
+
+        // Confirming the href key exists
+        $this->assertArrayHasKey('href',$response->getData()['role_data']);
+        // Confirming that the value of the href key is not empty
+        $this->assertNotEmpty($response->getData()['role_data']['href']);
+        // Confirming that the value of the href key is not empty
+        $this->assertEquals('/roles/FAST/USF_TR_TRAVELER', $response->getData()['role_data']['href']);
+    }
+    /**
+     * @covers UsfARMapi::getRoleByTypeAndName
+     */
+    public function testGetRoleByTypeAndName_RoleNotExists() {
+        $response = $this->usfARMapi->getRoleByTypeAndName('FAST','DOESNT_EXIST');
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['role']);                                        
+    }
+    /**
+     * @covers UsfARMapi::modifyRoleByTypeAndName
+     */
+    public function testModifyRoleByTypeAndName() {
+        $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[
+            'account_type' => 'FAST',
+            'name' => 'USF_TR_TRAVELER',
+            'role_data' => [
+                'arbitrary_stuff' => 'Any key you need to add'
+            ]
+        ]);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the account_type key exists
+        $this->assertArrayHasKey('account_type',$response->getData());
+        // Confirming that the value of the account_type key is not empty
+        $this->assertNotEmpty($response->getData()['account_type']);
+        // Confirming the value of the account_type key is FAST
+        $this->assertEquals('FAST', $response->getData()['account_type']);
+        
+        // Confirming the role_data key exists
+        $this->assertArrayHasKey('role_data',$response->getData());
+        // Confirming that the value of the role_data key is not empty
+        $this->assertNotEmpty($response->getData()['role_data']);
+
+        // Confirming the new arbitrary_stuff key exists
+        $this->assertArrayHasKey('arbitrary_stuff',$response->getData()['role_data']);
+        // Confirming that the value of the arbitrary_stuff key is not empty
+        $this->assertNotEmpty($response->getData()['role_data']['arbitrary_stuff']);
+        // Confirming that the value of the arbitrary_stuff key is not empty
+        $this->assertEquals('Any key you need to add', $response->getData()['role_data']['arbitrary_stuff']);
+        
+        // NOW TEST CHANGING THE NAME (no need for role_data when there's a name change but it works as well)
+        $responseNameChange = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[
+            'account_type' => 'FAST',
+            'name' => 'USF_TR_TRAVELER2',
+            'role_data' => [
+                'arbitrary_stuff' => 'Any key you need to add (changed along with name)'
+            ]
+        ]);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($responseNameChange->isSuccess());
+        // Confirming the account_type key exists
+        $this->assertArrayHasKey('account_type',$responseNameChange->getData());
+        // Confirming that the value of the account_type key is not empty
+        $this->assertNotEmpty($responseNameChange->getData()['account_type']);
+        // Confirming the value of the account_type key is FAST
+        $this->assertEquals('FAST', $responseNameChange->getData()['account_type']);
+        
+        // Confirming the role_data key exists
+        $this->assertArrayHasKey('role_data',$responseNameChange->getData());
+        // Confirming that the value of the role_data key is not empty
+        $this->assertNotEmpty($responseNameChange->getData()['role_data']);
+
+        // Confirming the new arbitrary_stuff key exists
+        $this->assertArrayHasKey('arbitrary_stuff',$responseNameChange->getData()['role_data']);
+        // Confirming that the value of the arbitrary_stuff key is not empty
+        $this->assertNotEmpty($responseNameChange->getData()['role_data']['arbitrary_stuff']);
+        // Confirming that the value of the arbitrary_stuff key is not empty
+        $this->assertEquals('Any key you need to add (changed along with name)', $responseNameChange->getData()['role_data']['arbitrary_stuff']);
+        // Confirming the changed name key exists
+        $this->assertArrayHasKey('name',$responseNameChange->getData()['role_data']);
+        // Confirming that the value of the name key is not empty
+        $this->assertNotEmpty($responseNameChange->getData()['role_data']['name']);
+        // Confirming the name change
+        $this->assertEquals('USF_TR_TRAVELER2',$responseNameChange->getData()['role_data']['name']);
+        // Confirming the changed href key exists
+        $this->assertArrayHasKey('href',$responseNameChange->getData()['role_data']);
+        // Confirming that the value of the href key is not empty
+        $this->assertNotEmpty($responseNameChange->getData()['role_data']['href']);
+        // Confirming the href change
+        $this->assertEquals('/roles/FAST/USF_TR_TRAVELER2',$responseNameChange->getData()['role_data']['href']);        
+    }
+    /**
+     * @covers UsfARMapi::modifyRoleByTypeAndName
+     */
+    public function testModifyRoleByTypeAndName_MissingRequiredKeys() {
+        $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[]);
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['role']);  
+    }
+    /**
+     * @covers UsfARMapi::modifyRoleByTypeAndName
+     */
+    public function testModifyRoleByTypeAndName_RoleDataEmpty() {
+        $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[
+            'account_type' => 'FAST',
+            'name' => 'USF_TR_TRAVELER',
+            'role_data' => []
+        ]);
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('role',$response->getData());
+        // Confirming the value of role is not empty
+        $this->assertNotEmpty($response->getData()['role']);
+        // Confirming the value of the role key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['role']);  
+    }
     // **************** STOPPING PLACE **********************
     /**
      * @covers UsfARMapi::getRolesForIdentity

@@ -92,4 +92,13 @@ trait UsfARMformatter {
         }
         return self::convertMongoDatesToUTCstrings(\array_diff_key($mongoaccount,array_flip($removekeys)));
     }
+    /**
+     * Returns a formatted string without spaces
+     * 
+     * @param type $name
+     * @return string
+     */
+    public static function formatRoleName($name) {
+        return str_replace(" ","+",$name);
+    }
 }
