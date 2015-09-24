@@ -39,33 +39,43 @@ trait UsfARMapprovals {
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
-                "account" => "Account not found!"
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]);
         }
         if(!isset($account['state'])) {
             $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
         } else {
-            // Find existing match for manager
-            if(UsfARMapi::hasStateForManager($account['state'], $managerattributes['usfid'])) {
-                $updatedattributes['state'] = \array_map(function($s) use($managerattributes,$state) {                    
-                    if($s['usfid'] == $managerattributes['usfid']) {
-                        return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
-                    } else {
-                        return $s;                    
-                    }                    
-                },$account['state']);                
-            } else {
-                $updatedattributes['state'] = array_merge(
-                    $account['state'],
-                    [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ]
-                );
-            }
+            $updatedattributes['state'] = UsfARMapi::getUpdatedStateArray($account['state'], $state, $managerattributes);
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if ($status) {
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
-            return new JSendResponse('error', "Update failed!");
+            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']); 
+        }
+    }
+    /**
+     * Returns an updated state array based on the new passed state and the manager attributes
+     * 
+     * @param type $states
+     * @param type $newstate
+     * @param type $managerattributes
+     * @return type
+     */
+    public static function getUpdatedStateArray($states,$newstate,$managerattributes) {
+        if(UsfARMapi::hasStateForManager($states, $managerattributes['usfid'])) {
+            return \array_map(function($s) use($managerattributes,$newstate) {                    
+                if($s['usfid'] == $managerattributes['usfid']) {
+                    return \array_merge($s,$managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]);
+                } else {
+                    return $s;                    
+                }                    
+            },$states);
+        } else {
+            return array_merge(
+                $states,
+                [ array_merge($managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]) ]
+            );
         }
     }
     /**
@@ -84,12 +94,12 @@ trait UsfARMapprovals {
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
-                "account" => "Account not found!"
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]);
         }
         if(!isset($account['roles'])) {
             return new JSendResponse('fail', [
-                "role" => "No roles exist for account specified!"
+                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'] 
             ]);
         } else {
             $roles = $this->getARMroles();
@@ -105,17 +115,7 @@ trait UsfARMapprovals {
                         if(!isset($r['state'])) {
                             $r['state'] = [ \array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
                         } else {
-                            if(UsfARMapi::hasStateForManager($r['state'], $managerattributes['usfid'])) {
-                                $r['state'] = \array_map(function($s) use($managerattributes,$state) {
-                                    if($s['usfid'] == $managerattributes['usfid']) {
-                                        return \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
-                                    } else {
-                                        return $s;                                        
-                                    }
-                                },$r['state']);
-                            } else {
-                                $r['state'][] = \array_merge($s,$managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]);
-                            }
+                            $r['state'] = UsfARMapi::getUpdatedStateArray($r['state'], $state, $managerattributes);
                         }
                     }
                     return $r;

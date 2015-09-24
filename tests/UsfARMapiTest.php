@@ -888,43 +888,5 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotEmpty($response->getData()['role']);
         // Confirming the value of the role key is the error message
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['role']);  
-    }
-    // **************** STOPPING PLACE **********************
-    /**
-     * @covers UsfARMapi::getRolesForIdentity
-     */
-    public function testGetRolesForIdentity() {
-        
-    }
-    /**
-     * @covers UsfARMapi::getRolesForAccount
-     */
-    public function testGetRolesForAccount() {
-        
-    }
-    /**
-     * @covers UsfARMapi::getIdentityForAccount
-     */
-    public function testGetIdentityForAccount() {
-        
-    }
-    /**
-     * @covers UsfARMapi::getIdentitiesForRole
-     */
-    public function testGetIdentitiesForRole() {
-        
-    }
-    /**
-     * @covers UsfARMapi::setAccountForIdentity
-     */
-    public function testSetAccountForIdentity() {
-        
-    }
-    /**
-     * @covers UsfARMapi::setRoleForAccount
-     */
-    public function testSetRoleForAccount() {
-        
-    }
-    
+    }    
 }

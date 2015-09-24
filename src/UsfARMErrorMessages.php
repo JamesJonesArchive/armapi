@@ -32,6 +32,7 @@ trait UsfARMErrorMessages {
         'ACCOUNT_NOT_EXISTS' => 'Account not found!',
         'ACCOUNT_UPDATE_ERROR' => 'Account update failed!',
         'ACCOUNT_CREATE_ERROR' => 'Account creation could not be performed!',
+        'ACCOUNT_NO_ROLES_EXIST' => 'No roles exist for account specified!',
         'ROLE_INFO_MISSING' => 'Role info missing!',
         'ROLE_INFO_MISSING_REQUIRED_KEYS' => 'Role info missing required keys!',
         'ROLE_DATA_EMPTY' => 'Role data is empty!',
