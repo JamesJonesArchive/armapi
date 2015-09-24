@@ -55,30 +55,6 @@ trait UsfARMapprovals {
         }
     }
     /**
-     * Returns an updated state array based on the new passed state and the manager attributes
-     * 
-     * @param type $states
-     * @param type $newstate
-     * @param type $managerattributes
-     * @return type
-     */
-    public static function getUpdatedStateArray($states,$newstate,$managerattributes) {
-        if(UsfARMapi::hasStateForManager($states, $managerattributes['usfid'])) {
-            return \array_map(function($s) use($managerattributes,$newstate) {                    
-                if($s['usfid'] == $managerattributes['usfid']) {
-                    return \array_merge($s,$managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]);
-                } else {
-                    return $s;                    
-                }                    
-            },$states);
-        } else {
-            return array_merge(
-                $states,
-                [ array_merge($managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]) ]
-            );
-        }
-    }
-    /**
      * Sets the role state on an account
      * 
      * @param type $type
@@ -106,7 +82,7 @@ trait UsfARMapprovals {
             $role = $roles->findOne([ 'type' => $type, 'name' => $rolename ]); 
             if (is_null($role)) {
                 return new JSendResponse('fail', [
-                    "role" => "Role does not exist!"
+                    "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
                 ]);
             }   
             if(UsfARMapi::hasMatchingRole($account['roles'], $role['_id'])) {
@@ -122,7 +98,7 @@ trait UsfARMapprovals {
                 },$account['roles']);                
             } else {
                 return new JSendResponse('fail', [
-                    "role" => "Role does not exist for account specified!"
+                    "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_NOT_EXISTS'] 
                 ]);
             }
         }
@@ -130,7 +106,7 @@ trait UsfARMapprovals {
         if ($status) {
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
-            return new JSendResponse('error', "Update failed!");
+            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
         }        
     }
     /**
@@ -186,6 +162,70 @@ trait UsfARMapprovals {
         }));
     }
     /**
+     * Returns the review string for the specified manager
+     * 
+     * @param type $states
+     * @param type $id
+     * @return string
+     */
+    public static function getReviewForManager($reviews,$id) {
+        $managerreview = \array_values(\array_filter($reviews, function($r) use(&$id) {
+            return ($r['usfid'] == $id);
+        }));
+        if(!empty($managerreview)) {
+            return $managerreview[0]['review'];
+        }
+        return '';
+    }
+    /**
+     * Returns an updated state array based on the new passed state and the manager attributes
+     * 
+     * @param type $states
+     * @param type $newstate
+     * @param type $managerattributes
+     * @return type
+     */
+    public static function getUpdatedStateArray($states,$newstate,$managerattributes) {
+        if(UsfARMapi::hasStateForManager($states, $managerattributes['usfid'])) {
+            return \array_map(function($s) use($managerattributes,$newstate) {                    
+                if($s['usfid'] == $managerattributes['usfid']) {
+                    return \array_merge($s,$managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]);
+                } else {
+                    return $s;                    
+                }                    
+            },$states);
+        } else {
+            return array_merge(
+                $states,
+                [ array_merge($managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]) ]
+            );
+        }
+    }
+    /**
+     * Returns an update review array based on the new passed review code and the manager attributes
+     * 
+     * @param type $reviews
+     * @param type $reviewcode
+     * @param type $managerattributes
+     * @return type
+     */
+    public static function getUpdatedReviewArray($reviews,$reviewcode,$managerattributes) {
+        if(UsfARMapi::hasReviewForManager($reviews, $managerattributes['usfid'])) {
+            return \array_map(function($rv) use($managerattributes,$reviewcode) {
+                if($rv['usfid'] == $managerattributes['usfid']) {
+                    return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);
+                } else {
+                    return $rv;
+                }
+            },((isset($reviews))?$reviews:[]));
+        } else {
+            return \call_user_func(function($r) use($reviewcode,$managerattributes) {
+                $r[] = \array_merge($managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);
+                return $r;
+            },(isset($reviews))?$reviews:[]);
+        }
+    }
+    /**
      * Updates account to the review state
      * 
      * @param type $identifier
@@ -204,18 +244,7 @@ trait UsfARMapprovals {
         if(!isset($account['review'])) {
             $account['review'] = [];
         }
-        if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
-            $updatedattributes['review'] = \array_map(function($rv) use($managerattributes) {
-                if($rv['usfid'] == $managerattributes['usfid']) {
-                    return \array_merge($rv,$managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
-                } else {
-                    return $rv;
-                }
-            },((isset($account['review']))?$account['review']:[]));
-        } else {
-            $updatedattributes['review'] = (isset($account['review']))?$account['review']:[];
-            $updatedattributes['review'][] = \array_merge($managerattributes,[ 'review' => 'open', 'timestamp' => new \MongoDate() ]);
-        }
+        $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'open', $managerattributes);
         // Update the account with review changes and move on to the state changes
         $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
