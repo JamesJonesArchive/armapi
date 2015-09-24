@@ -296,13 +296,13 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function getAllRoles() {
         $roles = $this->getARMroles();
-        $rolelist = $roles->find([],[ 'href' => true,'name' => true,'account_type' => true ]);
+        $rolelist = $roles->find([],[ 'href' => true,'name' => true,'type' => true ]);
         $result = [];
         foreach($rolelist as $role) {
-            if (!isset($result[$role['account_type']])) {
-                $result[$role['account_type']] = [];
+            if (!isset($result[$role['type']])) {
+                $result[$role['type']] = [];
             }
-            $result[$role['account_type']][] = [
+            $result[$role['type']][] = [
                 'href' => $role['href'],
                 'name' => $role['name']
             ];
