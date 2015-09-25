@@ -164,7 +164,7 @@ trait UsfARMapprovals {
     /**
      * Returns the review string for the specified manager
      * 
-     * @param type $states
+     * @param type $reviews
      * @param type $id
      * @return string
      */
@@ -188,7 +188,7 @@ trait UsfARMapprovals {
     public static function getUpdatedStateArray($states,$newstate,$managerattributes) {
         if(UsfARMapi::hasStateForManager($states, $managerattributes['usfid'])) {
             return \array_map(function($s) use($managerattributes,$newstate) {                    
-                if($s['usfid'] == $managerattributes['usfid']) {
+                if($s['usfid'] == $managerattributes['usfid']) {                    
                     return \array_merge($s,$managerattributes,[ 'state' => $newstate, 'timestamp' => new \MongoDate() ]);
                 } else {
                     return $s;                    
@@ -224,6 +224,23 @@ trait UsfARMapprovals {
                 return $r;
             },(isset($reviews))?$reviews:[]);
         }
+    }
+    /**
+     * Returns the last confirm object with max timestamp for manager usfid
+     * 
+     * @param type $confirms
+     * @param type $id
+     * @return type
+     */
+    public static function getLastConfirm($confirms,$id) {
+        $matchedconfirms = \array_values(\array_filter($confirms, function($c) use ($id) { return $c['usfid'] === $id; }));
+        \usort($matchedconfirms, function($a,$b) {
+            if (strtotime($a['timestamp']) == strtotime($b['timestamp'])) {
+                return 0;
+            }
+            return (strtotime($a['timestamp']) > strtotime($b['timestamp'])) ? -1 : 1;
+        });
+        return (!empty($matchedconfirms))?$matchedconfirms[0]:[];
     }
     /**
      * Updates account to the review state

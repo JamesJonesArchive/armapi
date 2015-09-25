@@ -103,7 +103,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers UsfARMapi::setAccountState
      */
     public function testSetAccountState() {
-        $response = $this->usfARMapi->setAccountState('FAST', 'U12345678', '', [
+        $response = $this->usfARMapi->setAccountState('FAST', 'U12345678', 'removal_pending', [
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
@@ -127,7 +127,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the value of the state key is not empty
         $this->assertNotEmpty($response->getData()['state']);
         // Make sure the state is matched for the specified manager (aka: USFID)
-        $this->assertEquals('',UsfARMapi::getStateForManager($response->getData()['state'], 'U99999999'));                
+        $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['state'], 'U99999999'));                
     }
     /**
      * @covers UsfARMapi::setAccountState
@@ -426,22 +426,32 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers UsfARMapi::setConfirmByAccount
      */
     public function testSetConfirmByAccount() {
-        // Set the state first
+        // Execute in Order
+        // 
+        // STEP1: Set the review first
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('RBULL',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        // STEP2: Set the state next
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
-        $this->assertTrue($this->usfARMapi->setReviewByAccount('RBULL',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ])->isSuccess());
-        // Then set the review
+        // STEP 3: Then confirm last
         $response = $this->usfARMapi->setConfirmByAccount('RBULL',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
-        print_r($response->getData());
+        // Confirming the confirm key exists
+        $this->assertArrayHasKey('confirm',$response->getData());
+        // Confirming the value of confirm is not empty
+        $this->assertNotEmpty($response->getData()['confirm']);
+        // There should be only one confirm object
+        $this->assertCount(1, $response->getData()['confirm']);
+        // Check the last confirm state
+        $this->assertEquals('removal_pending',UsfARMapi::getLastConfirm($response->getData()['confirm'], 'U99999999')['state']);
     }
     /**
      * @covers UsfARMapi::setConfirmByAccount
