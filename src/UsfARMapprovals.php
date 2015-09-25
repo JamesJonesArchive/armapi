@@ -293,22 +293,22 @@ trait UsfARMapprovals {
      */
     public function setReviewAll($func) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->find([ "identity" => [ '$exists' => true ] ],[ 'identity' => true, '_id' => false ]);
+        $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ] ]);
         if(empty($reviewaccounts)) {
             return new JSendResponse('fail', [
                 "identity" => "No accounts available for review!"
             ]);
         }
         $resp = [
-            'usfids' => \array_unique(\array_map(function($a) { return $a['identity']; },$reviewaccounts)),
+            'usfids' => $reviewaccounts,
             'reviewCount' => 0
         ];
         foreach ($resp['usfids'] as $usfid) {
             $visor = $func($usfid);
-            if($visor['status'] === 'success' && (isset($svisor['data']['directory_info']))?!empty($svisor['data']['directory_info']):false) {
+            if($visor['status'] == 'success' && (isset($visor['data']['directory_info']))?!empty($visor['data']['directory_info']):false) {
                 if((isset($visor['data']['directory_info']['supervisors']))?!empty($visor['data']['directory_info']['supervisors']):false) {
                     foreach($visor['data']['directory_info']['supervisors'] as $s) {
-                        if($this->setReviewByIdentity($usfid, [ 'name' => $s['name'], 'usfid' => $s['usf_id'] ])['status'] === 'success') {
+                        if($this->setReviewByIdentity($usfid, [ 'name' => $s['name'], 'usfid' => $s['usf_id'] ])->isSuccess()) {
                             $resp['reviewCount']++;
                         }
                     }

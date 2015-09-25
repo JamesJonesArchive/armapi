@@ -345,7 +345,6 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
-        print_r($response->getData());
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirm 3 accounts had reviews set
@@ -355,5 +354,42 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Confirm all 3 states are set to an empty string
         $this->assertCount(3, \array_filter($response->getData()['accounts'], function($a) { return UsfARMapi::getStateForManager($a['state'], 'U99999999') == ''; }));        
     }
-    
+    /**
+     * @covers UsfARMapi::setReviewAll
+     */
+    public function testSetReviewAll() {
+        $response = $this->usfARMapi->setReviewAll(function ($id) {
+            // Mock Visor Data
+            return [
+                'status' => 'success',
+                'data' => [
+                    'directory_info' => [
+                        'supervisors' => [
+                            [
+                                'name' => 'Rocky Bull',
+                                'usf_id' => 'U99999999'
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+        });
+        print_r($response);
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the reviewCount key exists
+        $this->assertArrayHasKey('reviewCount',$response->getData());
+        // Confirming that the value of the reviewCount key is not empty
+        $this->assertNotEmpty($response->getData()['reviewCount']);
+        // Confirming the value of the reviewCount key is 1
+        $this->assertEquals(1, $response->getData()['reviewCount']);
+        // Confirming the usfids key exists
+        $this->assertArrayHasKey('usfids',$response->getData());
+        // Confirming that the value of the usfids key is not empty
+        $this->assertNotEmpty($response->getData()['usfids']);
+        // Confirming that there is only 1 usfid in the test data to be processed
+        $this->assertCount(1,$response->getData()['usfids']);
+        // Confirming the usfids list contains U12345678
+        $this->assertContains('U12345678',$response->getData()['usfids']);
+    }
 }
