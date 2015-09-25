@@ -420,12 +420,9 @@ trait UsfARMapprovals {
             return new JSendResponse('fail', [
                 "identity" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST']
             ]);
-        } else {
-            print_r($identifiers);
         }
-        foreach ($identifiers as $account) {
-            print_r($account);
-            $resp = $this->setConfirmByAccount($account, $managerattributes);
+        foreach ($identifiers as $identifier) {
+            $resp = $this->setConfirmByAccount($identifier, $managerattributes);
             if(!$resp->isSuccess()) {
                 return $resp;
             }

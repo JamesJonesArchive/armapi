@@ -498,20 +498,46 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers UsfARMapi::setConfirm
      */
     public function testSetConfirm() {
+        // STEP1: Open review
+        $this->assertTrue($this->usfARMapi->setReviewByIdentity('U12345678',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());        
+        // STEP2: Set the state for each account
+        $this->assertTrue($this->usfARMapi->setAccountState('FAST', 'U12345678', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountState('GEMS', '00000012345', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        // STEP3: Confirm
         $response = $this->usfARMapi->setConfirm('U12345678',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
-        print_r($response->getData());
-        
-        
-        
-        
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the accounts key exists
+        $this->assertArrayHasKey('accounts',$response->getData());
+        // Confirming that the value of the accounts key is not empty
+        $this->assertNotEmpty($response->getData()['accounts']);
+        // Confirming the count of the accounts is 3
+        $this->assertCount(3, $response->getData()['accounts']);
+        foreach($response->getData()['accounts'] as $acct) {
+            // Check the last confirm state
+            $this->assertEquals('removal_pending',UsfARMapi::getLastConfirm($acct['confirm'], 'U99999999')['state']);
+        }
     }
     /**
      * @covers UsfARMapi::setConfirm
      */
-    public function testSetConfirm_NoAccounts() {
+    public function testSetConfirm_NoAccounts() {        
         $response = $this->usfARMapi->setConfirm('U12345670',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
