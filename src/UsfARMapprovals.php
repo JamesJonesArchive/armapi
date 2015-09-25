@@ -415,14 +415,17 @@ trait UsfARMapprovals {
      */
     public function setConfirm($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $confirmaccounts = $accounts->find([ "identity" => $identity ]);
-        if(empty($confirmaccounts)) {
+        $identifiers = $accounts->distinct("identifier",[ "identity" => $identity ]);
+        if(empty($identifiers)) {
             return new JSendResponse('fail', [
-                "identity" => "No accounts found for identity!"
+                "identity" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST']
             ]);
+        } else {
+            print_r($identifiers);
         }
-        foreach ($confirmaccounts as $account) {
-            $resp = $this->setConfirmByAccount($account['identifier'], $managerattributes);
+        foreach ($identifiers as $account) {
+            print_r($account);
+            $resp = $this->setConfirmByAccount($account, $managerattributes);
             if(!$resp->isSuccess()) {
                 return $resp;
             }

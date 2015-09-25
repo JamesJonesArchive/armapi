@@ -494,4 +494,35 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of the account key is the error message
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER'], $response->getData()['account']);                        
     }
+    /**
+     * @covers UsfARMapi::setConfirm
+     */
+    public function testSetConfirm() {
+        $response = $this->usfARMapi->setConfirm('U12345678',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        print_r($response->getData());
+        
+        
+        
+        
+    }
+    /**
+     * @covers UsfARMapi::setConfirm
+     */
+    public function testSetConfirm_NoAccounts() {
+        $response = $this->usfARMapi->setConfirm('U12345670',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the identity key exists
+        $this->assertArrayHasKey('identity',$response->getData());
+        // Confirming the value of identity is not empty
+        $this->assertNotEmpty($response->getData()['identity']);
+        // Confirming the value of the identity key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST'], $response->getData()['identity']);                                
+    }
 }
