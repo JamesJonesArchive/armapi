@@ -237,7 +237,7 @@ trait UsfARMapprovals {
         $account = $accounts->findOne([ "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
-                "account" => "Account not found!"
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]);
         }
         $updatedattributes = [];
@@ -248,7 +248,7 @@ trait UsfARMapprovals {
         // Update the account with review changes and move on to the state changes
         $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
-            return new JSendResponse('error', "Update failed!");
+            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
         } else {
             // Set the empty state for the account by the manager
             $stateresp = $this->setAccountState($account['type'], $identifier, '', $managerattributes);
@@ -296,7 +296,7 @@ trait UsfARMapprovals {
         $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ] ]);
         if(empty($reviewaccounts)) {
             return new JSendResponse('fail', [
-                "identity" => "No accounts available for review!"
+                "identity" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND']
             ]);
         }
         $resp = [

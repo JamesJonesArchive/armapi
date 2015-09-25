@@ -374,7 +374,6 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
                 ]
             ];
         });
-        print_r($response);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the reviewCount key exists
@@ -391,5 +390,37 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(1,$response->getData()['usfids']);
         // Confirming the usfids list contains U12345678
         $this->assertContains('U12345678',$response->getData()['usfids']);
+    }
+    /**
+     * @covers UsfARMapi::setReviewAll
+     */
+    public function testSetReviewAll_Identities_NoneFound() {
+        // Removing all accounts so the function will fail
+        $this->usfARMapi->getARMaccounts()->remove([]);
+        $response = $this->usfARMapi->setReviewAll(function ($id) {
+            // Mock Visor Data
+            return [
+                'status' => 'success',
+                'data' => [
+                    'directory_info' => [
+                        'supervisors' => [
+                            [
+                                'name' => 'Rocky Bull',
+                                'usf_id' => 'U99999999'
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+        });
+        print_r($response);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the identity key exists
+        $this->assertArrayHasKey('identity',$response->getData());
+        // Confirming that the value of the identity key is not empty
+        $this->assertNotEmpty($response->getData()['identity']);
+        // Confirming the value of the identity key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND'], $response->getData()['identity']);
     }
 }
