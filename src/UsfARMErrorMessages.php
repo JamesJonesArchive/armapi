@@ -34,6 +34,8 @@ trait UsfARMErrorMessages {
         'ACCOUNT_CREATE_ERROR' => 'Account creation could not be performed!',
         'ACCOUNT_NO_ROLES_EXIST' => 'No roles exist for account specified!',
         'ACCOUNT_ROLE_NOT_EXISTS' => 'Role does not exist for account specified!',
+        'ACCOUNT_REVIEW_UNSET_BY_MANAGER' => 'Account does not have a review set by current manager!',
+        'ACCOUNT_STATE_UNSET_BY_MANAGER' => 'Account does not have a state set by current manager!',
         'IDENTITIES_NONE_FOUND' => 'No identities found!',
         'ROLE_INFO_MISSING' => 'Role info missing!',
         'ROLE_INFO_MISSING_REQUIRED_KEYS' => 'Role info missing required keys!',

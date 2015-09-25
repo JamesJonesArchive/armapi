@@ -350,13 +350,7 @@ trait UsfARMapprovals {
             ]);
             if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
                 // Set the account review closed
-                $updatedattributes['review'] = \array_map(function($r) use($managerattributes) {
-                    if($r['usfid'] == $managerattributes['usfid']) {
-                        return \array_merge($r,$managerattributes,[ 'review' => 'closed', 'timestamp' => new \MongoDate() ]);
-                    } else {
-                        return $r;
-                    }
-                },$account['review']);
+                $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes);
                 if(!isset($account['roles'])) {
                     $account['roles'] = [];
                 }
@@ -378,20 +372,20 @@ trait UsfARMapprovals {
                     return $r;
                 },$account['roles']); 
                 // Update the account
-                $status = $accounts->update([ "identity" => $identity ], [ '$set' => $updatedattributes ]);
+                $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                 if (!$status) {
-                    return new JSendResponse('error', "Update failed!");
+                    return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
                 } else {
                     return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
                 }
             } else {
                 return new JSendResponse('fail', [
-                    "account" => "Account does not have a review set by current manager!"
+                    "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER']
                 ]);
             }
         } else {
             return new JSendResponse('fail', [
-                "account" => "Account does not have a state set by current manager!"
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
             ]);
         }
     }
