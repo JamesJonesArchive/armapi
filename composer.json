@@ -31,7 +31,7 @@
     },
     "autoload": {
         "psr-4" : {
-            "USF\\IdM\\" : "src/"
+            "USF\\IdM\\" : [ "src/", "tests/" ]
         }
     }
 }

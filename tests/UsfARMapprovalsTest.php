@@ -28,7 +28,8 @@ use USF\IdM\UsfConfig;
 class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     
     use \Zumba\PHPUnit\Extensions\Mongo\TestTrait;
-
+    use UsfARMtestdata;
+    
     const DEFAULT_DATABASE = 'mongounit_test';
 
     protected $connection;
@@ -71,8 +72,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     protected function getMongoDataSet() {
         if (empty($this->dataSet)) {
             $this->dataSet = new \Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet($this->getMongoConnection());
-            global $fixture;
-            $this->dataSet->setFixture($fixture);
+            $this->dataSet->setFixture(self::getFixture());
         }
         return $this->dataSet;
     }

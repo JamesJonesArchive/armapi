@@ -57,7 +57,7 @@ trait UsfARMimport {
             ]);
         } else {
             return new JSendResponse('fail', [
-                "account" => "Account info missing"
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
             ]);
         }
     }
