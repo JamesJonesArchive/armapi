@@ -34,14 +34,9 @@ trait UsfARMformatter {
         return \array_map(function($a) {
             if($a instanceof \MongoDate) {
                 return $a->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
-            } elseif (\is_array($a) && \array_diff_key($a,\array_keys(\array_keys($a)))) {
-                return \array_map(function ($b) {
-                    if($b instanceof \MongoDate) {
-                        return $b->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
-                    }
-                    return $b;
-                }, $a);
-            }
+            } elseif (\is_array($a)) {
+                return self::convertMongoDatesToUTCstrings($a);
+            }   
             return $a;
         }, $arr);
     }
@@ -65,7 +60,7 @@ trait UsfARMformatter {
      * @return type API formatted account
      */
     public function formatMongoAccountToAPIaccount($mongoaccount,$removekeys = []) {
-        $roles = UsfARMapi::getARMdb()->roles;
+        $roles = $this->getARMroles();
         if(!in_array('_id', $removekeys)) {
             $removekeys[] = "_id";
         }
@@ -84,5 +79,14 @@ trait UsfARMformatter {
             $mongoaccount['roles'] = [];
         }
         return self::convertMongoDatesToUTCstrings(\array_diff_key($mongoaccount,array_flip($removekeys)));
+    }
+    /**
+     * Returns a formatted string without spaces
+     * 
+     * @param type $name
+     * @return string
+     */
+    public static function formatRoleName($name) {
+        return str_replace(" ","+",$name);
     }
 }
