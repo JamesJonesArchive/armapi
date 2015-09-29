@@ -35,20 +35,8 @@ trait UsfARMformatter {
             if($a instanceof \MongoDate) {
                 return $a->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
             } elseif (\is_array($a)) {
-                return \array_map(function ($b) {
-                    if($b instanceof \MongoDate) {
-                        return $b->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
-                    } elseif (\is_array($b)) {
-                        return \array_map(function ($c) {
-                            if($c instanceof \MongoDate) {
-                                return $c->toDateTime()->format('Y-m-d\TH:i:s.u\Z');
-                            }
-                            return $c;
-                        },$b);
-                    }
-                    return $b;
-                }, $a);
-            }
+                return self::convertMongoDatesToUTCstrings($a);
+            }   
             return $a;
         }, $arr);
     }
