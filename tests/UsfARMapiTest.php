@@ -340,7 +340,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
      */
     public function testModifyAccountByTypeAndIdentifier_AccountNotFound() {
-        $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012340',[ 'anything' => 'myvalue' ]);
+        $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012340',[ 'account_data' => ['anything' => 'myvalue'] ]);
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
@@ -353,8 +353,22 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
      */
-    public function testModifyAccountByTypeAndIdentifier() {
+    public function testModifyAccountByTypeAndIdentifier_AccountDataMissing() {
         $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012345',[ 'anything' => 'myvalue' ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['account']);
+    }
+    /**
+     * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
+     */
+    public function testModifyAccountByTypeAndIdentifier() {
+        $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012345',[ 'account_data' => ['anything' => 'myvalue'] ]);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());    
         // Confirming the href key exists

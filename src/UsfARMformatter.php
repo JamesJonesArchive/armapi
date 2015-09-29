@@ -41,6 +41,21 @@ trait UsfARMformatter {
         }, $arr);
     }
     /**
+     * Converts UTC date strings to mongo dates for matched keys
+     * 
+     * @param type $arr
+     * @param type $datekeys
+     * @return type
+     */
+    public static function convertUTCstringsToMongoDates($arr,$datekeys = []) {
+        \array_walk($arr, function(&$val,$key) use(&$datekeys) {
+            if(\in_array($key, $datekeys) && \is_string($val)) {
+                $val = new \MongoDate(\strtotime($val));
+            }
+        });
+        return $arr;
+    }
+    /**
      * Formats raw mongo account data into API compliant accounts
      * 
      * @param type $mongoaccounts an array of accounts from mongo

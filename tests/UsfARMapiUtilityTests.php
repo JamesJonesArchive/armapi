@@ -112,6 +112,15 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('2011-08-22T15:43:13.000000Z',UsfARMapi::convertMongoDatesToUTCstrings([ 'timestamp' => new \MongoDate(strtotime('2011-08-22T15:43:13.000000Z')) ])['timestamp']);
     }
     /**
+     * @covers UsfARMapi::convertUTCstringsToMongoDates
+     */
+    public function testConvertUTCstringsToMongoDates() {
+        // Make sure the Mongo Date was created
+        $this->assertTrue(UsfARMapi::convertUTCstringsToMongoDates(['password_change' => '2011-08-22T15:43:13.000000Z' ], ['password_change'])['password_change'] instanceof \MongoDate);
+        // Make sure the Mongo Date matches
+        $this->assertEquals(new \MongoDate(strtotime('2011-08-22T15:43:13.000000Z')), UsfARMapi::convertUTCstringsToMongoDates(['password_change' => '2011-08-22T15:43:13.000000Z' ], ['password_change'])['password_change']);
+    }
+    /**
      * @covers className::formatRoleName
      */
     public function testFormatRoleName() {

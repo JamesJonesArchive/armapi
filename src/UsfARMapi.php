@@ -138,7 +138,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         
         $insert_status = $accounts->insert(
             array_merge(
-                (array) $account["account_data"],
+                UsfARMapi::convertUTCstringsToMongoDates((array) $account["account_data"],["password_change","last_used","last_update"]),
                 [
                     'href' => $href,
                     'type' => $account['account_type'],
@@ -146,10 +146,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     'created_date' => new \MongoDate(),
                     'modified_date' => new \MongoDate()
                 ],
-                (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[],
-                (isset($account["account_data"]["password_change"]))?["password_change" => new \MongoDate(strtotime($account["account_data"]["password_change"]))]:[],
-                (isset($account["account_data"]["last_used"]))?["last_used" => new \MongoDate(strtotime($account["account_data"]["last_used"]))]:[],
-                (isset($account["account_data"]["last_update"]))?["last_update" => new \MongoDate(strtotime($account["account_data"]["last_update"]))]:[]
+                (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[]
             )
         );        
         if(!$insert_status) {
@@ -194,8 +191,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]);
         }
+        // Make sure the account_data is not empty
+        if(empty($accountmods["account_data"])) {
+            return new JSendResponse('fail', [
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY']
+            ]);
+        }        
         $href = "/accounts/{$type}/{$identifier}";
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => \array_merge(array_diff_key($accountmods,array_flip(['type','identifier'])),["href" => $href ]) ]);
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => \array_merge(array_diff_key(UsfARMapi::convertUTCstringsToMongoDates($accountmods["account_data"],["password_change","last_used","last_update"]),array_flip(['type','identifier'])),["href" => $href ]) ]);
         if ($status) {
             return new JSendResponse('success', [ "href" => $href ]);
         } else {
@@ -435,14 +438,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $status = $roles->update(
             [ 'type' => $type, 'name' => $name ],
             [ '$set' => array_merge(
-                    (array) $updatedrole["role_data"],
+                    UsfARMapi::convertUTCstringsToMongoDates((array) $updatedrole["role_data"], ['created_date']),
                     [
                         'name' => $updatedrole['name'],
                         'href' => $href,
                         'type' => $updatedrole['account_type'],
                         'modified_date' => new \MongoDate()
                     ],
-                    (isset($role['role_data']['created_date']))?['created_date' => new \MongoDate(strtotime($role['role_data']['created_date']))]:['created_date' => new \MongoDate()]
+                    (isset($role['role_data']['created_date']))?[]:['created_date' => new \MongoDate()]
                 )
             ]                
         );
