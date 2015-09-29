@@ -18,85 +18,13 @@
 namespace USF\IdM;
 
 use \USF\IdM\UsfARMapi;
-use USF\IdM\UsfConfig;
 /**
  * Description of UsfARMimportTest
  *
  * @author james
  */
 class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
-    use \Zumba\PHPUnit\Extensions\Mongo\TestTrait;
-    use UsfARMtestdata;
-    
-    const DEFAULT_DATABASE = 'mongounit_test';
-
-    protected $connection;
-    protected $dataset;
-    protected $usfARMapi;
-    
-    /**
-     * Get the mongo connection for this test.
-     *
-     * @return Zumba\PHPUnit\Extensions\Mongo\Client\Connector
-     */
-    protected function getMongoConnection() {
-        // return new \MongoClient();
-        if (empty($this->connection)) {
-            $this->connection = new \Zumba\PHPUnit\Extensions\Mongo\Client\Connector(call_user_func(function() {
-                //Access configuration values from default location (/usr/local/etc/idm_config)
-                $config = new UsfConfig();
-
-                // The DBAL connection configuration
-                $mongoConfig = $config->mongoConfig;
-
-                if(empty($mongoConfig)) {
-                    return new \MongoClient();
-                } elseif (!isset($mongoConfig['options'])) {
-                    return new \MongoClient($mongoConfig['server']);
-                } else {
-                    return new \MongoClient($mongoConfig['server'],$mongoConfig['options']);
-                }                
-            }));
-            $this->connection->setDb(static::DEFAULT_DATABASE);
-        }
-        return $this->connection;
-    }
-
-    /**
-     * Get the dataset to be used for this test.
-     *
-     * @return Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet
-     */
-    protected function getMongoDataSet() {
-        if (empty($this->dataSet)) {
-            $this->dataSet = new \Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet($this->getMongoConnection());
-            $this->dataSet->setFixture(self::getFixture());            
-        }
-        return $this->dataSet;
-    }
-    /**
-     * Prepares the environment for mocking the mongo connection and the modified collection access functions
-     * 
-     */
-    public function setUp() {
-        $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
-        ->setMethods(array('getARMdb','getARMaccounts','getARMroles'))
-        ->getMock();
-        
-        $this->usfARMapi->expects($this->any())
-        ->method('getARMdb')
-        ->will($this->returnValue($this->getMongoConnection()));
-        
-        $this->usfARMapi->expects($this->any())
-        ->method('getARMaccounts')
-        ->will($this->returnValue($this->getMongoConnection()->collection('accounts')));
-
-        $this->usfARMapi->expects($this->any())
-        ->method('getARMroles')
-        ->will($this->returnValue($this->getMongoConnection()->collection('roles')));
-        
-        parent::setUp();
-    }
+    use UsfARMmongomock;
     /**
      * @covers UsfARMapi::importAccount
      */
