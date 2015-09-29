@@ -72,7 +72,7 @@ trait UsfARMformatter {
      * @return type API formatted account
      */
     public function formatMongoAccountToAPIaccount($mongoaccount,$removekeys = []) {
-        $roles = UsfARMapi::getARMdb()->roles;
+        $roles = $this->getARMroles();
         if(!in_array('_id', $removekeys)) {
             $removekeys[] = "_id";
         }
