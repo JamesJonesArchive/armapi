@@ -37,6 +37,7 @@ trait UsfARMmongomock {
      * Get the mongo connection for this test.
      *
      * @return Zumba\PHPUnit\Extensions\Mongo\Client\Connector
+     * @coversNothing
      */
     protected function getMongoConnection() {
         // return new \MongoClient();
@@ -65,6 +66,7 @@ trait UsfARMmongomock {
      * Get the dataset to be used for this test.
      *
      * @return Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet
+     * @coversNothing
      */
     protected function getMongoDataSet() {
         if (empty($this->dataSet)) {
@@ -75,7 +77,7 @@ trait UsfARMmongomock {
     }
     /**
      * Prepares the environment for mocking the mongo connection and the modified collection access functions
-     * 
+     * @coversNothing
      */
     public function setUp() {
         $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
@@ -99,6 +101,7 @@ trait UsfARMmongomock {
     
     /**
      * Test data for armapi testing
+     * @codeCoverageIgnore
      */
     public static function getFixture() {
         return [
