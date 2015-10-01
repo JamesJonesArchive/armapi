@@ -26,7 +26,7 @@ use \USF\IdM\UsfARMapi;
 class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
     use UsfARMmongomock;
     /**
-     * @covers UsfARMapi::importAccount
+     * @covers \USF\IdM\UsfARMimport::importAccount
      */
     public function testImportAccount() {
         $response = $this->usfARMapi->importAccount([
@@ -50,7 +50,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         $this->assertTrue($this->usfARMapi->getAccountByTypeAndIdentifier("FAST","ROCKYBULL")->isSuccess());
     }
     /**
-     * @covers UsfARMapi::importAccountRoles
+     * @covers \USF\IdM\UsfARMimport::importAccountRoles
      */
     public function testImportAccountRoles() {
         // The specified account has many roles. This should reduce that to one role
@@ -74,7 +74,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         $this->assertCount(1, $response->getData()['roles']);
     }
     /**
-     * @covers UsfARMapi::importAccountRoles
+     * @covers \USF\IdM\UsfARMimport::importAccountRoles
      */
     public function testImportAccountRoles_MissingAccountData() {
         $response = $this->usfARMapi->importAccountRoles([
@@ -97,7 +97,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['account']); 
     }
     /**
-     * @covers UsfARMapi::importRole
+     * @covers \USF\IdM\UsfARMimport::importRole
      */
     public function testimportRole() {
         $response = $this->usfARMapi->importRole([

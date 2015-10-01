@@ -26,7 +26,7 @@ namespace USF\IdM;
 class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
     use UsfARMmongomock;
     /**
-     * @covers UsfARMapi::hasMatchingRole
+     * @covers \USF\IdM\UsfARMapprovals::hasMatchingRole
      */
     public function testHasMatchingRole() {
         $this->assertTrue(UsfARMapi::hasMatchingRole([
@@ -34,7 +34,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ], '56004d33c8492d91308b45d9'));
     }
     /**
-     * @covers UsfARMapi::hasReviewForManager
+     * @covers \USF\IdM\UsfARMapprovals::hasReviewForManager
      */
     public function testHasReviewForManager() {
         $this->assertTrue(UsfARMapi::hasReviewForManager([
@@ -42,7 +42,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ], 'U99999999'));
     }
     /**
-     * @covers UsfARMapi::hasStateForManager
+     * @covers \USF\IdM\UsfARMapprovals::hasStateForManager
      */
     public function testHasStateForManager() {
         $this->assertTrue(UsfARMapi::hasStateForManager([
@@ -50,7 +50,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ], 'U99999999'));
     }
     /**
-     * @covers UsfARMapi::getStateForManager
+     * @covers \USF\IdM\UsfARMapprovals::getStateForManager
      */
     public function testGetStateForManager() {
         $this->assertEquals('pending_approval', UsfARMapi::getStateForManager([
@@ -58,7 +58,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ], 'U99999999'));
     }
     /**
-     * @covers UsfARMapi::getUpdatedReviewArray
+     * @covers \USF\IdM\UsfARMapprovals::getUpdatedReviewArray
      */
     public function testGetUpdatedReviewArray() {
         $this->assertEquals('open', UsfARMapi::getUpdatedReviewArray([
@@ -72,7 +72,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ])[0]['review']);
     }
     /**
-     * @covers UsfARMapi::getUpdatedStateArray
+     * @covers \USF\IdM\UsfARMapprovals::getUpdatedStateArray
      */
     public function testGetUpdatedStateArray() {
         $this->assertEquals('removal_pending', UsfARMapi::getUpdatedStateArray([
@@ -86,7 +86,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ])[0]['state']);
     }
     /**
-     * @covers UsfARMapi::getLastConfirm
+     * @covers \USF\IdM\UsfARMapprovals::getLastConfirm
      */
     public function testGetLastConfirm() {
         // Check the last confirm state
@@ -106,13 +106,13 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         ], 'U99999999')['state']);
     }
     /**
-     * @covers UsfARMapi::convertMongoDatesToUTCstrings
+     * @covers \USF\IdM\UsfARMformatter::convertMongoDatesToUTCstrings
      */
     public function testConvertMongoDatesToUTCstrings() {
         $this->assertEquals('2011-08-22T15:43:13.000000Z',UsfARMapi::convertMongoDatesToUTCstrings([ 'timestamp' => new \MongoDate(strtotime('2011-08-22T15:43:13.000000Z')) ])['timestamp']);
     }
     /**
-     * @covers UsfARMapi::convertUTCstringsToMongoDates
+     * @covers \USF\IdM\UsfARMformatter::convertUTCstringsToMongoDates
      */
     public function testConvertUTCstringsToMongoDates() {
         // Make sure the Mongo Date was created
@@ -121,7 +121,7 @@ class UsfARMapiUtilityTests extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(new \MongoDate(strtotime('2011-08-22T15:43:13.000000Z')), UsfARMapi::convertUTCstringsToMongoDates(['password_change' => '2011-08-22T15:43:13.000000Z' ], ['password_change'])['password_change']);
     }
     /**
-     * @covers className::formatRoleName
+     * @covers \USF\IdM\UsfARMformatter::formatRoleName
      */
     public function testFormatRoleName() {
         $this->assertEquals('Rocky+Bull',UsfARMapi::formatRoleName('Rocky Bull'));

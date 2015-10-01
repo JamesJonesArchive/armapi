@@ -50,13 +50,13 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('U12345678', $result2['identity']);
     }
     /**
-     * @covers UsfARMapi::getVersion
+     * @covers \USF\IdM\UsfARMapi::getVersion
      */
     public function testGetVersion() {
         $this->assertEquals($_SERVER['ARMAPI_VERSION'], $this->usfARMapi->getVersion());
     }
     /**
-     * @covers UsfARMapi:getAllAccounts
+     * @covers \USF\IdM\UsfARMapi::getAllAccounts
      */
     public function testGetAllAccounts() {
         $response = $this->usfARMapi->getAllAccounts();
@@ -82,7 +82,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/accounts/FAST/U12345678', $response->getData()['FAST']);
     }
     /**
-     * @covers UsfARMapi::getAccountsForIdentity
+     * @covers \USF\IdM\UsfARMapi::getAccountsForIdentity
      */
     public function testGetAccountsForIdentity() {
         $response = $this->usfARMapi->getAccountsForIdentity('U12345678');
@@ -141,7 +141,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $account3['roles']));
     }
     /**
-     * @covers UsfARMapi::getAccountsByType
+     * @covers \USF\IdM\UsfARMapi::getAccountsByType
      */
     public function testGetAccountsByType() {
         $response = $this->usfARMapi->getAccountsByType('GEMS');
@@ -187,7 +187,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $account2['roles']));
     }
     /**
-     * @covers UsfARMapi::createAccountByType
+     * @covers \USF\IdM\UsfARMapi::createAccountByType
      */
     public function testCreateAccountByType_NullAccount() {        
         $response = $this->usfARMapi->createAccountByType('GEMS',null);
@@ -201,7 +201,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::createAccountByType
+     * @covers \USF\IdM\UsfARMapi::createAccountByType
      */
     public function testCreateAccountByType_ValidAccountInfo() {
         // Testing account with no key value pairs
@@ -238,7 +238,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response3->getData()['account']);                
     }
     /**
-     * @covers UsfARMapi::createAccountByType
+     * @covers \USF\IdM\UsfARMapi::createAccountByType
      */
     public function testCreateAccountByType_AccountDataEmpty() {
         $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345', 'account_data' => [] ]);
@@ -252,7 +252,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['account']);                        
     }
     /**
-     * @covers UsfARMapi::createAccountByType
+     * @covers \USF\IdM\UsfARMapi::createAccountByType
      */
     public function testCreateAccountByType_AccountTypeMismatch() {
         $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS_bad','account_identifier' => '00000012345', 'account_data' => [ 'anything' => 'myvalue' ] ]);
@@ -266,7 +266,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_TYPE_MISMATCH'], $response->getData()['account']);                                
     }
     /**
-     * @covers UsfARMapi::createAccountByType
+     * @covers \USF\IdM\UsfARMapi::createAccountByType
      */
     public function testCreateAccountByType_AccountExists() {
         $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345', 'account_data' => [ 'anything' => 'myvalue' ] ]);
@@ -280,7 +280,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_EXISTS'], $response->getData()['account']);                                
     }
     /**
-     * @covers UsfARMapi::createAccountByType
+     * @covers \USF\IdM\UsfARMapi::createAccountByType
      */
     public function testCreateAccountByType() {
         $response = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012340', 'account_data' => [ 'anything' => 'myvalue' ] ]);
@@ -294,7 +294,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('/accounts/GEMS/00000012340', $response->getData()['href']); 
     }
     /**
-     * @covers UsfARMapi::getAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::getAccountByTypeAndIdentifier
      */
     public function testGetAccountByTypeAndIdentifier_AccountNotFound() {
         $response = $this->usfARMapi->getAccountByTypeAndIdentifier('GEMS','00000012340');
@@ -308,7 +308,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::getAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::getAccountByTypeAndIdentifier
      */
     public function testGetAccountByTypeAndIdentifier() {
         $response = $this->usfARMapi->getAccountByTypeAndIdentifier('GEMS','00000012345');
@@ -337,7 +337,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
     }
     /**
-     * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyAccountByTypeAndIdentifier
      */
     public function testModifyAccountByTypeAndIdentifier_AccountNotFound() {
         $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012340',[ 'account_data' => ['anything' => 'myvalue'] ]);
@@ -351,7 +351,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyAccountByTypeAndIdentifier
      */
     public function testModifyAccountByTypeAndIdentifier_AccountDataMissing() {
         $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012345',[ 'anything' => 'myvalue' ]);
@@ -365,7 +365,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::modifyAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyAccountByTypeAndIdentifier
      */
     public function testModifyAccountByTypeAndIdentifier() {
         $response = $this->usfARMapi->modifyAccountByTypeAndIdentifier('GEMS','00000012345',[ 'account_data' => ['anything' => 'myvalue'] ]);
@@ -379,7 +379,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('/accounts/GEMS/00000012345', $response->getData()['href']);        
     }
     /**
-     * @covers UsfARMapi::getRolesForAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::getRolesForAccountByTypeAndIdentifier
      */
     public function testGetRolesForAccountByTypeAndIdentifier_AccountNotFound() {
         $response = $this->usfARMapi->getRolesForAccountByTypeAndIdentifier('GEMS','00000012340');
@@ -393,7 +393,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::getRolesForAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::getRolesForAccountByTypeAndIdentifier
      */
     public function testGetRolesForAccountByTypeAndIdentifier() {
         $response = $this->usfARMapi->getRolesForAccountByTypeAndIdentifier('GEMS','00000012345');
@@ -427,7 +427,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
     }
     /**
-     * @covers UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
      */
     public function testModifyRolesForAccountByTypeAndIdentifier() {
         $response = $this->usfARMapi->modifyRolesForAccountByTypeAndIdentifier('GEMS','00000012345',['role_list' => [
@@ -460,7 +460,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/SELFSALL_ROLE',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
     }
     /**
-     * @covers UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
      */
     public function testModifyRolesForAccountByTypeAndIdentifier_AccountNotFound() {
         $response = $this->usfARMapi->modifyRolesForAccountByTypeAndIdentifier('GEMS','00000012340',[]);
@@ -474,7 +474,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
      */
     public function testModifyRolesForAccountByTypeAndIdentifier_NoRoleList() {
         $response = $this->usfARMapi->modifyRolesForAccountByTypeAndIdentifier('GEMS','00000012345',[]);
@@ -488,7 +488,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'], $response->getData()['roles']);
     }
     /**
-     * @covers UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
+     * @covers \USF\IdM\UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
      */
     public function testModifyRolesForAccountByTypeAndIdentifier_InvalidRoles() {
         $response = $this->usfARMapi->modifyRolesForAccountByTypeAndIdentifier('GEMS','00000012345',['role_list' => [
@@ -506,7 +506,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID'], $response->getData()['role_list']);
     }
     /**
-     * @covers UsfARMapi::getAccountsByTypeAndIdentity
+     * @covers \USF\IdM\UsfARMapi::getAccountsByTypeAndIdentity
      */
     public function testGetAccountsByTypeAndIdentity() {
         $response = $this->usfARMapi->getAccountsByTypeAndIdentity('GEMS','U12345678');
@@ -552,7 +552,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/GEMS/EFFORT_CERTIFIER_SS',array_map(function($a) { return $a['href']; }, $account2['roles']));
     }
     /**
-     * @covers UsfARMapi::getAllRoles
+     * @covers \USF\IdM\UsfARMapi::getAllRoles
      */
     public function testGetAllRoles() {
         $response = $this->usfARMapi->getAllRoles();
@@ -583,7 +583,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $response->getData()['FAST']));
     }
     /**
-     * @covers UsfARMapi::createRoleByType
+     * @covers \USF\IdM\UsfARMapi::createRoleByType
      */
     public function testCreateRoleByType() {
         $response = $this->usfARMapi->createRoleByType([
@@ -603,7 +603,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('/roles/FAST/My+Test+Role', $response->getData()['href']);
     }
     /**
-     * @covers UsfARMapi::createRoleByType
+     * @covers \USF\IdM\UsfARMapi::createRoleByType
      */
     public function testCreateRoleByType_Null() {
         $response = $this->usfARMapi->createRoleByType(null);
@@ -617,7 +617,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING'], $response->getData()['role']);        
     }
     /**
-     * @covers UsfARMapi::createRoleByType
+     * @covers \USF\IdM\UsfARMapi::createRoleByType
      */
     public function testCreateRoleByType_MissingRequiredKeys() {
         $response = $this->usfARMapi->createRoleByType([]);
@@ -630,7 +630,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['role']);                
     }
     /**
-     * @covers UsfARMapi::createRoleByType
+     * @covers \USF\IdM\UsfARMapi::createRoleByType
      */
     public function testCreateRoleByType_MissingRoleData() {
         $response = $this->usfARMapi->createRoleByType([
@@ -647,7 +647,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['role']);                                
     }
     /**
-     * @covers UsfARMapi::createRoleByType
+     * @covers \USF\IdM\UsfARMapi::createRoleByType
      */
     public function testCreateRoleByType_RoleAlreadyExists() {
         $response = $this->usfARMapi->createRoleByType([
@@ -666,7 +666,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS'], $response->getData()['role']);                                
     }
     /**
-     * @covers UsfARMapi::getAllRolesByType
+     * @covers \USF\IdM\UsfARMapi::getAllRolesByType
      */
     public function testGetAllRolesByType() {
         $response = $this->usfARMapi->getAllRolesByType('FAST');
@@ -688,7 +688,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/roles/FAST/USF_TR_TRAVELER',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
     }
     /**
-     * @covers UsfARMapi::getRoleByTypeAndName
+     * @covers \USF\IdM\UsfARMapi::getRoleByTypeAndName
      */
     public function testGetRoleByTypeAndName() {
         $response = $this->usfARMapi->getRoleByTypeAndName('FAST','USF_TR_TRAVELER');
@@ -714,7 +714,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('/roles/FAST/USF_TR_TRAVELER', $response->getData()['role_data']['href']);
     }
     /**
-     * @covers UsfARMapi::getRoleByTypeAndName
+     * @covers \USF\IdM\UsfARMapi::getRoleByTypeAndName
      */
     public function testGetRoleByTypeAndName_RoleNotExists() {
         $response = $this->usfARMapi->getRoleByTypeAndName('FAST','DOESNT_EXIST');
@@ -727,7 +727,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['role']);                                        
     }
     /**
-     * @covers UsfARMapi::modifyRoleByTypeAndName
+     * @covers \USF\IdM\UsfARMapi::modifyRoleByTypeAndName
      */
     public function testModifyRoleByTypeAndName() {
         $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[
@@ -800,7 +800,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('/roles/FAST/USF_TR_TRAVELER2',$responseNameChange->getData()['role_data']['href']);        
     }
     /**
-     * @covers UsfARMapi::modifyRoleByTypeAndName
+     * @covers \USF\IdM\UsfARMapi::modifyRoleByTypeAndName
      */
     public function testModifyRoleByTypeAndName_MissingRequiredKeys() {
         $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[]);
@@ -813,7 +813,7 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['role']);  
     }
     /**
-     * @covers UsfARMapi::modifyRoleByTypeAndName
+     * @covers \USF\IdM\UsfARMapi::modifyRoleByTypeAndName
      */
     public function testModifyRoleByTypeAndName_RoleDataEmpty() {
         $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[

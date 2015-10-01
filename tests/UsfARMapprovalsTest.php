@@ -27,7 +27,7 @@ use \USF\IdM\UsfARMapi;
 class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     use UsfARMmongomock;
     /**
-     * @covers UsfARMapi::setAccountState
+     * @covers \USF\IdM\UsfARMapprovals::setAccountState
      */
     public function testSetAccountState() {
         $response = $this->usfARMapi->setAccountState('FAST', 'U12345678', 'removal_pending', [
@@ -57,7 +57,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['state'], 'U99999999'));                
     }
     /**
-     * @covers UsfARMapi::setAccountState
+     * @covers \USF\IdM\UsfARMapprovals::setAccountState
      */
     public function testSetAccountState_AccountNotExists() {
         $response = $this->usfARMapi->setAccountState('FAST', 'U12345670', '', [
@@ -74,7 +74,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::setAccountRoleState
+     * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState() {
         $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','USF_TR_TRAVELER','open',[
@@ -109,7 +109,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('open',UsfARMapi::getStateForManager($role['state'], 'U99999999'));
     }
     /**
-     * @covers UsfARMapi::setAccountRoleState
+     * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState_AccountNotExists() {
         $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345670','USF_TR_TRAVELER','open',[
@@ -126,7 +126,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
     }
     /**
-     * @covers UsfARMapi::setAccountRoleState
+     * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState_AccountHasNoRoles() {
         // Remove all roles for target account for testing
@@ -145,7 +145,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'], $response->getData()['role']);
     }
     /**
-     * @covers UsfARMapi::setAccountRoleState 
+     * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState 
      */
     public function testSetAccountRoleState_RoleNotExists() {
         $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','USF_TR_TRAVELER2','open',[
@@ -162,7 +162,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['role']);        
     }
     /**
-     * @covers UsfARMapi::setAccountRoleState
+     * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState_AccountRoleNotExists() {
         $response = $this->usfARMapi->setAccountRoleState('GEMS', 'RBULL','EFFORT_CERTIFIER_SS','open',[
@@ -179,7 +179,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_NOT_EXISTS'], $response->getData()['role']);                
     }
     /**
-     * @covers UsfARMapi::setReviewByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
      */
     public function testSetReviewByAccount_AccountNotFound() {
         $response = $this->usfARMapi->setReviewByAccount('RBULL2',[
@@ -196,7 +196,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);                
     }
     /**
-     * @covers UsfARMapi::setReviewByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
      */
     public function testSetReviewByAccount() {
         $response = $this->usfARMapi->setReviewByAccount('RBULL',[
@@ -265,7 +265,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('',UsfARMapi::getStateForManager($role3['state'], 'U99999999'));
     }
     /**
-     * @covers UsfARMapi::setReviewByIdentity
+     * @covers \USF\IdM\UsfARMapprovals::setReviewByIdentity
      */
     public function testSetReviewByIdentity() {
         $response = $this->usfARMapi->setReviewByIdentity('U12345678',[
@@ -282,7 +282,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(3, \array_filter($response->getData()['accounts'], function($a) { return UsfARMapi::getStateForManager($a['state'], 'U99999999') == ''; }));        
     }
     /**
-     * @covers UsfARMapi::setReviewAll
+     * @covers \USF\IdM\UsfARMapprovals::setReviewAll
      */
     public function testSetReviewAll() {
         $response = $this->usfARMapi->setReviewAll(function ($id) {
@@ -319,7 +319,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('U12345678',$response->getData()['usfids']);
     }
     /**
-     * @covers UsfARMapi::setReviewAll
+     * @covers \USF\IdM\UsfARMapprovals::setReviewAll
      */
     public function testSetReviewAll_Identities_NoneFound() {
         // Removing all accounts so the function will fail
@@ -350,7 +350,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND'], $response->getData()['identity']);
     }
     /**
-     * @covers UsfARMapi::setConfirmByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
      */
     public function testSetConfirmByAccount() {
         // Execute in Order
@@ -381,7 +381,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('removal_pending',UsfARMapi::getLastConfirm($response->getData()['confirm'], 'U99999999')['state']);
     }
     /**
-     * @covers UsfARMapi::setConfirmByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
      */
     public function testSetConfirmByAccount_StateUnset() {
         $response = $this->usfARMapi->setConfirmByAccount('RBULL',[
@@ -398,7 +398,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER'], $response->getData()['account']);                        
     }
     /**
-     * @covers UsfARMapi::setConfirmByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
      */
     public function testSetConfirmByAccount_ReviewUnset() {
         // Set the state first
@@ -422,7 +422,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER'], $response->getData()['account']);                        
     }
     /**
-     * @covers UsfARMapi::setConfirm
+     * @covers \USF\IdM\UsfARMapprovals::setConfirm
      */
     public function testSetConfirm() {
         // STEP1: Open review
@@ -462,7 +462,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         }
     }
     /**
-     * @covers UsfARMapi::setConfirm
+     * @covers \USF\IdM\UsfARMapprovals::setConfirm
      */
     public function testSetConfirm_NoAccounts() {        
         $response = $this->usfARMapi->setConfirm('U12345670',[
