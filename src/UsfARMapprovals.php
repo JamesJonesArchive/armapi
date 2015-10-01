@@ -27,10 +27,10 @@ trait UsfARMapprovals {
     /**
      * Sets the account state
      * 
-     * @param type $type
-     * @param type $identifier
-     * @param type $state
-     * @param type $managerattributes
+     * @param string $type
+     * @param string $identifier
+     * @param string $state
+     * @param array $managerattributes
      * @return JSendResponse
      */
     public function setAccountState($type, $identifier, $state, $managerattributes=[]) {
@@ -57,11 +57,11 @@ trait UsfARMapprovals {
     /**
      * Sets the role state on an account
      * 
-     * @param type $type
-     * @param type $identifier
-     * @param type $rolename
-     * @param type $state
-     * @param type $managerattributes
+     * @param string $type
+     * @param string $identifier
+     * @param string $rolename
+     * @param string $state
+     * @param array $managerattributes
      * @return JSendResponse
      */
     public function setAccountRoleState($type, $identifier, $rolename, $state, $managerattributes=[]) {
@@ -112,8 +112,8 @@ trait UsfARMapprovals {
     /**
      * Checks to see if a state exists for the specified manager usfid
      * 
-     * @param type $states
-     * @param type $usfid
+     * @param array $states
+     * @param string $id
      * @return boolean
      */
     public static function hasStateForManager($states,$id) {
@@ -124,8 +124,8 @@ trait UsfARMapprovals {
     /**
      * Returns the state string for the specified manager
      * 
-     * @param type $states
-     * @param type $id
+     * @param array $states
+     * @param string $id
      * @return string
      */
     public static function getStateForManager($states,$id) {
@@ -140,8 +140,8 @@ trait UsfARMapprovals {
     /**
      * Checks to see if there is a matching
      * 
-     * @param type $roles
-     * @param type $id
+     * @param array $roles
+     * @param string $id
      * @return boolean
      */
     public static function hasMatchingRole($roles,$id) {
@@ -152,8 +152,8 @@ trait UsfARMapprovals {
     /**
      * Checks to see if a review exists for the specified manager usfid
      * 
-     * @param type $reviews
-     * @param type $id
+     * @param array $reviews
+     * @param string $id
      * @return boolean
      */
     public static function hasReviewForManager($reviews,$id) {
@@ -164,8 +164,8 @@ trait UsfARMapprovals {
     /**
      * Returns the review string for the specified manager
      * 
-     * @param type $reviews
-     * @param type $id
+     * @param array $reviews
+     * @param string $id
      * @return string
      */
     public static function getReviewForManager($reviews,$id) {
@@ -180,10 +180,10 @@ trait UsfARMapprovals {
     /**
      * Returns an updated state array based on the new passed state and the manager attributes
      * 
-     * @param type $states
-     * @param type $newstate
-     * @param type $managerattributes
-     * @return type
+     * @param array $states
+     * @param string $newstate
+     * @param array $managerattributes
+     * @return array
      */
     public static function getUpdatedStateArray($states,$newstate,$managerattributes) {
         if(UsfARMapi::hasStateForManager($states, $managerattributes['usfid'])) {
@@ -204,10 +204,10 @@ trait UsfARMapprovals {
     /**
      * Returns an update review array based on the new passed review code and the manager attributes
      * 
-     * @param type $reviews
-     * @param type $reviewcode
-     * @param type $managerattributes
-     * @return type
+     * @param array $reviews
+     * @param string $reviewcode
+     * @param array $managerattributes
+     * @return array
      */
     public static function getUpdatedReviewArray($reviews,$reviewcode,$managerattributes) {
         if(UsfARMapi::hasReviewForManager($reviews, $managerattributes['usfid'])) {
@@ -228,9 +228,9 @@ trait UsfARMapprovals {
     /**
      * Returns the last confirm object with max timestamp for manager usfid
      * 
-     * @param type $confirms
-     * @param type $id
-     * @return type
+     * @param array $confirms
+     * @param string $id
+     * @return array
      */
     public static function getLastConfirm($confirms,$id) {
         $matchedconfirms = \array_values(\array_filter($confirms, function($c) use ($id) { return $c['usfid'] === $id; }));
@@ -245,8 +245,8 @@ trait UsfARMapprovals {
     /**
      * Updates account to the review state
      * 
-     * @param type $identifier
-     * @param type $managerattributes
+     * @param string $identifier
+     * @param array $managerattributes
      * @return JSendResponse
      */
     public function setReviewByAccount($identifier,$managerattributes=[]) {
@@ -288,9 +288,9 @@ trait UsfARMapprovals {
     /**
      * Updates accounts for an identity to the review state
      * 
-     * @param type $identity
-     * @param type $managerattributes
-     * @return type
+     * @param string $identity
+     * @param array $managerattributes
+     * @return JSendResponse
      */
     public function setReviewByIdentity($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
@@ -306,7 +306,8 @@ trait UsfARMapprovals {
     /**
      * Sets the review for ALL accounts
      * 
-     * @param type $func Anonymous function for Visor to run in to gather the managers
+     * @param closure $func Anonymous function for Visor to run in to gather the managers
+     * @return JSendResponse
      */
     public function setReviewAll($func) {
         $accounts = $this->getARMaccounts();
@@ -337,8 +338,8 @@ trait UsfARMapprovals {
     /**
      * Updates account to the confirmed state
      * 
-     * @param type $identifier
-     * @param type $managerattributes
+     * @param string $identifier
+     * @param array $managerattributes
      * @return JSendResponse
      */
     public function setConfirmByAccount($identifier,$managerattributes=[]) {
@@ -409,8 +410,8 @@ trait UsfARMapprovals {
     /**
      * Updates accounts for an identity to the confirmed state
      * 
-     * @param type $identity
-     * @param type $managerattributes
+     * @param string $identity
+     * @param array $managerattributes
      * @return JSendResponse
      */
     public function setConfirm($identity,$managerattributes=[]) {

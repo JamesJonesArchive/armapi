@@ -27,8 +27,8 @@ trait UsfARMformatter {
     /**
      * Converts mongo dates to UTC date strings with one level of recursion
      * 
-     * @param type $arr
-     * @return type
+     * @param array $arr
+     * @return string
      */
     public static function convertMongoDatesToUTCstrings($arr) {
         return \array_map(function($a) {
@@ -43,9 +43,9 @@ trait UsfARMformatter {
     /**
      * Converts UTC date strings to mongo dates for matched keys
      * 
-     * @param type $arr
-     * @param type $datekeys
-     * @return type
+     * @param array $arr
+     * @param array $datekeys
+     * @return \MongoDate
      */
     public static function convertUTCstringsToMongoDates($arr,$datekeys = []) {
         \array_walk($arr, function(&$val,$key) use(&$datekeys) {
@@ -58,9 +58,9 @@ trait UsfARMformatter {
     /**
      * Formats raw mongo account data into API compliant accounts
      * 
-     * @param type $mongoaccounts an array of accounts from mongo
-     * @param type $removekeys an array of keys to remove
-     * @return type array of API formated accounts
+     * @param array $mongoaccounts an array of accounts from mongo
+     * @param array $removekeys an array of keys to remove
+     * @return array of API formated accounts
      */
     public function formatMongoAccountsListToAPIListing($mongoaccounts,$removekeys = []) {        
         return \array_map(function($act) use(&$removekeys) {
@@ -70,9 +70,9 @@ trait UsfARMformatter {
     /**
      * Formats a raw mongo account into API compliant account
      * 
-     * @param type $mongoaccount an account from mongo
-     * @param string $removekeys an array of keys to remove
-     * @return type API formatted account
+     * @param array $mongoaccount an account from mongo
+     * @param array $removekeys an array of keys to remove
+     * @return array API formatted account
      */
     public function formatMongoAccountToAPIaccount($mongoaccount,$removekeys = []) {
         $roles = $this->getARMroles();

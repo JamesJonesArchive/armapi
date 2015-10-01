@@ -101,6 +101,8 @@ trait UsfARMmongomock {
     
     /**
      * Test data for armapi testing
+     * 
+     * @return array An array of the test data for the fixture
      * @codeCoverageIgnore
      */
     public static function getFixture() {

@@ -28,8 +28,8 @@ trait UsfARMimport {
     /**
      * Takes SOR account in JSON format and imports it into ARM accounts
      * 
-     * @param type $account
-     * @return \Api\JSendResponse
+     * @param array $account
+     * @return JSendResponse
      */
     public function importAccount($account) {
         $currentaccount = $this->getAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier']);
@@ -44,8 +44,8 @@ trait UsfARMimport {
     /**
      * Takes account roles from SOR in JSON format and imports it into ARM account roles
      * 
-     * @param type $accountroles
-     * @return \Api\JSendResponse
+     * @param array $accountroles
+     * @return JSendResponse
      */
     public function importAccountRoles($accountroles) {
         $currentaccount = $this->getAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier']);
@@ -64,8 +64,8 @@ trait UsfARMimport {
     /**
      * Takes SOR role in JSON format and imports it into ARM accounts
      * 
-     * @param type $role
-     * @return \Api\JSendResponse
+     * @param array $role
+     * @return JSendResponse
      */
     public function importRole($role) {
         $currentrole = $this->getRoleByTypeAndName($role['account_type'],$role['name']);

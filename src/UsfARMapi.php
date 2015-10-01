@@ -36,17 +36,35 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     private $version = "0.0.1";
     
     public function __construct() { }
-    
+    /**
+     * Returns the current API version
+     * 
+     * @return string
+     */
     public function getVersion() {
         return $this->version;
     }
-    
+    /**
+     * Returns the arm database 
+     * 
+     * @return \MongoDB
+     */
     public function getARMdb() {
         return parent::getMongoConnection()->arm;
     }
+    /**
+     * Returns the accounts mongo collection
+     * 
+     * @return \MongoCollection
+     */
     public function getARMaccounts() {
         return $this->getARMdb()->accounts;
     }
+    /**
+     * Returns the roles mongo collection
+     * 
+     * @return \MongoCollection
+     */
     public function getARMroles() {
         return $this->getARMdb()->roles;
     }
@@ -70,7 +88,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Retrieves an array of accounts for a specified identity 
      * 
-     * @param object $identity
+     * @param string $identity
      * @return array of accounts
      */
     public function getAccountsForIdentity($identity) {
@@ -83,7 +101,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Return all accounts of a specified type
      * 
-     * @param type $type
+     * @param string $type
      * @return JSendResponse
      */
     public function getAccountsByType($type) {
@@ -97,7 +115,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Add a new account
      * 
-     * @param type $type
+     * @param string $type
      * @param array $account
      * @return JSendResponse
      */
@@ -160,8 +178,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Retrieve the account by type and identity (using the identifier)
      * 
-     * @param type $type
-     * @param type $identifier
+     * @param string $type
+     * @param string $identifier
      * @return JSendResponse
      */
     public function getAccountByTypeAndIdentifier($type,$identifier) {
@@ -178,8 +196,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Modify an account by type and identity (using the identifier)
      * 
-     * @param type $type
-     * @param type $identifier
+     * @param string $type
+     * @param string $identifier
      * @param array $accountmods
      * @return JSendResponse
      */
@@ -208,8 +226,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Get roles for a specific account by type and identity (using the identifier)
      * 
-     * @param type $type
-     * @param type $identifier
+     * @param string $type
+     * @param string $identifier
      * @return JSendResponse
      */
     public function getRolesForAccountByTypeAndIdentifier($type,$identifier) {
@@ -225,9 +243,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Modify the role list for an accounty by it's type and identity (using the identifier)
      * 
-     * @param type $type
-     * @param type $identifier
-     * @param type $rolechanges
+     * @param string $type
+     * @param string $identifier
+     * @param array $rolechanges
      * @return JSendResponse
      */
     public function modifyRolesForAccountByTypeAndIdentifier($type,$identifier,$rolechanges) {
@@ -283,8 +301,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Get all accounts of a certain type for a user 
      * 
-     * @param type $type
-     * @param type $identity
+     * @param string $type
+     * @param string $identity
      * @return JSendResponse
      */
     public function getAccountsByTypeAndIdentity($type,$identity) {
@@ -317,7 +335,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Create a new role of a specific account type
      * 
-     * @param type $newrole
+     * @param array $newrole
      * @return JSendResponse
      */
     public function createRoleByType($newrole) {
@@ -371,7 +389,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Get all roles of a specific account type
      * 
-     * @param type $type
+     * @param string $type
      * @return JSendResponse
      */
     public function getAllRolesByType($type) {
@@ -386,8 +404,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Get a single role of a type by role name
      * 
-     * @param type $type
-     * @param type $name
+     * @param string $type
+     * @param string $name
      * @return JSendResponse
      */
     public function getRoleByTypeAndName($type,$name) {
@@ -408,9 +426,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     /**
      * Modify a role of a type by role name
      * 
-     * @param type $type
-     * @param type $name
-     * @param type $updatedrole
+     * @param string $type
+     * @param string $name
+     * @param array $updatedrole
      * @return JSendResponse
      */
     public function modifyRoleByTypeAndName($type,$name,$updatedrole) {
