@@ -54,7 +54,9 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the value of the state key is not empty
         $this->assertNotEmpty($response->getData()['state']);
         // Make sure the state is matched for the specified manager (aka: USFID)
-        $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['state'], 'U99999999'));                
+        $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['state'], 'U99999999'));         
+        // Make sure the state is matched for the specified manager (aka: USFID)
+        $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['roles'][0]['state'], 'U99999999'));         
     }
     /**
      * @covers \USF\IdM\UsfARMapprovals::setAccountState
