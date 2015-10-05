@@ -52,7 +52,7 @@ trait UsfARMapprovals {
             if(!isset($account['roles'])) {
                 $roles = $this->getARMroles();
                 foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
-                    $rolestateresp = $this->setAccountRoleState($account['type'], $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], '', $managerattributes);
+                    $rolestateresp = $this->setAccountRoleState($account['type'], $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], $state, $managerattributes);
                     if(!$rolestateresp->isSuccess()) {
                         return $rolestateresp;
                     }
