@@ -49,6 +49,15 @@ trait UsfARMapprovals {
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if ($status) {
+            if(!isset($account['roles'])) {
+                $roles = $this->getARMroles();
+                foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
+                    $rolestateresp = $this->setAccountRoleState($account['type'], $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], '', $managerattributes);
+                    if(!$rolestateresp->isSuccess()) {
+                        return $rolestateresp;
+                    }
+                }
+            }
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
             return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']); 
