@@ -49,15 +49,6 @@ trait UsfARMapprovals {
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if ($status) {
-            if(isset($account['roles'])) {
-                $roles = $this->getARMroles();
-                foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
-                    $rolestateresp = $this->setAccountRoleState($account['type'], $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], $state, $managerattributes);
-                    if(!$rolestateresp->isSuccess()) {
-                        return $rolestateresp;
-                    }
-                }
-            }
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
             return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']); 
@@ -345,6 +336,69 @@ trait UsfARMapprovals {
         return new JSendResponse('success', $resp);
     }
     /**
+     * Updates account role on account to the confirmed state
+     * 
+     * @param string $identifier
+     * @param string $href
+     * @param array $managerattributes
+     * @return JSendResponse
+     */
+    public function setConfirmByAccountRole($identifier,$href,$managerattributes=[]) {
+        $accounts = $this->getARMaccounts();
+        $account = $accounts->findOne([ "identifier" => $identifier ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', [
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]);
+        }
+        $updatedattributes = [];
+        if(!isset($account['roles'])) {
+            $updatedattributes['roles'] = [];
+        } else {
+            $updatedattributes['roles'] = $account['roles'];
+        }
+        $roles = $this->getARMroles();        
+        try {
+            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$roles,$href) {
+                if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
+                    return $r;
+                }
+                $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
+                if (!is_null($accountRole)) {
+                    $confirmRole = $roles->findOne(["href" => $href]);
+                    if(isset($accountRole['href']) && isset($confirmRole['href'])) {
+                        if($accountRole['href'] == $confirmRole['href']) {
+                            // See if a state exists for this manager and create a confirm
+                            if(UsfARMapi::hasStateForManager(((isset($r['state']))?$r['state']:[]), $managerattributes['usfid'])) {
+                                if(!isset($r['confirm'])) {
+                                    $r['confirm'] = [];
+                                }
+                                $r['confirm'][] = \array_merge($managerattributes,[ 
+                                    'state' => UsfARMapi::getStateForManager($r['state'],$managerattributes['usfid']), 
+                                    'timestamp' => new \MongoDate() ]
+                                );
+                            } else {
+                                throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_STATE_UNSET_BY_MANAGER']);
+                            }
+                        }
+                    }
+                }
+                return $r;
+            }, $updatedattributes['roles']);
+        } catch (\Exception $e) {
+            return new JSendResponse('fail', [
+                "account" => $e->getMessage()
+            ]);
+        }
+        // Update the account
+        $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+        if (!$status) {
+            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
+        } else {
+            return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
+        }
+    }
+    /**
      * Updates account to the confirmed state
      * 
      * @param string $identifier
@@ -356,7 +410,7 @@ trait UsfARMapprovals {
         $account = $accounts->findOne([ "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
-                "account" => "Account not found!"
+                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]);
         }
         $updatedattributes = [];
@@ -381,28 +435,29 @@ trait UsfARMapprovals {
                 if(!isset($account['roles'])) {
                     $account['roles'] = [];
                 }
-                // Iterate the role confirms and set those reviews closed as well 
-                $updatedattributes['roles'] = \array_map(function($r) use($managerattributes) {
-                    if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
-                        return $r;
-                    }
-                    // See if a state exists for this manager and create a confirm
-                    if(UsfARMapi::hasStateForManager(((!isset($r['state']))?$r['state']:[]), $managerattributes['usfid'])) {
-                        if(!isset($r['confirm'])) {
-                            $r['confirm'] = [];
-                        }
-                        $r['confirm'][] = \array_merge($managerattributes,[ 
-                            'state' => UsfARMapi::getStateForManager($r['state'],$managerattributes['usfid']), 
-                            'timestamp' => new \MongoDate() ]
-                        );
-                    }
-                    return $r;
-                },$account['roles']); 
                 // Update the account
                 $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                 if (!$status) {
                     return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
-                } else {
+                } else {  
+                    $roles = $this->getARMroles(); 
+                    try {
+                        foreach(\array_filter($account['roles'], function($r) { return (isset($r['dynamic_role']))?!$r['dynamic_role']:true; }) as $r) {
+                            $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
+                            if (!is_null($accountRole)) {
+                                $resp = $this->setConfirmByAccountRole($identifier, $accountRole['href'],$managerattributes);
+                                if(!$resp->isSuccess()) {
+                                    return $resp;
+                                }
+                            } else {
+                                throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']);                                
+                            }
+                        }                        
+                    } catch (\Exception $e) {
+                        return new JSendResponse('fail', [
+                            "account" => $e->getMessage()
+                        ]);
+                    }                    
                     return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
                 }
             } else {

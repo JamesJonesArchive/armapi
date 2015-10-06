@@ -55,8 +55,6 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotEmpty($response->getData()['state']);
         // Make sure the state is matched for the specified manager (aka: USFID)
         $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['state'], 'U99999999'));         
-        // Make sure the state is matched for the specified manager (aka: USFID)
-        $this->assertEquals('removal_pending',UsfARMapi::getStateForManager($response->getData()['roles'][0]['state'], 'U99999999'));         
     }
     /**
      * @covers \USF\IdM\UsfARMapprovals::setAccountState
@@ -353,6 +351,8 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     }
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setAccountState
      */
     public function testSetConfirmByAccount() {
         // Execute in Order
@@ -422,6 +422,60 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotEmpty($response->getData()['account']);
         // Confirming the value of the account key is the error message
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER'], $response->getData()['account']);                        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccountRole
+     */
+    public function testSetConfirmByAccount_NoAccount() {
+        // Now run the setConfirmByAccount to test the result
+        $response = $this->usfARMapi->setConfirmByAccount('RBULL2',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);                                        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccountRole
+     */
+    public function testSetConfirmByAccountRole_StateUnset() {
+        // Now run the setConfirmByAccount to test the result
+        $response = $this->usfARMapi->setConfirmByAccountRole('RBULL',"/roles/GEMS/RPT2_ROLE",[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_STATE_UNSET_BY_MANAGER'], $response->getData()['account']);                        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccountRole
+     */
+    public function testSetConfirmByAccountRole_NoAccount() {
+        // Now run the setConfirmByAccount to test the result
+        $response = $this->usfARMapi->setConfirmByAccountRole('RBULL2',"/roles/GEMS/RPT2_ROLE",[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);                                
     }
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirm
