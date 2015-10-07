@@ -90,11 +90,11 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the identity key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['account']); 
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['description']); 
     }
     /**
      * @covers \USF\IdM\UsfARMimport::importRole

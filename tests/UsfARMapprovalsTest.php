@@ -617,10 +617,10 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the identity key exists
-        $this->assertArrayHasKey('identity',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of identity is not empty
-        $this->assertNotEmpty($response->getData()['identity']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the identity key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST'], $response->getData()['identity']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST'], $response->getData()['description']);                                
     }
 }

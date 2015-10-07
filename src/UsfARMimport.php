@@ -56,9 +56,9 @@ trait UsfARMimport {
                 'role_list' => $accountroles['account_roles']
             ]);
         } else {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
+            ]));
         }
     }
     /**
