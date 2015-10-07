@@ -37,6 +37,7 @@ trait UsfARMErrorMessages {
         'ACCOUNT_REVIEW_UNSET_BY_MANAGER' => 'Account does not have a review set by current manager!',
         'ACCOUNT_STATE_UNSET_BY_MANAGER' => 'Account does not have a state set by current manager!',
         'ACCOUNT_ROLE_STATE_UNSET_BY_MANAGER' => 'Account role does not have a state set by current manager!',
+        'ACCOUNT_HAS_UNAPPROVED_ROLE_STATES' => 'Account has unapproved role states',
         'IDENTITY_NO_ACCOUNTS_EXIST' => 'No accounts found for identity!',
         'IDENTITIES_NONE_FOUND' => 'No identities found!',
         'ROLE_INFO_MISSING' => 'Role info missing!',

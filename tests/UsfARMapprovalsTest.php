@@ -77,7 +77,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState() {
-        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','USF_TR_TRAVELER','open',[
+        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','/roles/FAST/USF_TR_TRAVELER','open',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
@@ -112,7 +112,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState_AccountNotExists() {
-        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345670','USF_TR_TRAVELER','open',[
+        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345670','/roles/FAST/USF_TR_TRAVELER','open',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
@@ -131,7 +131,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     public function testSetAccountRoleState_AccountHasNoRoles() {
         // Remove all roles for target account for testing
         $this->usfARMapi->getARMaccounts()->update([ "type" => 'FAST', "identifier" => 'U12345678' ],[ '$unset' => [ 'roles' => '' ]]);
-        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','USF_TR_TRAVELER','open',[
+        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','/roles/FAST/USF_TR_TRAVELER','open',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
@@ -148,7 +148,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState 
      */
     public function testSetAccountRoleState_RoleNotExists() {
-        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','USF_TR_TRAVELER2','open',[
+        $response = $this->usfARMapi->setAccountRoleState('FAST', 'U12345678','/roles/FAST/USF_TR_TRAVELER2','open',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
@@ -165,7 +165,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setAccountRoleState
      */
     public function testSetAccountRoleState_AccountRoleNotExists() {
-        $response = $this->usfARMapi->setAccountRoleState('GEMS', 'RBULL','EFFORT_CERTIFIER_SS','open',[
+        $response = $this->usfARMapi->setAccountRoleState('GEMS', 'RBULL','/roles/GEMS/EFFORT_CERTIFIER_SS','open',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
@@ -368,11 +368,26 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/RPT2_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/PeopleSoft+User', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/INQUIRE_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
         // STEP 3: Then confirm last
         $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
+
+        // Confirming that the function succeeded by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
         // Confirming the confirm key exists
         $this->assertArrayHasKey('confirm',$response->getData());
         // Confirming the value of confirm is not empty
@@ -381,6 +396,39 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(1, $response->getData()['confirm']);
         // Check the last confirm state
         $this->assertEquals('removal_pending',UsfARMapi::getLastConfirm($response->getData()['confirm'], 'U99999999')['state']);
+    }    
+    /**
+     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
+     * @covers \USF\IdM\UsfARMapprovals::setAccountState
+     */
+    public function testSetConfirmByAccount_UnapprovedRoleState() {
+        // Execute in Order
+        // 
+        // STEP1: Set the review first
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        // STEP2: Set the state next
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        // STEP 3: Then confirm last
+        $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        // Confirming that the function failed by the JSendResponse isFail method
+        $this->assertTrue($response->isFail());
+        // Confirming the account key exists
+        $this->assertArrayHasKey('account',$response->getData());
+        // Confirming the value of account is not empty
+        $this->assertNotEmpty($response->getData()['account']);
+        // Confirming the value of the account key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES'], $response->getData()['account']);                        
     }
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
@@ -491,14 +539,55 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('FAST', 'U12345678', '/roles/FAST/USF_TR_TRAVELER', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
         $this->assertTrue($this->usfARMapi->setAccountState('GEMS', '00000012345', 'removal_pending', [
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', '00000012345', '/roles/GEMS/USF_APPLICANT', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', '00000012345', '/roles/GEMS/SELFSALL_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', '00000012345', '/roles/GEMS/USF_EMPLOYEE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', '00000012345', '/roles/GEMS/USF_WF_APPROVALS_USER', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', '00000012345', '/roles/GEMS/PeopleSoft+User', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', '00000012345', '/roles/GEMS/EFFORT_CERTIFIER_SS', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());                
         $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/RPT2_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/PeopleSoft+User', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/INQUIRE_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        
         // STEP3: Confirm
         $response = $this->usfARMapi->setConfirm('U12345678',[
             'usfid' => 'U99999999',

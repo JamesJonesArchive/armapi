@@ -64,7 +64,7 @@ trait UsfARMapprovals {
      * @param array $managerattributes
      * @return JSendResponse
      */
-    public function setAccountRoleState($type, $identifier, $rolename, $state, $managerattributes=[]) {
+    public function setAccountRoleState($type, $identifier, $href, $state, $managerattributes=[]) {
         $accounts = $this->getARMaccounts();
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
@@ -79,7 +79,7 @@ trait UsfARMapprovals {
             ]);
         } else {
             $roles = $this->getARMroles();
-            $role = $roles->findOne([ 'type' => $type, 'name' => $rolename ]); 
+            $role = $roles->findOne(["href" => $href]);
             if (is_null($role)) {
                 return new JSendResponse('fail', [
                     "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
@@ -161,6 +161,27 @@ trait UsfARMapprovals {
             return ($rv['usfid'] == $id);
         }));
     }
+    /**
+     * Detects if list of roles has any unapproved states
+     * 
+     * @param array $roles
+     * @param array $managerattributes
+     * @return boolean Description
+     */
+    public static function hasUnapprovedRoleState($roles,$managerattributes=[]) {
+        return !empty(\array_filter($roles, function($r) use($managerattributes) { 
+            if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
+                return false;
+            }
+            if(!UsfARMapi::hasStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid'])) {
+                return true;
+            }
+            if(UsfARMapi::getStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid']) == '') {
+                return true;
+            }
+            return false;
+        }));
+    }    
     /**
      * Returns the review string for the specified manager
      * 
@@ -278,7 +299,7 @@ trait UsfARMapprovals {
             }
             $roles = $this->getARMroles();
             foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
-                $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], '', $managerattributes);
+                $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['href'], '', $managerattributes);
                 if(!$rolestateresp->isSuccess()) {
                     return $rolestateresp;
                 }
@@ -437,6 +458,11 @@ trait UsfARMapprovals {
                 $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes);
                 if(!isset($account['roles'])) {
                     $account['roles'] = [];
+                }
+                if(UsfARMapi::hasUnapprovedRoleState($account['roles'], $managerattributes)) {
+                    return new JSendResponse('fail', [
+                        "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
+                    ]);
                 }
                 // Update the account
                 $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
