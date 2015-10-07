@@ -245,13 +245,14 @@ trait UsfARMapprovals {
     /**
      * Updates account to the review state
      * 
+     * @param string $type
      * @param string $identifier
      * @param array $managerattributes
      * @return JSendResponse
      */
-    public function setReviewByAccount($identifier,$managerattributes=[]) {
+    public function setReviewByAccount($type,$identifier,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $account = $accounts->findOne([ "identifier" => $identifier ]);
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
@@ -263,12 +264,12 @@ trait UsfARMapprovals {
         }
         $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'open', $managerattributes);
         // Update the account with review changes and move on to the state changes
-        $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
             return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
         } else {
             // Set the empty state for the account by the manager
-            $stateresp = $this->setAccountState($account['type'], $identifier, '', $managerattributes);
+            $stateresp = $this->setAccountState($type, $identifier, '', $managerattributes);
             if(!$stateresp->isSuccess()) {
                 return $stateresp;
             }
@@ -277,12 +278,12 @@ trait UsfARMapprovals {
             }
             $roles = $this->getARMroles();
             foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
-                $rolestateresp = $this->setAccountRoleState($account['type'], $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], '', $managerattributes);
+                $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['name'], '', $managerattributes);
                 if(!$rolestateresp->isSuccess()) {
                     return $rolestateresp;
                 }
             }
-            return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
+            return $this->getAccountByTypeAndIdentifier($type,$identifier);
         }
     }
     /**
@@ -294,9 +295,9 @@ trait UsfARMapprovals {
      */
     public function setReviewByIdentity($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->find([ "identity" => $identity ],[ "identifier" => true ]);
+        $reviewaccounts = $accounts->find([ "identity" => $identity ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
-            $resp = $this->setReviewByAccount($account['identifier'], $managerattributes);
+            $resp = $this->setReviewByAccount($account['type'],$account['identifier'], $managerattributes);
             if(!$resp->isSuccess()) {
                 return $resp;
             }
@@ -338,14 +339,15 @@ trait UsfARMapprovals {
     /**
      * Updates account role on account to the confirmed state
      * 
+     * @param string $type
      * @param string $identifier
      * @param string $href
      * @param array $managerattributes
      * @return JSendResponse
      */
-    public function setConfirmByAccountRole($identifier,$href,$managerattributes=[]) {
+    public function setConfirmByAccountRole($type,$identifier,$href,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $account = $accounts->findOne([ "identifier" => $identifier ]);
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
@@ -391,23 +393,24 @@ trait UsfARMapprovals {
             ]);
         }
         // Update the account
-        $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
             return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
         } else {
-            return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
+            return $this->getAccountByTypeAndIdentifier($type,$identifier);
         }
     }
     /**
      * Updates account to the confirmed state
      * 
+     * @param string $type
      * @param string $identifier
      * @param array $managerattributes
      * @return JSendResponse
      */
-    public function setConfirmByAccount($identifier,$managerattributes=[]) {
+    public function setConfirmByAccount($type,$identifier,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $account = $accounts->findOne([ "identifier" => $identifier ]);
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
             return new JSendResponse('fail', [
                 "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
@@ -436,7 +439,7 @@ trait UsfARMapprovals {
                     $account['roles'] = [];
                 }
                 // Update the account
-                $status = $accounts->update([ "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+                $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                 if (!$status) {
                     return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
                 } else {  
@@ -445,7 +448,7 @@ trait UsfARMapprovals {
                         foreach(\array_filter($account['roles'], function($r) { return (isset($r['dynamic_role']))?!$r['dynamic_role']:true; }) as $r) {
                             $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
                             if (!is_null($accountRole)) {
-                                $resp = $this->setConfirmByAccountRole($identifier, $accountRole['href'],$managerattributes);
+                                $resp = $this->setConfirmByAccountRole($type,$identifier, $accountRole['href'],$managerattributes);
                                 if(!$resp->isSuccess()) {
                                     return $resp;
                                 }
@@ -458,7 +461,7 @@ trait UsfARMapprovals {
                             "account" => $e->getMessage()
                         ]);
                     }                    
-                    return $this->getAccountByTypeAndIdentifier($account['type'],$identifier);
+                    return $this->getAccountByTypeAndIdentifier($type,$identifier);
                 }
             } else {
                 return new JSendResponse('fail', [
@@ -480,14 +483,17 @@ trait UsfARMapprovals {
      */
     public function setConfirm($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $identifiers = $accounts->distinct("identifier",[ "identity" => $identity ]);
-        if(empty($identifiers)) {
+        $identifiers = $accounts->aggregate([
+            [ '$match' => [ 'identity' => $identity ] ],
+            [ '$group' => [ '_id' => [ 'identifier' => '$identifier', 'type' => '$type' ] ] ]
+        ]);
+        if(empty($identifiers['result'])) {
             return new JSendResponse('fail', [
                 "identity" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST']
             ]);
         }
-        foreach ($identifiers as $identifier) {
-            $resp = $this->setConfirmByAccount($identifier, $managerattributes);
+        foreach ($identifiers['result'] as $pair) {
+            $resp = $this->setConfirmByAccount($pair['_id']['type'],$pair['_id']['identifier'], $managerattributes);
             if(!$resp->isSuccess()) {
                 return $resp;
             }
