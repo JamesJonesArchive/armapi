@@ -121,35 +121,35 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function createAccountByType($type,$account) {
         $accounts = $this->getARMaccounts();
-        if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
-            ]);
+        if (is_null($account)) {            
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
+            ]));
         }
         // Check to make sure the account itself has enough valid info
         if(!isset($account["account_type"]) || !isset($account["account_identifier"]) || !isset($account["account_data"])) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'],
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'],
                 "required_keys" => ['account_type','account_identifier','account_data']
-            ]);
+            ]));
         }
         // Make sure the account_data is not empty
         if(empty($account["account_data"])) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY']
+            ]));
         }
         // Check to make sure the type is set the same in the account data as indicated from the call
         if(strcasecmp($account["account_type"], $type) != 0) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_TYPE_MISMATCH']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_TYPE_MISMATCH']
+            ]));
         }
         // Check to see if it exists already
         if($this->getAccountByTypeAndIdentifier($type, $account["account_identifier"])->isSuccess()) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_EXISTS'] 
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_EXISTS'] 
+            ]));
         }
         // Add on the href
         $href = "/accounts/{$type}/{$account['account_identifier']}";
@@ -168,7 +168,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             )
         );        
         if(!$insert_status) {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_CREATE_ERROR']); 
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_CREATE_ERROR'] 
+            ])); 
         } else {
             return new JSendResponse('success', [
                 "href" => $href
@@ -186,9 +188,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }        
         return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account));
     }
@@ -205,22 +207,24 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         // Make sure the account_data is not empty
         if(empty($accountmods["account_data"])) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY']
+            ]));
         }        
         $href = "/accounts/{$type}/{$identifier}";
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => \array_merge(array_diff_key(UsfARMapi::convertUTCstringsToMongoDates($accountmods["account_data"],["password_change","last_used","last_update"]),array_flip(['type','identifier'])),["href" => $href ]) ]);
         if ($status) {
             return new JSendResponse('success', [ "href" => $href ]);
         } else {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']); 
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+            ])); 
         }
     }
     /**
@@ -234,9 +238,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ],[ "type" => true, "identifier" => true, "roles" => true ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account));
     }
@@ -254,14 +258,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         // ,[ "type" => true, "identifier" => true, "roles" => true ]
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         if(!isset($rolechanges['role_list'])) {
-            return new JSendResponse('fail', [
-                "roles" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'] 
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'] 
+            ]));
         }
         if(!isset($account['roles'])) {
             $account['roles'] = [];
@@ -270,9 +274,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if(count(array_filter($rolechanges['role_list'],function($r) use(&$roles) {
             return is_null($roles->findOne([ 'href' => $r['href'] ]));
         })) > 0) {
-            return new JSendResponse('fail', [
-                "role_list" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID']
+            ]));
         }
         // Determine the actual new roles and add _only_ the matched existing roles
         $account['roles'] = \array_map(function($r) use(&$roles) {
@@ -295,7 +299,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if ($status) {
             return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
         } else {
-            return new JSendResponse('error', "Update failed!");
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR'] 
+            ]));
         }
     }
     /**
@@ -341,30 +347,30 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     public function createRoleByType($newrole) {
         $roles = $this->getARMroles();
         if (is_null($newrole)) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING']
+            ]));
         }
         // Check to make sure the account itself has enough valid info
         if(!isset($newrole["account_type"]) || !isset($newrole["name"]) || !isset($newrole["role_data"])) {            
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'],
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'],
                 "required_keys" => ['account_type','name','role_data']
-            ]);
+            ]));
         }
         // Make sure the account_data is not empty
         if(empty($newrole["role_data"])) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY']
+            ]));
         }        
         // Build the href
         $href = "/roles/{$newrole['account_type']}/" . UsfARMapi::formatRoleName($newrole['name']);
         $role = $roles->findOne([ 'href' => $href ]);
         if (!is_null($role)) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS']
-            ]); 
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS']
+            ])); 
         }
         $insert_status = $roles->insert(
             array_merge(
@@ -379,7 +385,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             )
         ); 
         if(!$insert_status) {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_CREATE_ERROR']);
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_CREATE_ERROR']
+            ]));
         } else {
             return new JSendResponse('success', [
                 "href" => $href
@@ -414,9 +422,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $href = "/roles/{$type}/" . UsfARMapi::formatRoleName($name);
         $role = $roles->findOne([ 'href' => $href ]);
         if (is_null($role)) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'] 
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'] 
+            ]));
         }
         return new JSendResponse('success', [
             'account_type' => $type,
@@ -440,16 +448,16 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $role = $roleresp->getData();
         // Check to make sure the account itself has enough valid info
         if(!isset($updatedrole["account_type"]) || !isset($updatedrole["name"]) || !isset($updatedrole["role_data"])) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'],
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'],
                 "required_keys" => ['account_type','name','role_data']
-            ]);
+            ]));
         }
         // Make sure the role_data is not empty when there's no name change
         if(empty($updatedrole["role_data"]) && strcmp($updatedrole["name"], $name) == 0) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY']
+            ]));
         }
         // Update the href
         $href = "/roles/{$updatedrole['account_type']}/" . UsfARMapi::formatRoleName($updatedrole['name']);
@@ -470,7 +478,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if ($status) {
             return $this->getRoleByTypeAndName($type, $updatedrole['name']);
         } else {
-            return new JSendResponse('error', "Update failed!");
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_UPDATE_ERROR']
+            ]));
         }
     }
     

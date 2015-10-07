@@ -194,11 +194,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createAccountByType
@@ -209,33 +209,33 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['description']);
 
         // Testing account with 2 missing key value pairs
         $response2 = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS' ]);
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response2->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response2->getData());
+        $this->assertArrayHasKey('description',$response2->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response2->getData()['account']);
+        $this->assertNotEmpty($response2->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response2->getData()['account']);        
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response2->getData()['description']);        
         
         // Testing account with 1 missing key value pairs
         $response3 = $this->usfARMapi->createAccountByType('GEMS',[ 'account_type' => 'GEMS','account_identifier' => '00000012345' ]);
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response3->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response3->getData());
+        $this->assertArrayHasKey('description',$response3->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response3->getData()['account']);
+        $this->assertNotEmpty($response3->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response3->getData()['account']);                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING_REQUIRED_KEYS'], $response3->getData()['description']);                
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createAccountByType
@@ -245,11 +245,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['account']);                        
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['description']);                        
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createAccountByType
@@ -259,11 +259,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_TYPE_MISMATCH'], $response->getData()['account']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_TYPE_MISMATCH'], $response->getData()['description']);                                
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createAccountByType
@@ -273,11 +273,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_EXISTS'], $response->getData()['account']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_EXISTS'], $response->getData()['description']);                                
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createAccountByType
@@ -301,11 +301,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::getAccountByTypeAndIdentifier
@@ -344,11 +344,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::modifyAccountByTypeAndIdentifier
@@ -358,11 +358,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DATA_EMPTY'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::modifyAccountByTypeAndIdentifier
@@ -386,11 +386,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::getRolesForAccountByTypeAndIdentifier
@@ -467,11 +467,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['account']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
@@ -481,11 +481,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('roles',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['roles']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'], $response->getData()['roles']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::modifyRolesForAccountByTypeAndIdentifier
@@ -499,11 +499,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role_list',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role_list is not empty
-        $this->assertNotEmpty($response->getData()['role_list']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role_list key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID'], $response->getData()['role_list']);
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID'], $response->getData()['description']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::getAccountsByTypeAndIdentity
@@ -610,11 +610,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING'], $response->getData()['role']);        
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING'], $response->getData()['description']);        
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createRoleByType
@@ -623,11 +623,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $response = $this->usfARMapi->createRoleByType([]);
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['role']);                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['description']);                
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createRoleByType
@@ -640,11 +640,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         ]);
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['role']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['description']);                                
     }
     /**
      * @covers \USF\IdM\UsfARMapi::createRoleByType
@@ -659,11 +659,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         ]);
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS'], $response->getData()['role']);                                
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS'], $response->getData()['description']);                                
     }
     /**
      * @covers \USF\IdM\UsfARMapi::getAllRolesByType
@@ -720,11 +720,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $response = $this->usfARMapi->getRoleByTypeAndName('FAST','DOESNT_EXIST');
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['role']);                                        
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['description']);                                        
     }
     /**
      * @covers \USF\IdM\UsfARMapi::modifyRoleByTypeAndName
@@ -806,11 +806,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $response = $this->usfARMapi->modifyRoleByTypeAndName('FAST','USF_TR_TRAVELER',[]);
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['role']);  
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING_REQUIRED_KEYS'], $response->getData()['description']);  
     }
     /**
      * @covers \USF\IdM\UsfARMapi::modifyRoleByTypeAndName
@@ -823,10 +823,10 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         ]);
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('role',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of role is not empty
-        $this->assertNotEmpty($response->getData()['role']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the role key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['role']);  
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['description']);  
     }    
 }

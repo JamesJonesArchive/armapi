@@ -45,6 +45,7 @@ trait UsfARMErrorMessages {
         'ROLE_DATA_EMPTY' => 'Role data is empty!',
         'ROLE_EXISTS' => 'Role already exists!',
         'ROLE_NOT_EXISTS' => 'Role does not exist!',
+        'ROLE_UPDATE_ERROR' => 'Role update failed!',
         'ROLE_CREATE_ERROR' => 'Role creation could not be performed!',
         'ROLE_LIST_MISSING' => 'No role list specified!',
         'ROLES_CONTAINS_INVALID' => 'Role list contains invalid roles!'

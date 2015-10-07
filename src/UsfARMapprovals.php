@@ -38,9 +38,9 @@ trait UsfARMapprovals {
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         if(!isset($account['state'])) {
             $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
@@ -51,7 +51,9 @@ trait UsfARMapprovals {
         if ($status) {
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']); 
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+            ])); 
         }
     }
     /**
@@ -69,21 +71,21 @@ trait UsfARMapprovals {
         $updatedattributes = [];
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         if(!isset($account['roles'])) {
-            return new JSendResponse('fail', [
-                "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'] 
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'] 
+            ]));
         } else {
             $roles = $this->getARMroles();
             $role = $roles->findOne(["href" => $href]);
             if (is_null($role)) {
-                return new JSendResponse('fail', [
-                    "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
-                ]);
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
+                ]));
             }   
             if(UsfARMapi::hasMatchingRole($account['roles'], $role['_id'])) {
                 $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$state,$role) {  
@@ -97,16 +99,18 @@ trait UsfARMapprovals {
                     return $r;
                 },$account['roles']);                
             } else {
-                return new JSendResponse('fail', [
-                    "role" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_NOT_EXISTS'] 
-                ]);
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_NOT_EXISTS'] 
+                ]));
             }
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if ($status) {
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+            ]));
         }        
     }
     /**
@@ -275,9 +279,9 @@ trait UsfARMapprovals {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         $updatedattributes = [];
         if(!isset($account['review'])) {
@@ -287,7 +291,9 @@ trait UsfARMapprovals {
         // Update the account with review changes and move on to the state changes
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+            ]));
         } else {
             // Set the empty state for the account by the manager
             $stateresp = $this->setAccountState($type, $identifier, '', $managerattributes);
@@ -335,9 +341,9 @@ trait UsfARMapprovals {
         $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ] ]);
         if(empty($reviewaccounts)) {
-            return new JSendResponse('fail', [
-                "identity" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND']
+            ]));
         }
         $resp = [
             'usfids' => $reviewaccounts,
@@ -370,9 +376,9 @@ trait UsfARMapprovals {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         $updatedattributes = [];
         if(!isset($account['roles'])) {
@@ -409,14 +415,16 @@ trait UsfARMapprovals {
                 return $r;
             }, $updatedattributes['roles']);
         } catch (\Exception $e) {
-            return new JSendResponse('fail', [
-                "account" => $e->getMessage()
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => $e->getMessage()
+            ]));
         }
         // Update the account
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
-            return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+            ]));
         } else {
             return $this->getAccountByTypeAndIdentifier($type,$identifier);
         }
@@ -433,9 +441,9 @@ trait UsfARMapprovals {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
         }
         $updatedattributes = [];
         if(!isset($account['confirm'])) {
@@ -460,14 +468,16 @@ trait UsfARMapprovals {
                     $account['roles'] = [];
                 }
                 if(UsfARMapi::hasUnapprovedRoleState($account['roles'], $managerattributes)) {
-                    return new JSendResponse('fail', [
-                        "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
-                    ]);
+                    return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
+                    ]));
                 }
                 // Update the account
                 $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                 if (!$status) {
-                    return new JSendResponse('error', UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']);
+                    return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+                    ]));
                 } else {  
                     $roles = $this->getARMroles(); 
                     try {
@@ -483,21 +493,21 @@ trait UsfARMapprovals {
                             }
                         }                        
                     } catch (\Exception $e) {
-                        return new JSendResponse('fail', [
-                            "account" => $e->getMessage()
-                        ]);
+                        return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                            "description" => $e->getMessage()
+                        ]));
                     }                    
                     return $this->getAccountByTypeAndIdentifier($type,$identifier);
                 }
             } else {
-                return new JSendResponse('fail', [
-                    "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER']
-                ]);
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER']
+                ]));
             }
         } else {
-            return new JSendResponse('fail', [
-                "account" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
+            ]));
         }
     }
     /**
@@ -514,9 +524,9 @@ trait UsfARMapprovals {
             [ '$group' => [ '_id' => [ 'identifier' => '$identifier', 'type' => '$type' ] ] ]
         ]);
         if(empty($identifiers['result'])) {
-            return new JSendResponse('fail', [
-                "identity" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST']
-            ]);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITY_NO_ACCOUNTS_EXIST']
+            ]));
         }
         foreach ($identifiers['result'] as $pair) {
             $resp = $this->setConfirmByAccount($pair['_id']['type'],$pair['_id']['identifier'], $managerattributes);

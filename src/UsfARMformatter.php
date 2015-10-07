@@ -104,4 +104,27 @@ trait UsfARMformatter {
     public static function formatRoleName($name) {
         return str_replace(" ","+",$name);
     }
+    /**
+     * Adds on the status info for failed or errored responses
+     * 
+     * @param type $errorType
+     * @param type $output
+     * @return type
+     */
+    public static function errorWrapper($errorType,$output) {
+        switch($errorType) {
+            case 'fail':
+                return \array_merge($output, [
+                    "status" => 428,
+                    "statusText" => "Precondition Required"
+                ]);
+                break;
+            case 'error':
+                return \array_merge($output, [
+                    "status" => 500,
+                    "statusText" => "Internal Server Errod"
+                ]);
+                break;
+        }
+    }
 }
