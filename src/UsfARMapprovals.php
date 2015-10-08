@@ -498,6 +498,10 @@ trait UsfARMapprovals {
                                 if(!$resp->isSuccess()) {
                                     return $resp;
                                 }
+                                $rolestateresp = $this->setAccountRoleState($type, $identifier, $accountRole['href'], '', $managerattributes);
+                                if(!$rolestateresp->isSuccess()) {
+                                    return $rolestateresp;
+                                }
                             } else {
                                 throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']);                                
                             }
