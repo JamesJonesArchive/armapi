@@ -77,5 +77,42 @@ trait UsfARMimport {
             return $this->createRoleByType($role);
         }
     }
+    /**
+     * Finds all existing accounts and primes a compares collection for later processing
+     */
+    public function buildAccountComparison() {
+        $compares = $this->getARMcompares();
+        $compares->drop();
+        foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
+            $compares->batchInsert($accounts);
+        }
+    }
+    /**
+     * Finds all existing roles and primes a compares collection for later processing
+     */
+    public function buildRoleComparison() {
+        $compares = $this->getARMcompares();
+        $compares->drop();
+        foreach ($this->getAllRoles()->getData() as $type => $roles) {
+            $compares->batchInsert($roles);
+        }
+    }
+    /**
+     * Returns the compares mongo collection (tracking changes)
+     * 
+     * @return \MongoCollection
+     */
+    public function getARMcompares() {
+        return $this->getARMdb()->compares;
+    }
+    /**
+     * Returns the logs mongo collection (tracking changes)
+     * 
+     * @return \MongoCollection
+     */
+    public function getARMlogs() {
+        return $this->getARMdb()->logs;
+    }
+
 
 }

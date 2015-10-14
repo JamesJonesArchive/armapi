@@ -96,6 +96,14 @@ trait UsfARMmongomock {
         ->method('getARMroles')
         ->will($this->returnValue($this->getMongoConnection()->collection('roles')));
         
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMcompares')
+        ->will($this->returnValue($this->getMongoConnection()->collection('compares')));
+
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMlogs')
+        ->will($this->returnValue($this->getMongoConnection()->collection('logs')));
+        
         parent::setUp();
     }
     
