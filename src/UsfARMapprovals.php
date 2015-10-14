@@ -190,9 +190,12 @@ trait UsfARMapprovals {
             if(!UsfARMapi::hasStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid'])) {
                 return true;
             }
-            if(UsfARMapi::getStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid']) == '') {
+            if(!preg_match('/\S/', UsfARMapi::getStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid']))) {
                 return true;
             }
+//            if(UsfARMapi::getStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid']) === '') {
+//                return true;
+//            }
             return false;
         }));
     }    

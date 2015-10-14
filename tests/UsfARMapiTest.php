@@ -82,6 +82,23 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertContains('/accounts/FAST/U12345678', $response->getData()['FAST']);
     }
     /**
+     * @covers \USF\IdM\UsfARMapi::getAccountTypes
+     */
+    public function testGetAccountTypes() {
+        $response = $this->usfARMapi->getAccountTypes();
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the account_types key exists
+        $this->assertArrayHasKey('account_types',$response->getData());
+        // Confirming that the value of the account_types key is not empty
+        $this->assertNotEmpty($response->getData()['account_types']);
+        // Confirming the count of the values in the account_types key
+        $this->assertCount(2,$response->getData()['account_types']);
+        // Test the known types
+        $this->assertContains('FAST',$response->getData()['account_types']);
+        $this->assertContains('GEMS',$response->getData()['account_types']);
+    }
+    /**
      * @covers \USF\IdM\UsfARMapi::getAccountsForIdentity
      */
     public function testGetAccountsForIdentity() {

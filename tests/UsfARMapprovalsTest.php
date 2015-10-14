@@ -416,6 +416,11 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
+        // Now change one of the role states to unset
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/RPT2_ROLE', '', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
         // STEP 3: Then confirm last
         $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
             'usfid' => 'U99999999',

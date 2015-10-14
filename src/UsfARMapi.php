@@ -111,7 +111,17 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             "accounts" => $this->formatMongoAccountsListToAPIListing(iterator_to_array($accounts->find([ "type" => $type ])))
         ]);
     }
-    // ALERT: May need work    
+    /**
+     * Returns all the available account types
+     * 
+     * @return JSendResponse
+     */
+    public function getAccountTypes() {
+        $accounts = $this->getARMaccounts();
+        return new JSendResponse('success',[
+            'account_types' => $accounts->distinct('type')
+        ]);
+    }
     /**
      * Add a new account
      * 
