@@ -31,7 +31,7 @@ trait UsfARMimport {
      * @return \MongoCollection
      */
     public function getARMtracking() {
-        return $this->getARMlogdb()->tracking;
+        return $this->getARMdb()->tracking;
     }
     /**
      * Returns the logs mongo collection (logging changes)
@@ -39,15 +39,7 @@ trait UsfARMimport {
      * @return \MongoCollection
      */
     public function getARMlogs() {
-        return $this->getARMlogdb()->logs;
-    }
-    /**
-     * Returns the arm database 
-     * 
-     * @return \MongoDB
-     */
-    public function getARMlogdb() {
-        return parent::getMongoConnection()->armLog;
+        return $this->getARMdb()->logs;
     }
     /**
      * Takes SOR account in JSON format and imports it into ARM accounts
