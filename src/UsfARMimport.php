@@ -150,9 +150,7 @@ trait UsfARMimport {
     public function getTrackingHrefList() {
         $compares = $this->getARMtracking();
         return new JSendResponse('success', [
-            'hrefs' => \array_map(function($t) {
-                return $t['href'];
-            }, \iterator_to_array($compares->find()))
+            'hrefs' => $compares->distinct("href",[ "href" => [ '$exists' => true ] ])
         ]);
     }
     /**
