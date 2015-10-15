@@ -26,6 +26,14 @@ use \JSend\JSendResponse;
  */
 trait UsfARMimport {
     /**
+     * Returns the arm database 
+     * 
+     * @return \MongoDB
+     */
+    public function getARMlogdb() {
+        return parent::getMongoConnection()->armLog;
+    }
+    /**
      * Takes SOR account in JSON format and imports it into ARM accounts
      * 
      * @param array $account
@@ -81,7 +89,7 @@ trait UsfARMimport {
      * Finds all existing accounts and primes a compares collection for later processing
      */
     public function buildAccountComparison() {
-        $compares = $this->getARMcompares();
+        $compares = $this->getARMtracking();
         $compares->drop();
         foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
             $compares->batchInsert($accounts);
@@ -91,7 +99,7 @@ trait UsfARMimport {
      * Finds all existing roles and primes a compares collection for later processing
      */
     public function buildRoleComparison() {
-        $compares = $this->getARMcompares();
+        $compares = $this->getARMtracking();
         $compares->drop();
         foreach ($this->getAllRoles()->getData() as $type => $roles) {
             $compares->batchInsert($roles);
@@ -102,8 +110,8 @@ trait UsfARMimport {
      * 
      * @return \MongoCollection
      */
-    public function getARMcompares() {
-        return $this->getARMdb()->compares;
+    public function getARMtracking() {
+        return $this->getARMlogdb()->tracking;
     }
     /**
      * Returns the logs mongo collection (tracking changes)
@@ -111,7 +119,7 @@ trait UsfARMimport {
      * @return \MongoCollection
      */
     public function getARMlogs() {
-        return $this->getARMdb()->logs;
+        return $this->getARMlogdb()->logs;
     }
 
 
