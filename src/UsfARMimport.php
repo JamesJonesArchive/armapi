@@ -134,7 +134,7 @@ trait UsfARMimport {
     /**
      * Removes an account from the tracking list
      * 
-     * @param type $href
+     * @param string $href
      * @return JSendResponse
      */
     public function removeAccountFromTracking($href) {
@@ -147,6 +147,31 @@ trait UsfARMimport {
         } else {
             return new JSendResponse('success', [
                 "href" => $href
+            ]);
+        }
+    }
+    /**
+     * Logs the import error and offending object
+     * 
+     * @param string $importType
+     * @param array $importObject
+     * @param array $error
+     * @return JSendResponse
+     */
+    public function logImportErrors($importType,$importObject,$error) {
+        $logs = $this->getARMlogs();
+        $insert_status = $logs->insert([
+            'importType' => $importType,
+            'importObject' => $importObject,
+            'error' => $error
+        ]);        
+        if(!$insert_status) {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['LOG_CREATE_ERROR'] 
+            ])); 
+        } else {
+            return new JSendResponse('success', [
+                "error" => $error
             ]);
         }
     }
