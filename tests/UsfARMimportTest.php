@@ -144,7 +144,6 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
      */
     public function testBuildRoleComparison() {
         $response = $this->usfARMapi->buildRoleComparison();
-        print_r($response->getData());
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the FAST key exists

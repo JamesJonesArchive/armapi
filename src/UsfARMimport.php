@@ -151,6 +151,19 @@ trait UsfARMimport {
         }
     }
     /**
+     * Gets the hrefs in the tracking collection
+     * 
+     * @return JSendResponse
+     */
+    public function getTrackingHrefList() {
+        $compares = $this->getARMtracking();
+        return new JSendResponse('success', [
+            'hrefs' => \array_map(function($t) {
+                return $t['href'];
+            }, \iterator_to_array($compares->find()))
+        ]);
+    }
+    /**
      * Logs the import error and offending object
      * 
      * @param string $importType
@@ -172,6 +185,25 @@ trait UsfARMimport {
         } else {
             return new JSendResponse('success', [
                 "error" => $error
+            ]);
+        }
+    }
+    /**
+     * Removes an account from the accounts
+     * 
+     * @param string $href
+     * @return JSendResponse
+     */
+    public function removeAccount($href) {
+        $accounts = $this->getARMaccounts();
+        $delete_status = $accounts->remove(['href' => $href], ["justOne" => true]);
+        if($delete_status['n'] < 1) {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DELETE_ERROR'] 
+            ])); 
+        } else {
+            return new JSendResponse('success', [
+                "href" => $href
             ]);
         }
     }
