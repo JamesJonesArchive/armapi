@@ -99,7 +99,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
     /**
      * @covers \USF\IdM\UsfARMimport::importRole
      */
-    public function testimportRole() {
+    public function testImportRole() {
         $response = $this->usfARMapi->importRole([
             "name" => "Test Role",
             "account_type" => "FAST",
@@ -119,4 +119,46 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirm the account was created
         $this->assertTrue($this->usfARMapi->getRoleByTypeAndName("FAST","Test Role")->isSuccess());
     }
+    /**
+     * @covers \USF\IdM\UsfARMimport::buildAccountComparison
+     */
+    public function testBuildAccountComparison() {
+        $response = $this->usfARMapi->buildAccountComparison();
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the FAST key exists
+        $this->assertArrayHasKey('FAST',$response->getData());
+        // Confirming the value of FAST is not empty
+        $this->assertNotEmpty($response->getData()['FAST']);
+        // Check the FAST
+        $this->assertEquals(1,$response->getData()['FAST']);
+        // Confirming the GEMS key exists
+        $this->assertArrayHasKey('GEMS',$response->getData());
+        // Confirming the value of GEMS is not empty
+        $this->assertNotEmpty($response->getData()['GEMS']);
+        // Check the GEMS
+        $this->assertEquals(2,$response->getData()['GEMS']);
+    }
+    /**
+     * @covers \USF\IdM\UsfARMimport::buildRoleComparison
+     */
+    public function testBuildRoleComparison() {
+        $response = $this->usfARMapi->buildRoleComparison();
+        print_r($response->getData());
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the FAST key exists
+        $this->assertArrayHasKey('FAST',$response->getData());
+        // Confirming the value of FAST is not empty
+        $this->assertNotEmpty($response->getData()['FAST']);
+        // Check the FAST
+        $this->assertEquals(1,$response->getData()['FAST']);
+        // Confirming the GEMS key exists
+        $this->assertArrayHasKey('GEMS',$response->getData());
+        // Confirming the value of GEMS is not empty
+        $this->assertNotEmpty($response->getData()['GEMS']);
+        // Check the GEMS
+        $this->assertEquals(8,$response->getData()['GEMS']);
+    }
+
 }

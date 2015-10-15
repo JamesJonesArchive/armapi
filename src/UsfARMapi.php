@@ -81,7 +81,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             if (!isset($result[$act['type']])) {
                 $result[$act['type']] = [];
             }
-            $result[$act['type']][] = $act["href"];
+            $result[$act['type']][] = [ 'href' => $act["href"] ];
         }
         return new JSendResponse('success', $result);
     }

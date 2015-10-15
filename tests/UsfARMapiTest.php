@@ -68,18 +68,12 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotEmpty($response->getData()['GEMS']);
         // Confirming the count of the values in the GEMS key
         $this->assertCount(2,$response->getData()['GEMS']);
-        // Confirming the href exists
-        $this->assertContains('/accounts/GEMS/RBULL', $response->getData()['GEMS']);
-        // Confirming the href exists
-        $this->assertContains('/accounts/GEMS/00000012345', $response->getData()['GEMS']);
-        // Confirming the FAST key exists
+        // Confirming the FAST exists
         $this->assertArrayHasKey('FAST',$response->getData());
         // Confirming that the value of the FAST key is not empty
         $this->assertNotEmpty($response->getData()['FAST']);
         // Confirming the count of the values in the FAST key
         $this->assertCount(1,$response->getData()['FAST']);
-        // Confirming the href exists
-        $this->assertContains('/accounts/FAST/U12345678', $response->getData()['FAST']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::getAccountTypes

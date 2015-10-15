@@ -81,7 +81,7 @@ trait UsfARMmongomock {
      */
     public function setUp() {
         $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
-        ->setMethods(array('getARMdb','getARMaccounts','getARMroles'))
+        ->setMethods(array('getARMdb','getARMaccounts','getARMroles','getARMtracking','getARMlogs'))
         ->getMock();
         
         $this->usfARMapi->expects($this->any())
@@ -97,8 +97,8 @@ trait UsfARMmongomock {
         ->will($this->returnValue($this->getMongoConnection()->collection('roles')));
         
         $this->usfARMapi->expects($this->any())
-        ->method('getARMcompares')
-        ->will($this->returnValue($this->getMongoConnection()->collection('compares')));
+        ->method('getARMtracking')
+        ->will($this->returnValue($this->getMongoConnection()->collection('tracking')));
 
         $this->usfARMapi->expects($this->any())
         ->method('getARMlogs')
@@ -115,6 +115,8 @@ trait UsfARMmongomock {
      */
     public static function getFixture() {
         return [
+            'logs' => [],
+            'tracking' => [],
             'accounts' => [
                 [
                     "employeeID" => "00000012345",

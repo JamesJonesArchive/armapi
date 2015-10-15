@@ -26,6 +26,22 @@ use \JSend\JSendResponse;
  */
 trait UsfARMimport {
     /**
+     * Returns the tracking mongo collection (tracking changes)
+     * 
+     * @return \MongoCollection
+     */
+    public function getARMtracking() {
+        return $this->getARMlogdb()->tracking;
+    }
+    /**
+     * Returns the logs mongo collection (logging changes)
+     * 
+     * @return \MongoCollection
+     */
+    public function getARMlogs() {
+        return $this->getARMlogdb()->logs;
+    }
+    /**
      * Returns the arm database 
      * 
      * @return \MongoDB
@@ -87,39 +103,33 @@ trait UsfARMimport {
     }
     /**
      * Finds all existing accounts and primes a compares collection for later processing
+     * 
+     * @return JSendResponse
      */
     public function buildAccountComparison() {
         $compares = $this->getARMtracking();
         $compares->drop();
+        $result = [];
         foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
+            $result[$type] = count($accounts);
             $compares->batchInsert($accounts);
         }
+        return new JSendResponse('success', $result);
     }
     /**
      * Finds all existing roles and primes a compares collection for later processing
+     * 
+     * @return JSendResponse
      */
     public function buildRoleComparison() {
         $compares = $this->getARMtracking();
         $compares->drop();
+        $result = [];
         foreach ($this->getAllRoles()->getData() as $type => $roles) {
+            $result[$type] = count($roles);
             $compares->batchInsert($roles);
         }
-    }
-    /**
-     * Returns the compares mongo collection (tracking changes)
-     * 
-     * @return \MongoCollection
-     */
-    public function getARMtracking() {
-        return $this->getARMlogdb()->tracking;
-    }
-    /**
-     * Returns the logs mongo collection (tracking changes)
-     * 
-     * @return \MongoCollection
-     */
-    public function getARMlogs() {
-        return $this->getARMlogdb()->logs;
+        return new JSendResponse('success', $result);
     }
 
 
