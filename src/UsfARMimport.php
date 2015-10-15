@@ -140,8 +140,7 @@ trait UsfARMimport {
     public function removeAccountFromTracking($href) {
         $compares = $this->getARMtracking();
         $delete_status = $compares->remove(['href' => $href], ["justOne" => true]);
-        print_r($delete_status);
-        if(!$delete_status) {
+        if($delete_status['n'] < 1) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['TRACKING_ACCOUNT_DELETE_FAILED'] 
             ])); 
