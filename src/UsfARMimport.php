@@ -131,6 +131,25 @@ trait UsfARMimport {
         }
         return new JSendResponse('success', $result);
     }
-
+    /**
+     * Removes an account from the tracking list
+     * 
+     * @param type $href
+     * @return JSendResponse
+     */
+    public function removeAccountFromTracking($href) {
+        $compares = $this->getARMtracking();
+        $delete_status = $compares->remove(['href' => $href], ["justOne" => true]);
+        print_r($delete_status);
+        if(!$delete_status) {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['TRACKING_ACCOUNT_DELETE_FAILED'] 
+            ])); 
+        } else {
+            return new JSendResponse('success', [
+                "href" => $href
+            ]);
+        }
+    }
 
 }
