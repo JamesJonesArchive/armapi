@@ -212,7 +212,7 @@ trait UsfARMimport {
      * @param string $identifier
      * @return JSendResponse
      */
-    public function removeAccount($type,$identifier) {        
+    public function removeAccountByTypeAndIdentifier($type,$identifier) {        
         return $this->removeAccount("/accounts/{$type}/{$identifier}");
     }
 }
