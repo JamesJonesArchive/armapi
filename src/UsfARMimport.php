@@ -130,7 +130,7 @@ trait UsfARMimport {
      * @return JSendResponse
      */
     public function removeAccountFromTracking($href) {
-        $compares = $this->getARMtracking();
+        $compares = $this->getARMtracking();        
         $delete_status = $compares->remove(['href' => $href], ["justOne" => true]);
         if($delete_status['n'] < 1) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
@@ -163,11 +163,13 @@ trait UsfARMimport {
      */
     public function logImportErrors($importType,$importObject,$error) {
         $logs = $this->getARMlogs();
-        $insert_status = $logs->insert([
+        $insert_status = $logs->insert(\array_merge([
             'importType' => $importType,
             'importObject' => $importObject,
             'error' => $error
-        ]);        
+        ],[
+            'timestamp' => new \MongoDate()
+        ]));        
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['LOG_CREATE_ERROR'] 
@@ -186,6 +188,12 @@ trait UsfARMimport {
      */
     public function removeAccount($href) {
         $accounts = $this->getARMaccounts();
+        $account = $accounts->findOne([ 'href' => $href ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
+        }  
         $delete_status = $accounts->remove(['href' => $href], ["justOne" => true]);
         if($delete_status['n'] < 1) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
@@ -193,7 +201,7 @@ trait UsfARMimport {
             ])); 
         } else {
             return new JSendResponse('success', [
-                "href" => $href
+                "account" => $this->formatMongoAccountToAPIaccount($account)
             ]);
         }
     }
