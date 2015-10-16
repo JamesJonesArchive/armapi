@@ -205,5 +205,14 @@ trait UsfARMimport {
             ]);
         }
     }
-
+    /**
+     * Removes an account from the accounts
+     * 
+     * @param string $type
+     * @param string $identifier
+     * @return JSendResponse
+     */
+    public function removeAccount($type,$identifier) {        
+        return $this->removeAccount("/accounts/{$type}/{$identifier}");
+    }
 }
