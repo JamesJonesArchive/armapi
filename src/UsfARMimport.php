@@ -215,4 +215,40 @@ trait UsfARMimport {
     public function removeAccountByTypeAndIdentifier($type,$identifier) {        
         return $this->removeAccount("/accounts/{$type}/{$identifier}");
     }
+    /**
+     * Removes an role from the roles
+     * 
+     * @param string $href
+     * @return JSendResponse
+     */
+    public function removeRole($href) {
+        $roles = $this->getARMroles();
+        $role = $roles->findOne([ 'href' => $href ]);
+        if (is_null($role)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
+            ]));
+        }  
+        $delete_status = $accounts->remove(['href' => $href], ["justOne" => true]);
+        if($delete_status['n'] < 1) {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR'] 
+            ])); 
+        } else {
+            return new JSendResponse('success', [
+                "role" => self::convertMongoDatesToUTCstrings(array_diff_key($role,["_id" => true]))
+            ]);
+        }
+    }
+    /**
+     * Removes an role from the roles
+     * 
+     * @param string $type
+     * @param string $rolename
+     * @return JSendResponse
+     */
+    public function removeRoleByTypeAndIdentifier($type,$rolename) {  
+        return $this->removeAccount(UsfARMapi::formatRoleName("/accounts/{$type}/{$rolename}"));
+    }
+
 }

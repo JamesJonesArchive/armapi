@@ -48,6 +48,7 @@ trait UsfARMErrorMessages {
         'ROLE_NOT_EXISTS' => 'Role does not exist!',
         'ROLE_UPDATE_ERROR' => 'Role update failed!',
         'ROLE_CREATE_ERROR' => 'Role creation could not be performed!',
+        'ROLE_DELETE_ERROR' => 'Role deletion could not be performed!',
         'ROLE_LIST_MISSING' => 'No role list specified!',
         'ROLES_CONTAINS_INVALID' => 'Role list contains invalid roles!',
         'TRACKING_ACCOUNT_DELETE_FAILED' => 'Removing the account from the tracking collection failed!',
