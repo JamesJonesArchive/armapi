@@ -42,6 +42,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
+        if($account['status'] === "Locked") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+            ]));
+        }
         if(!isset($account['state'])) {
             $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
         } else {
@@ -85,6 +90,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
+        if($account['status'] === "Locked") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+            ]));
+        } 
         if(!isset($account['roles'])) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'] 
@@ -357,7 +367,7 @@ trait UsfARMapprovals {
      */
     public function setReviewAll($func) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ] ]);
+        $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ], "status" => [ '$ne' => 'Locked' ] ]);
         if(empty($reviewaccounts)) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND']
@@ -398,6 +408,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
+        if($account['status'] === "Locked") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+            ]));
+        } 
         $updatedattributes = [];
         if(!isset($account['roles'])) {
             $updatedattributes['roles'] = [];
@@ -463,6 +478,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
+        if($account['status'] === "Locked") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+            ]));
+        } 
         $updatedattributes = [];
         if(!isset($account['confirm'])) {
             $account['confirm'] = [];
@@ -542,7 +562,7 @@ trait UsfARMapprovals {
     public function setConfirm($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
         $identifiers = $accounts->aggregate([
-            [ '$match' => [ 'identity' => $identity ] ],
+            [ '$match' => [ 'identity' => $identity, 'status' => [ '$ne' => 'Locked' ] ] ],
             [ '$group' => [ '_id' => [ 'identifier' => '$identifier', 'type' => '$type' ] ] ]
         ]);
         if(empty($identifiers['result'])) {
