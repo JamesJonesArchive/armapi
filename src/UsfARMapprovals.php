@@ -296,6 +296,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
+        if($account['status'] === "Locked") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+            ]));
+        }            
         $updatedattributes = [];
         if(!isset($account['review'])) {
             $account['review'] = [];
@@ -335,7 +340,7 @@ trait UsfARMapprovals {
      */
     public function setReviewByIdentity($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->find([ "identity" => $identity ],[ "identifier" => true,'type' => true ]);
+        $reviewaccounts = $accounts->find([ "identity" => $identity, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
             $resp = $this->setReviewByAccount($account['type'],$account['identifier'], $managerattributes);
             if(!$resp->isSuccess()) {
