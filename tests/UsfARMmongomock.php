@@ -107,21 +107,21 @@ trait UsfARMmongomock {
         $this->usfARMapi->expects($this->any())
         ->method('getVisor')
         ->will($this->returnValue(new \JSend\JSendResponse('success', [
-            "employee_id" => "00000070172",
-            "supervisors" => ["00000024817"],
+            "employee_id" => "00000065432",
+            "supervisors" => ["00000023456"],
             "employees" => [],
             "directory_info" => [
                 "self" => [
-                    "name" => "Jones, James ",
-                    "usf_id" => "U47220888",
-                    "email" => "james@usf.edu",
+                    "name" => "Gold, Greeny",
+                    "usf_id" => "U98767543",
+                    "email" => "someguy@usf.edu",
                     "eppa" => "Staff",
-                    "phone" => "813 974-2152",
-                    "mailstop" => "LIB 618",
-                    "affiliations" => ["Sr Applications Developer : Information Technology"],
+                    "phone" => "987 654-3210",
+                    "mailstop" => "XYX 100",
+                    "affiliations" => ["Some Affiliation : Some Department"],
                     "supervisors" => [
                         [
-                            "employee_id" => "00000024817",
+                            "employee_id" => "00000023456",
                             "usf_id" => "U99999999",
                             "name" => "Rocky Bull",
                             "email" => "user@usf.edu",
@@ -129,7 +129,7 @@ trait UsfARMmongomock {
                             "mailstop" => "AAA123",
                             "phone" => "123 456-7899",
                             "affiliations" => [
-                                "Assistant Director : Information Technology",
+                                "Assistant Director : Some Department",
                                 "Grad Student : Information Systems/Decision Sciences"
                             ],
                         ]
