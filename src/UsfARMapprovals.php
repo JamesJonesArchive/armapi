@@ -394,6 +394,24 @@ trait UsfARMapprovals {
         return $this->getAccountsForIdentity($identity);
     }
     /**
+     * Updates accounts for an identity of a specified type to the review state
+     * 
+     * @param string $type
+     * @param string $identity
+     * @return JSendResponse
+     */
+    public function setReviewByTypeAndIdentity($type,$identity) {
+        $accounts = $this->getARMaccounts();
+        $reviewaccounts = $accounts->find([ "identity" => $identity, "type" => $type, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
+        foreach ($reviewaccounts as $account) {
+            $resp = $this->setReviewByAccount($account['type'],$account['identifier']);
+            if(!$resp->isSuccess()) {
+                return $resp;
+            }
+        }
+        return $this->getAccountsByTypeAndIdentity($type,$identity);
+    }
+    /**
      * Sets the review for ALL accounts
      * 
      * @param closure $func Anonymous function for Visor to run in to gather the managers
