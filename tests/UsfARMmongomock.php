@@ -118,24 +118,24 @@ trait UsfARMmongomock {
                     "eppa" => "Staff",
                     "phone" => "987 654-3210",
                     "mailstop" => "XYX 100",
-                    "affiliations" => ["Some Affiliation : Some Department"],
-                    "supervisors" => [
-                        [
-                            "employee_id" => "00000023456",
-                            "usf_id" => "U99999999",
-                            "name" => "Rocky Bull",
-                            "email" => "user@usf.edu",
-                            "eppa"=> "Staff",
-                            "mailstop" => "AAA123",
-                            "phone" => "123 456-7899",
-                            "affiliations" => [
-                                "Assistant Director : Some Department",
-                                "Grad Student : Information Systems/Decision Sciences"
-                            ],
-                        ]
-                    ],
-                    "employees" => []
-                ]
+                    "affiliations" => ["Some Affiliation : Some Department"]
+                ],
+                "supervisors" => [
+                    [
+                        "employee_id" => "00000023456",
+                        "usf_id" => "U99999999",
+                        "name" => "Rocky Bull",
+                        "email" => "user@usf.edu",
+                        "eppa"=> "Staff",
+                        "mailstop" => "AAA123",
+                        "phone" => "123 456-7899",
+                        "affiliations" => [
+                            "Assistant Director : Some Department",
+                            "Grad Student : Information Systems/Decision Sciences"
+                        ],
+                    ]
+                ],
+                "employees" => []                
             ]
         ])));
 

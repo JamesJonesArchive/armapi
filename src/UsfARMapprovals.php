@@ -326,7 +326,7 @@ trait UsfARMapprovals {
             return visor;
         }        
         \error_log(\json_encode($visor->getData()['directory_info'], JSON_PRETTY_PRINT), 3, "/tmp/armapi-errors.log");
-        $supervisors = $visor->getData()['directory_info']['self']['supervisors'];
+        $supervisors = $visor->getData()['directory_info']['supervisors'];
         
         if(empty($supervisors)) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
@@ -399,7 +399,7 @@ trait UsfARMapprovals {
      * @param closure $func Anonymous function for Visor to run in to gather the managers
      * @return JSendResponse
      */
-    public function setReviewAll($func) {
+    public function setReviewAll() {
         $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ], "status" => [ '$ne' => 'Locked' ] ]);
         if(empty($reviewaccounts)) {
@@ -412,16 +412,11 @@ trait UsfARMapprovals {
             'reviewCount' => 0
         ];
         foreach ($resp['usfids'] as $usfid) {
-            $visor = $func($usfid);
-            if($visor['status'] == 'success' && (isset($visor['data']['directory_info']))?!empty($visor['data']['directory_info']):false) {
-                if((isset($visor['data']['directory_info']['self']['supervisors']))?!empty($visor['data']['directory_info']['self']['supervisors']):false) {
-                    foreach($visor['data']['directory_info']['self']['supervisors'] as $s) {
-                        if($this->setReviewByIdentity($usfid, [ 'name' => $s['name'], 'usfid' => $s['usf_id'] ])->isSuccess()) {
-                            $resp['reviewCount']++;
-                        }
-                    }
-                }
-            }
+            $response = $this->setReviewByIdentity($usfid);
+            if(!$response->isSuccess()) {
+                return $response;
+            }  
+            $resp['reviewCount']++;
         }
         return new JSendResponse('success', $resp);
     }
