@@ -408,8 +408,8 @@ trait UsfARMapprovals {
         foreach ($resp['usfids'] as $usfid) {
             $visor = $func($usfid);
             if($visor['status'] == 'success' && (isset($visor['data']['directory_info']))?!empty($visor['data']['directory_info']):false) {
-                if((isset($visor['data']['directory_info']['supervisors']))?!empty($visor['data']['directory_info']['supervisors']):false) {
-                    foreach($visor['data']['directory_info']['supervisors'] as $s) {
+                if((isset($visor['data']['directory_info']['self']['supervisors']))?!empty($visor['data']['directory_info']['self']['supervisors']):false) {
+                    foreach($visor['data']['directory_info']['self']['supervisors'] as $s) {
                         if($this->setReviewByIdentity($usfid, [ 'name' => $s['name'], 'usfid' => $s['usf_id'] ])->isSuccess()) {
                             $resp['reviewCount']++;
                         }
