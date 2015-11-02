@@ -324,8 +324,10 @@ trait UsfARMapprovals {
         $visor = $this->getVisor($account['identity']);
         if(!$visor->isSuccess()) {
             return visor;
-        }
-        $supervisors = $this->getVisor($account['identity'])->getData()['directory_info']['self']['supervisors'];
+        }        
+        \error_log(\json_encode($visor->getData()['directory_info'], JSON_PRETTY_PRINT), 3, "/tmp/armapi-errors.log");
+        $supervisors = $visor->getData()['directory_info']['self']['supervisors'];
+        
         if(empty($supervisors)) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_NO_SUPERVISORS']
