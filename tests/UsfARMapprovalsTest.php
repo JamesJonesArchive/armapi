@@ -19,6 +19,9 @@
 namespace USF\IdM;
 
 use \USF\IdM\UsfARMapi;
+use GuzzleHttp\Subscriber\Mock;
+use GuzzleHttp\Message\Response;
+use GuzzleHttp\Stream\Stream;
 /**
  * Description of UsfARMapprovalsTest
  *
@@ -182,10 +185,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
      */
     public function testSetReviewByAccount_AccountNotFound() {
-        $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL2',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ]);
+        $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL2');
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
@@ -199,10 +199,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
      */
     public function testSetReviewByAccount() {
-        $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ]);
+        $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL');
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the type key exists
@@ -358,10 +355,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Execute in Order
         // 
         // STEP1: Set the review first
-        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL')->isSuccess());
         // STEP2: Set the state next
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [
@@ -406,10 +400,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Execute in Order
         // 
         // STEP1: Set the review first
-        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL')->isSuccess());        
         // STEP2: Set the state next
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [

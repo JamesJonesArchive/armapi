@@ -81,7 +81,7 @@ trait UsfARMmongomock {
      */
     public function setUp() {
         $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
-        ->setMethods(array('getARMdb','getARMaccounts','getARMroles','getARMtracking','getARMlogs'))
+        ->setMethods(array('getARMdb','getARMaccounts','getARMroles','getARMtracking','getARMlogs','getVisor'))
         ->getMock();
         
         $this->usfARMapi->expects($this->any())
@@ -104,6 +104,41 @@ trait UsfARMmongomock {
         ->method('getARMlogs')
         ->will($this->returnValue($this->getMongoConnection()->collection('logs')));
         
+        $this->usfARMapi->expects($this->any())
+        ->method('getVisor')
+        ->will($this->returnValue(new \JSend\JSendResponse('success', [
+            "employee_id" => "00000070172",
+            "supervisors" => ["00000024817"],
+            "employees" => [],
+            "directory_info" => [
+                "self" => [
+                    "name" => "Jones, James ",
+                    "usf_id" => "U47220888",
+                    "email" => "james@usf.edu",
+                    "eppa" => "Staff",
+                    "phone" => "813 974-2152",
+                    "mailstop" => "LIB 618",
+                    "affiliations" => ["Sr Applications Developer : Information Technology"],
+                    "supervisors" => [
+                        [
+                            "employee_id" => "00000024817",
+                            "usf_id" => "U99999999",
+                            "name" => "Rocky Bull",
+                            "email" => "user@usf.edu",
+                            "eppa"=> "Staff",
+                            "mailstop" => "AAA123",
+                            "phone" => "123 456-7899",
+                            "affiliations" => [
+                                "Assistant Director : Information Technology",
+                                "Grad Student : Information Systems/Decision Sciences"
+                            ],
+                        ]
+                    ],
+                    "employees" => []
+                ]
+            ]
+        ])));
+
         parent::setUp();
     }
     

@@ -291,6 +291,16 @@ trait UsfARMapprovals {
         return (!empty($matchedconfirms))?$matchedconfirms[0]:[];
     }
     /**
+     * Runs the external visor service for internal processing
+     * 
+     * @param string $id
+     * @return JSendResponse
+     */
+    public function getVisor($id) {
+        $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig);
+        return $usfVisorAPI->getVisor($id);
+    }
+    /**
      * Updates account to the review state
      * 
      * @param string $type
@@ -298,7 +308,7 @@ trait UsfARMapprovals {
      * @param array $managerattributes
      * @return JSendResponse
      */
-    public function setReviewByAccount($type,$identifier,$managerattributes=[]) {
+    public function setReviewByAccount($type,$identifier) {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -311,11 +321,25 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         }            
-        $updatedattributes = [];
+        $supervisors = $this->getVisor($account['identity'])->getData()['directory_info']['self']['supervisors'];
+        if(empty($supervisors)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_NO_SUPERVISORS']
+            ]));
+        }        
         if(!isset($account['review'])) {
             $account['review'] = [];
         }
-        $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'open', $managerattributes);
+        $updatedattributes = [ 'review' => $account['review'] ];
+        $managersattributes = \array_map(function($supervisor) {
+            return [
+                'name' => $supervisor['name'],
+                'usfid' => $supervisor['usf_id']
+            ];
+        }, $supervisors);
+        foreach ($managersattributes as $managerattributes) {
+            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($updatedattributes['review'], 'open', $managerattributes);
+        }
         // Update the account with review changes and move on to the state changes
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if (!$status) {
@@ -323,19 +347,23 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
             ]));
         } else {
-            // Set the empty state for the account by the manager
-            $stateresp = $this->setAccountState($type, $identifier, '', $managerattributes);
-            if(!$stateresp->isSuccess()) {
-                return $stateresp;
+            foreach ($managersattributes as $managerattributes) {
+                // Set the empty state for the account by the manager
+                $stateresp = $this->setAccountState($type, $identifier, '', $managerattributes);
+                if(!$stateresp->isSuccess()) {
+                    return $stateresp;
+                }
             }
             if(!isset($account['roles'])) {
                 $account['roles'] = [];
             }
             $roles = $this->getARMroles();
             foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
-                $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['href'], '', $managerattributes);
-                if(!$rolestateresp->isSuccess()) {
-                    return $rolestateresp;
+                foreach ($managersattributes as $managerattributes) {
+                    $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['href'], '', $managerattributes);
+                    if(!$rolestateresp->isSuccess()) {
+                        return $rolestateresp;
+                    }
                 }
             }
             return $this->getAccountByTypeAndIdentifier($type,$identifier);
@@ -348,11 +376,11 @@ trait UsfARMapprovals {
      * @param array $managerattributes
      * @return JSendResponse
      */
-    public function setReviewByIdentity($identity,$managerattributes=[]) {
+    public function setReviewByIdentity($identity) {
         $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->find([ "identity" => $identity, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
-            $resp = $this->setReviewByAccount($account['type'],$account['identifier'], $managerattributes);
+            $resp = $this->setReviewByAccount($account['type'],$account['identifier']);
             if(!$resp->isSuccess()) {
                 return $resp;
             }

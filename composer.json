@@ -16,12 +16,17 @@
         {
             "type": "vcs",
             "url": "https://github.com/USF-IT/usf-idm-database/"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/jamjon3/VisorClientAPI.git"
         }
     ],
     "require": {
         "usf-it/usf-idm-database": "dev-master",
         "usf-it/usf-idm-common": "dev-master",
-        "shkm/jsend": ">1.2.0"
+        "shkm/jsend": ">1.2.0",
+        "usf-it/usf-visor-client-api": "dev-master"
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",
