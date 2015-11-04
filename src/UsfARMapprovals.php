@@ -348,7 +348,7 @@ trait UsfARMapprovals {
             'admin_usfid' => $this->auditInfo['armuser']['usf_id']
         ];
         foreach ($managersattributes as $managerattributes) {
-            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($updatedattributes['review'], 'open', \array_map(function($supervisor) use($adminattributes) { return \array_merge($supervisor, $adminattributes); }, $managerattributes));
+            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($updatedattributes['review'], 'open', \array_merge($managerattributes, $adminattributes), $managerattributes);
         }
         // Update the account with review changes and move on to the state changes
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
