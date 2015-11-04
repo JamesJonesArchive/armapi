@@ -32,10 +32,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     use UsfARMapprovals;
     use UsfARMimport;
     use UsfARMErrorMessages;
+    use UsfARMaudit;
     
     private $version = "0.0.1";
+    private $logInfo;
     
-    public function __construct() { }
+    public function __construct($request = []) {         
+        $this->logInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
+    }
     /**
      * Returns the current API version
      * 
@@ -493,5 +497,72 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]));
         }
     }
+    /**
+     * Flags a "Deleted" status for an account from the accounts
+     * 
+     * @param string $href
+     * @return JSendResponse
+     */
+    public function removeAccount($href) {
+        $accounts = $this->getARMaccounts();
+        $account = $accounts->findOne([ 'href' => $href ]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
+        }  
+        $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
+        if ($status) {
+            return new JSendResponse('success', [ "href" => $href ]);
+        } else {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DELETE_ERROR']
+            ])); 
+        }
+    }
+    /**
+     * Removes an account from the accounts
+     * 
+     * @param string $type
+     * @param string $identifier
+     * @return JSendResponse
+     */
+    public function removeAccountByTypeAndIdentifier($type,$identifier) {        
+        return $this->removeAccount("/accounts/{$type}/{$identifier}");
+    }
+    /**
+     * Removes an role from the roles
+     * 
+     * @param string $href
+     * @return JSendResponse
+     */
+    public function removeRole($href) {
+        $roles = $this->getARMroles();
+        $role = $roles->findOne([ 'href' => $href ]);
+        if (is_null($role)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
+            ]));
+        }  
+        $status = $roles->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
+        if ($status) {
+            return new JSendResponse('success', [ "href" => $href ]);
+        } else {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR']
+            ])); 
+        }
+    }
+    /**
+     * Removes an role from the roles
+     * 
+     * @param string $type
+     * @param string $rolename
+     * @return JSendResponse
+     */
+    public function removeRoleByTypeAndIdentifier($type,$rolename) {  
+        return $this->removeAccount(UsfARMapi::formatRoleName("/accounts/{$type}/{$rolename}"));
+    }
+
     
 }
