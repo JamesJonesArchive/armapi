@@ -82,7 +82,12 @@ trait UsfARMaudit {
             'isAjax' => $request->isAjax(),
             'isDelete' => $request->isDelete(),
             'isFormData' => $request->isFormData(),
-            'isGet' => $request->isGet()            
+            'isGet' => $request->isGet(),
+            'armuser' => [
+                'usf_id' => $request->headers->get('ARMusfid'),
+                'name' => $request->headers->get('ARMname'),
+                'role' => $request->headers->get('ARMrole')
+            ]
         ];
     }
 }

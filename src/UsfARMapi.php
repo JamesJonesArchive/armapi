@@ -37,7 +37,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     private $version = "0.0.1";
     private $auditInfo;
     
-    public function __construct($request = []) {         
+    public function __construct($request = ['armuser' => [ 'usf_id' => '', 'name' => '', 'role' => 'Batch' ]]) {         
         $this->auditInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
     }
     /**
@@ -232,8 +232,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ]));
         }        
         $href = "/accounts/{$type}/{$identifier}";
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' => \array_merge(array_diff_key(UsfARMapi::convertUTCstringsToMongoDates($accountmods["account_data"],["password_change","last_used","last_update"]),array_flip(['type','identifier'])),["href" => $href ]) ]);
+        $updatedattributes = \array_merge(array_diff_key(UsfARMapi::convertUTCstringsToMongoDates($accountmods["account_data"],["password_change","last_used","last_update"]),array_flip(['type','identifier'])),["href" => $href ]);
+        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' =>  $updatedattributes ]);
         if ($status) {
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             return new JSendResponse('success', [ "href" => $href ]);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
@@ -311,6 +313,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         });
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']]]);
         if ($status) {
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']] ]);
             return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
@@ -475,21 +478,22 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         // Update the href
         $href = "/roles/{$updatedrole['account_type']}/" . UsfARMapi::formatRoleName($updatedrole['name']);
+        $updatedattributes = \array_merge(
+            UsfARMapi::convertUTCstringsToMongoDates((array) $updatedrole["role_data"], ['created_date']),
+            [
+                'name' => $updatedrole['name'],
+                'href' => $href,
+                'type' => $updatedrole['account_type'],
+                'modified_date' => new \MongoDate()
+            ],
+            (isset($role['role_data']['created_date']))?[]:['created_date' => new \MongoDate()]
+        );
         $status = $roles->update(
             [ 'type' => $type, 'name' => $name ],
-            [ '$set' => array_merge(
-                    UsfARMapi::convertUTCstringsToMongoDates((array) $updatedrole["role_data"], ['created_date']),
-                    [
-                        'name' => $updatedrole['name'],
-                        'href' => $href,
-                        'type' => $updatedrole['account_type'],
-                        'modified_date' => new \MongoDate()
-                    ],
-                    (isset($role['role_data']['created_date']))?[]:['created_date' => new \MongoDate()]
-                )
-            ]                
+            [ '$set' => $updatedattributes ]                
         );
         if ($status) {
+            $this->auditLog([ "type" => $type, 'name' => $name ], [ '$set' => $updatedattributes ]);
             return $this->getRoleByTypeAndName($type, $updatedrole['name']);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
