@@ -33,6 +33,32 @@ trait UsfARMaudit {
         return $this->getARMdb()->audits;
     }
     /**
+     * Adds an audit of a change transaction
+     * 
+     * @param array $change
+     * @param array $result
+     * @return \USF\IdM\JSendResponse
+     */
+    public function auditLog($change,$result) {
+        $audits = $this->getARMaudits();
+        $armMethod = \debug_backtrace()[1]['function'];
+        $insert_status = $audits->insert(\array_merge($this->auditInfo,[
+            'timestamp' => new \MongoDate(),
+            'change' => $change,
+            'result' => $result,
+            'armMethod' => $armMethod
+        ]));        
+        if(!$insert_status) {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['AUDITLOG_ENTRY_ERROR'] 
+            ])); 
+        } else {
+            return new JSendResponse('success', [
+                "error" => $error
+            ]);
+        }
+    }
+    /**
      * 
      * @param \Slim\Http\Request $request
      * @return type

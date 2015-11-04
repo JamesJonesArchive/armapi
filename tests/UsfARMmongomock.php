@@ -81,7 +81,7 @@ trait UsfARMmongomock {
      */
     public function setUp() {
         $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
-        ->setMethods(array('getARMdb','getARMaccounts','getARMroles','getARMtracking','getARMlogs','getVisor'))
+        ->setMethods(array('getARMdb','getARMaccounts','getARMroles','getARMtracking','getARMlogs','getARMaudits','getVisor'))
         ->getMock();
         
         $this->usfARMapi->expects($this->any())
@@ -103,6 +103,10 @@ trait UsfARMmongomock {
         $this->usfARMapi->expects($this->any())
         ->method('getARMlogs')
         ->will($this->returnValue($this->getMongoConnection()->collection('logs')));
+        
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMaudits')
+        ->will($this->returnValue($this->getMongoConnection()->collection('audits')));
         
         $this->usfARMapi->expects($this->any())
         ->method('getVisor')

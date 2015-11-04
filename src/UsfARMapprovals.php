@@ -54,6 +54,7 @@ trait UsfARMapprovals {
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if ($status) {
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             if(!isset($account['roles'])) {
                 $account['roles'] = [];
             }
@@ -126,6 +127,7 @@ trait UsfARMapprovals {
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
         if ($status) {
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [

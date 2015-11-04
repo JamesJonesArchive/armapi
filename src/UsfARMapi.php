@@ -35,10 +35,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     use UsfARMaudit;
     
     private $version = "0.0.1";
-    private $logInfo;
+    private $auditInfo;
     
     public function __construct($request = []) {         
-        $this->logInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
+        $this->auditInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
     }
     /**
      * Returns the current API version
@@ -513,6 +513,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }  
         $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
         if ($status) {
+            $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
             return new JSendResponse('success', [ "href" => $href ]);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
@@ -546,6 +547,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }  
         $status = $roles->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
         if ($status) {
+            $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
             return new JSendResponse('success', [ "href" => $href ]);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [

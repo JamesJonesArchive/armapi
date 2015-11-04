@@ -54,6 +54,7 @@ trait UsfARMErrorMessages {
         'ROLE_LIST_MISSING' => 'No role list specified!',
         'ROLES_CONTAINS_INVALID' => 'Role list contains invalid roles!',
         'TRACKING_ACCOUNT_DELETE_FAILED' => 'Removing the account from the tracking collection failed!',
-        'LOG_CREATE_ERROR' => 'Log entry creation could not be performed!'
+        'LOG_CREATE_ERROR' => 'Log entry creation could not be performed!',
+        'AUDITLOG_ENTRY_ERROR' => 'Audit Log entry creation could not be performed!'
     );
 }
