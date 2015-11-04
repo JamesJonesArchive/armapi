@@ -77,7 +77,7 @@ trait UsfARMapprovals {
      * 
      * @param string $type
      * @param string $identifier
-     * @param string $rolename
+     * @param string $href
      * @param string $state
      * @param array $managerattributes
      * @return JSendResponse
@@ -205,9 +205,6 @@ trait UsfARMapprovals {
             if(!preg_match('/\S/', UsfARMapi::getStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid']))) {
                 return true;
             }
-//            if(UsfARMapi::getStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid']) === '') {
-//                return true;
-//            }
             return false;
         }));
     }    
@@ -355,6 +352,7 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
             ]));
         } else {
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             foreach ($managersattributes as $managerattributes) {
                 // Set the empty state for the account by the manager
                 $stateresp = $this->setAccountState($type, $identifier, '', $managerattributes);
@@ -508,6 +506,7 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
             ]));
         } else {
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             return $this->getAccountByTypeAndIdentifier($type,$identifier);
         }
     }
@@ -566,6 +565,7 @@ trait UsfARMapprovals {
                         "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
                     ]));
                 } else {  
+                    $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                     $roles = $this->getARMroles(); 
                     try {
                         foreach(\array_filter($account['roles'], function($r) { return (isset($r['dynamic_role']))?!$r['dynamic_role']:true; }) as $r) {
