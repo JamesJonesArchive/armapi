@@ -55,7 +55,7 @@ trait UsfARMaudit {
             ])); 
         } else {
             return new JSendResponse('success', [
-                "error" => $error
+                "audit" => $armMethod
             ]);
         }
     }
