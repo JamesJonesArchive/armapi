@@ -71,7 +71,11 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirming that the value of the roles key is not empty
         $this->assertNotEmpty($response->getData()['roles']);
         // Confirming the count of the roles is 1
-        $this->assertCount(1, $response->getData()['roles']);
+        // Confirming the count of the values in the roles key for non deleted roles
+        $this->assertCount(1,\array_filter($response->getData()['roles'], function($r) { return (isset($r['status']))?($r['status'] != "Removed"):true;  }));
+        // Confirming the count of the values in the roles key for deleted roles
+        $this->assertCount(5,\array_filter($response->getData()['roles'], function($r) { return (isset($r['status']))?($r['status'] == "Removed"):false;  }));
+        
     }
     /**
      * @covers \USF\IdM\UsfARMimport::importAccountRoles

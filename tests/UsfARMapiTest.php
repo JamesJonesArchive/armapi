@@ -465,8 +465,10 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey('roles',$response->getData());
         // Confirming the value of roles is not empty
         $this->assertNotEmpty($response->getData()['roles']);
-        // Confirming the count of the values in the roles key
-        $this->assertCount(1,$response->getData()['roles']);
+        // Confirming the count of the values in the roles key for non deleted roles
+        $this->assertCount(1,\array_filter($response->getData()['roles'], function($r) { return (isset($r['status']))?($r['status'] != "Removed"):true;  }));
+        // Confirming the count of the values in the roles key for deleted roles
+        $this->assertCount(5,\array_filter($response->getData()['roles'], function($r) { return (isset($r['status']))?($r['status'] == "Removed"):false;  }));
         // Matching single role href values
         $this->assertContains('/roles/GEMS/SELFSALL_ROLE',array_map(function($a) { return $a['href']; }, $response->getData()['roles']));
     }
