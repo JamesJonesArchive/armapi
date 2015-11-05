@@ -199,7 +199,7 @@ trait UsfARMapprovals {
             if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
                 return false;
             }
-            if((isset($r['state']))?($r['state'] == "Deleted"):false) {
+            if((isset($r['status']))?($r['status'] == "Removed"):false) {
                 return false;
             }
             if(!UsfARMapi::hasStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid'])) {
@@ -372,7 +372,7 @@ trait UsfARMapprovals {
                 $account['roles'] = [];
             }
             $roles = $this->getARMroles();
-            foreach (\array_filter($account['roles'], function($r) { return !((isset($r['dynamic_role']))?$r['dynamic_role']:false); }) as $role) {
+            foreach (\array_filter($account['roles'], function($r) { return (!((isset($r['dynamic_role']))?$r['dynamic_role']:false && !(isset($r['status']))?($r['status'] == "Removed"):false)); }) as $role) {
                 foreach ($managersattributes as $managerattributes) {
                     $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['href'], '', $managerattributes);
                     if(!$rolestateresp->isSuccess()) {
@@ -501,7 +501,9 @@ trait UsfARMapprovals {
                     }
                 }
                 return $r;
-            }, $updatedattributes['roles']);
+            }, \array_filter($updatedattributes['roles'], function($r) {
+                return (isset($r['status']))?($r['status'] !== "Removed"):true;
+            }));
         } catch (\Exception $e) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => $e->getMessage()
