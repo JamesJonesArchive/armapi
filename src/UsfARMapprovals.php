@@ -199,6 +199,9 @@ trait UsfARMapprovals {
             if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
                 return false;
             }
+            if((isset($r['state']))?($r['state'] == "Deleted"):false) {
+                return false;
+            }
             if(!UsfARMapi::hasStateForManager((isset($r['state']))?$r['state']:[], $managerattributes['usfid'])) {
                 return true;
             }

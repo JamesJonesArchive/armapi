@@ -842,4 +842,11 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the value of the role key is the error message
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DATA_EMPTY'], $response->getData()['description']);  
     }    
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeAccount
+     */
+    public function testRemoveAccount() {
+        $response = $this->usfARMapi->removeAccount('/accounts/GEMS/RBULL');
+        print_r($response->getData());
+    } 
 }
