@@ -586,10 +586,25 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }  
+        if(isset($account['roles'])) {
+            $roles = $this->getARMroles();
+            foreach ($account['roles'] as $r) {
+                $role = $roles->findOne(['_id' => $r['role_id']]);
+                if(is_null($role)) {
+                    return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
+                    ]));
+                }
+                $resp = $this->removeAccountRole($href,$role['href']);
+                if(!$resp->isSuccess()) {
+                    return $resp;
+                }
+            }            
+        }
         $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
         if ($status) {
             $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
-            return new JSendResponse('success', [ "href" => $href ]);
+            return $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DELETE_ERROR']
