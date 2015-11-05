@@ -372,7 +372,7 @@ trait UsfARMapprovals {
                 $account['roles'] = [];
             }
             $roles = $this->getARMroles();
-            foreach (\array_filter($account['roles'], function($r) { return (!((isset($r['dynamic_role']))?$r['dynamic_role']:false && !(isset($r['status']))?($r['status'] == "Removed"):false)); }) as $role) {
+            foreach (\array_filter($account['roles'], function($r) { return (!((isset($r['dynamic_role']))?$r['dynamic_role']:false && !((isset($r['status']))?($r['status'] == "Removed"):false))); }) as $role) {
                 foreach ($managersattributes as $managerattributes) {
                     $rolestateresp = $this->setAccountRoleState($type, $identifier, $roles->findOne([ "_id" => $role['role_id'] ])['href'], '', $managerattributes);
                     if(!$rolestateresp->isSuccess()) {
