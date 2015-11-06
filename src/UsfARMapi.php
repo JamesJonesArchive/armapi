@@ -638,7 +638,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         $status = $roles->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
         if ($status) {
             $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
-            return new JSendResponse('success', [ "href" => $href ]);
+            return $this->getRoleByTypeAndName($role['type'], $role['name']);
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR']

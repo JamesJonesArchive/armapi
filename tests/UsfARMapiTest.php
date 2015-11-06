@@ -847,6 +847,116 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      */
     public function testRemoveAccount() {
         $response = $this->usfARMapi->removeAccount('/accounts/GEMS/RBULL');
-        print_r($response->getData());
+        // Confirm success
+        $this->assertTrue($response->isSuccess());
+        // Confirming the status key exists
+        $this->assertArrayHasKey('status',$response->getData());
+        // Confirming the value of status is not empty
+        $this->assertNotEmpty($response->getData()['status']);
+        // Confirm account status removed
+        $this->assertEquals("Removed",$response->getData()['status']);
+        // Confirm all account roles status removed
+        foreach($response->getData()['roles'] as $role) {
+            $this->assertEquals("Removed",$role['status']);
+        }
     } 
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeAccount
+     */
+    public function testRemoveAccount_AccountNotExists() {
+        $response = $this->usfARMapi->removeAccount('/accounts/GEMS/RBULL2');
+        // Confirm failure
+        $this->assertTrue($response->isFail());
+        // Confirming the description key exists
+        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming the value of description is not empty
+        $this->assertNotEmpty($response->getData()['description']);
+        // Confirming the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeRole
+     */
+    public function testRemoveRole() {
+        $response = $this->usfARMapi->removeRole('/roles/GEMS/RPT2_ROLE');
+        // Confirm success
+        $this->assertTrue($response->isSuccess());
+        // Confirming the role_data key exists
+        $this->assertArrayHasKey('role_data',$response->getData());
+        // Confirming the value of role_data is not empty
+        $this->assertNotEmpty($response->getData()['role_data']);
+        // Confirming the status key exists
+        $this->assertArrayHasKey('status',$response->getData()['role_data']);
+        // Confirming the value of status is not empty
+        $this->assertNotEmpty($response->getData()['role_data']['status']);
+        // Confirm account status removed
+        $this->assertEquals("Removed",$response->getData()['role_data']['status']);
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeRole
+     */
+    public function testRemoveRole_RoleNotExists() {
+        $response = $this->usfARMapi->removeRole('/roles/GEMS/RPT2_ROLE2');
+        // Confirm failure
+        $this->assertTrue($response->isFail());
+        // Confirming the description key exists
+        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming the value of description is not empty
+        $this->assertNotEmpty($response->getData()['description']);
+        // Confirming the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['description']);        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeAccountRole
+     */
+    public function testremoveAccountRole() {
+        $response = $this->usfARMapi->removeAccountRole('/accounts/GEMS/RBULL','/roles/GEMS/RPT2_ROLE');
+        print_r($response->getData());
+        // Confirm success
+        $this->assertTrue($response->isSuccess());
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$response->getData());
+        // Confirming the value of roles is not empty
+        $this->assertNotEmpty($response->getData()['roles']);
+        foreach($response->getData()['roles'] as $role) {
+            if($role['href'] == '/roles/GEMS/RPT2_ROLE') {
+                // Confirming the status key exists
+                $this->assertArrayHasKey('status',$role);
+                // Confirm the status is removed
+                $this->assertEquals("Removed",$role['status']);
+            } else {
+                // Confirm there is no status key
+                $this->assertArrayNotHasKey('status', $role);
+            }
+        }
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeAccountRole
+     */
+    public function testRemoveAccountRole_RoleNotExists() {
+        $response = $this->usfARMapi->removeAccountRole('/accounts/GEMS/RBULL','/roles/GEMS/RPT2_ROLE2');
+        // Confirm failure
+        $this->assertTrue($response->isFail());
+        // Confirming the description key exists
+        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming the value of description is not empty
+        $this->assertNotEmpty($response->getData()['description']);
+        // Confirming the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['description']);        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::removeAccountRole
+     */
+    public function testRemoveAccountRole_AccountNotExists() {
+        $response = $this->usfARMapi->removeAccountRole('/accounts/GEMS/RBULL2','/roles/GEMS/RPT2_ROLE');
+        // Confirm failure
+        $this->assertTrue($response->isFail());
+        // Confirming the description key exists
+        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming the value of description is not empty
+        $this->assertNotEmpty($response->getData()['description']);
+        // Confirming the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);        
+    }
+    
 }
