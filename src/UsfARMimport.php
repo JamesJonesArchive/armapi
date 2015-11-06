@@ -102,8 +102,8 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function buildAccountComparison($uniquesuffix = "") {
-        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);
+    public function buildAccountComparison() {
+        $compares = $this->getARMtracking();
         $compares->drop();
         $result = [];
         foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
@@ -117,8 +117,8 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function buildRoleComparison($uniquesuffix = "") {        
-        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);
+    public function buildRoleComparison() {
+        $compares = $this->getARMtracking();
         $compares->drop();
         $result = [];
         foreach ($this->getAllRoles()->getData() as $type => $roles) {
@@ -133,8 +133,8 @@ trait UsfARMimport {
      * @param string $href
      * @return JSendResponse
      */
-    public function removeHrefFromTracking($href,$uniquesuffix = "") {
-        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);       
+    public function removeHrefFromTracking($href) {
+        $compares = $this->getARMtracking();        
         $delete_status = $compares->remove(['href' => $href], ["justOne" => true]);
         if($delete_status['n'] < 1) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
@@ -151,8 +151,8 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function getTrackingHrefList($uniquesuffix = "") {
-        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);
+    public function getTrackingHrefList() {
+        $compares = $this->getARMtracking();
         return new JSendResponse('success', [
             'hrefs' => $compares->distinct("href",[ "href" => [ '$exists' => true ] ])
         ]);
