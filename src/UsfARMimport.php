@@ -129,7 +129,7 @@ trait UsfARMimport {
      * @param string $href
      * @return JSendResponse
      */
-    public function removeAccountFromTracking($href) {
+    public function removeHrefFromTracking($href) {
         $compares = $this->getARMtracking();        
         $delete_status = $compares->remove(['href' => $href], ["justOne" => true]);
         if($delete_status['n'] < 1) {

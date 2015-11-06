@@ -1019,7 +1019,6 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         $response = $this->usfARMapi->addAccountRole('/accounts/GEMS/RBULL',[
             'href' => '/roles/GEMS/INQUIRE_ROLE'
         ]);
-        print_r($response->getData());
         // Confirm success
         $this->assertTrue($response->isSuccess());
         // Confirming the roles key exists
