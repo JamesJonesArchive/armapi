@@ -911,7 +911,6 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
      */
     public function testremoveAccountRole() {
         $response = $this->usfARMapi->removeAccountRole('/accounts/GEMS/RBULL','/roles/GEMS/RPT2_ROLE');
-        print_r($response->getData());
         // Confirm success
         $this->assertTrue($response->isSuccess());
         // Confirming the roles key exists
@@ -924,9 +923,6 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
                 $this->assertArrayHasKey('status',$role);
                 // Confirm the status is removed
                 $this->assertEquals("Removed",$role['status']);
-            } else {
-                // Confirm there is no status key
-                $this->assertArrayNotHasKey('status', $role);
             }
         }
     }
@@ -958,5 +954,90 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
         // Confirming the error message
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);        
     }
-    
+    /**
+     * @covers \USF\IdM\UsfARMapi::addAccountRole
+     */
+    public function testAddAccountRole() {
+        $response = $this->usfARMapi->addAccountRole('/accounts/GEMS/RBULL',[
+            'href' => '/roles/GEMS/USF_APPLICANT'
+        ]);
+        // Confirm success
+        $this->assertTrue($response->isSuccess());
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$response->getData());
+        // Confirming the value of roles is not empty
+        $this->assertNotEmpty($response->getData()['roles']);
+        // Confirm the href is now in the roles
+        $this->assertContains('/roles/GEMS/USF_APPLICANT', \array_map(function($r) { return $r['href']; }, $response->getData()['roles']));
+        // The count of roles should be 4 (instead of just the 3 original ones
+        $this->assertCount(4, $response->getData()['roles']);
+        foreach($response->getData()['roles'] as $role) {
+            if($role['href'] == '/roles/GEMS/USF_APPLICANT') {
+                // Confirming the status key exists
+                $this->assertArrayHasKey('status',$role);
+                // Confirm the status is active
+                $this->assertEquals("Active",$role['status']);
+            }
+        }
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::addAccountRole
+     */
+    public function testAddAccountRole_AccountNotExists() {
+        $response = $this->usfARMapi->addAccountRole('/accounts/GEMS/RBULL2',[
+            'href' => '/roles/GEMS/USF_APPLICANT'
+        ]);
+        // Confirm failure
+        $this->assertTrue($response->isFail());
+        // Confirming the description key exists
+        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming the value of description is not empty
+        $this->assertNotEmpty($response->getData()['description']);
+        // Confirming the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']);        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::addAccountRole
+     */
+    public function testAddAccountRole_RoleNotExists() {
+        $response = $this->usfARMapi->addAccountRole('/accounts/GEMS/RBULL',[
+            'href' => '/roles/GEMS/USF_APPLICANT2'
+        ]);
+        // Confirm failure
+        $this->assertTrue($response->isFail());
+        // Confirming the description key exists
+        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming the value of description is not empty
+        $this->assertNotEmpty($response->getData()['description']);
+        // Confirming the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS'], $response->getData()['description']);        
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapi::addAccountRole
+     */
+    public function testAddAccountRole_ExistingRoleGetStatusActive() {
+        $response = $this->usfARMapi->addAccountRole('/accounts/GEMS/RBULL',[
+            'href' => '/roles/GEMS/INQUIRE_ROLE'
+        ]);
+        print_r($response->getData());
+        // Confirm success
+        $this->assertTrue($response->isSuccess());
+        // Confirming the roles key exists
+        $this->assertArrayHasKey('roles',$response->getData());
+        // Confirming the value of roles is not empty
+        $this->assertNotEmpty($response->getData()['roles']);
+        // Confirm the href is now in the roles
+        $this->assertContains('/roles/GEMS/INQUIRE_ROLE', \array_map(function($r) { return $r['href']; }, $response->getData()['roles']));
+        // The count of roles should be 3 (the role existed in the 3 original ones so it was just updated)
+        $this->assertCount(3, $response->getData()['roles']);
+        foreach($response->getData()['roles'] as $role) {
+            if($role['href'] == '/roles/GEMS/INQUIRE_ROLE') {
+                // Confirming the status key exists
+                $this->assertArrayHasKey('status',$role);
+                // Confirm the status is active
+                $this->assertEquals("Active",$role['status']);
+            }
+        }
+
+    }
 }

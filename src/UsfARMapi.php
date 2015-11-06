@@ -167,25 +167,24 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         // Add on the href
         $href = "/accounts/{$type}/{$account['account_identifier']}";
-        
-        $insert_status = $accounts->insert(
-            array_merge(
-                UsfARMapi::convertUTCstringsToMongoDates((array) $account["account_data"],["password_change","last_used","last_update"]),
-                [
-                    'href' => $href,
-                    'type' => $account['account_type'],
-                    'identifier' => $account['account_identifier'],
-                    'created_date' => new \MongoDate(),
-                    'modified_date' => new \MongoDate()
-                ],
-                (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[]
-            )
-        );        
+        $accountattributes = \array_merge(
+            UsfARMapi::convertUTCstringsToMongoDates((array) $account["account_data"],["password_change","last_used","last_update"]),
+            [
+                'href' => $href,
+                'type' => $account['account_type'],
+                'identifier' => $account['account_identifier'],
+                'created_date' => new \MongoDate(),
+                'modified_date' => new \MongoDate()
+            ],
+            (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[]
+        );
+        $insert_status = $accounts->insert($accountattributes);        
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_CREATE_ERROR'] 
             ])); 
         } else {
+            $this->auditLog([ "type" => $type, "account" => $account ], $accountattributes);
             return new JSendResponse('success', [
                 "href" => $href
             ]);
@@ -330,67 +329,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
     }
     /**
-     * Modify the role list for an accounty by it's type and identity (using the identifier)
-     * 
-     * @param string $type
-     * @param string $identifier
-     * @param array $rolechanges
-     * @return JSendResponse
-     */
-    public function modifyRolesForAccountByTypeAndIdentifierOld($type,$identifier,$rolechanges) {
-        $accounts = $this->getARMaccounts();
-        $roles = $this->getARMroles();
-        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
-        // ,[ "type" => true, "identifier" => true, "roles" => true ]
-        if (is_null($account)) {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
-            ]));
-        }
-        if(!isset($rolechanges['role_list'])) {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_LIST_MISSING'] 
-            ]));
-        }
-        if(!isset($account['roles'])) {
-            $account['roles'] = [];
-        }
-        // Look for invalid roles
-        if(count(array_filter($rolechanges['role_list'],function($r) use(&$roles) {
-            return is_null($roles->findOne([ 'href' => $r['href'] ]));
-        })) > 0) {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID']
-            ]));
-        }
-        // Determine the actual new roles and add _only_ the matched existing roles
-        $account['roles'] = \array_map(function($r) use(&$roles) {
-            return array_merge([
-                "role_id" => $roles->findOne([ 'href' => $r['href'] ])['_id'],
-                "added_date" => new \MongoDate()
-            ], \array_diff_key($r,array_flip([
-                'href','short_description','name'
-            ])));
-        },\array_filter($rolechanges['role_list'],function($r) use(&$roles,&$account) { 
-            return !in_array($roles->findOne([ 'href' => $r['href'] ])['_id'], \array_map(function($a) { 
-                return $a['role_id'];
-            }, $account['roles']));
-        })) + \array_filter($account['roles'],function($ar) use(&$roles,&$rolechanges) { 
-            return in_array($ar['role_id'], \array_map(function($r) use(&$roles) { 
-                return $roles->findOne([ 'href' => $r['href'] ])['_id'];
-            },$rolechanges['role_list']));
-        });
-        $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']]]);
-        if ($status) {
-            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => ['roles' => $account['roles']] ]);
-            return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
-        } else {
-            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR'] 
-            ]));
-        }
-    }
-    /**
      * Get all accounts of a certain type for a user 
      * 
      * @param string $type
@@ -458,24 +396,24 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_EXISTS']
             ])); 
         }
-        $insert_status = $roles->insert(
-            array_merge(
-                (array) $newrole["role_data"],
-                [
-                    'name' => $newrole['name'],
-                    'href' => $href,
-                    'type' => $newrole['account_type'],
-                    'status' => 'Active',
-                    'created_date' => new \MongoDate(),
-                    'modified_date' => new \MongoDate()
-                ]
-            )
-        ); 
+        $roleattributes = \array_merge(
+            (array) $newrole["role_data"],
+            [
+                'name' => $newrole['name'],
+                'href' => $href,
+                'type' => $newrole['account_type'],
+                'status' => 'Active',
+                'created_date' => new \MongoDate(),
+                'modified_date' => new \MongoDate()
+            ]
+        );
+        $insert_status = $roles->insert($roleattributes); 
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_CREATE_ERROR']
             ]));
         } else {
+            $this->auditLog([ "role" => $newrole ], $roleattributes);
             return new JSendResponse('success', [
                 "href" => $href
             ]);
@@ -745,9 +683,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             // Append it
             $account['roles'][] = \array_merge([
                 "role_id" => $roles->findOne([ 'href' => $roleappend['href'] ])['_id'],
-                "added_date" => new \MongoDate()
+                "added_date" => new \MongoDate(),
+                "status" => "Active"
             ], \array_diff_key($roleappend,array_flip([
-                'href','short_description','name','role_id','added_date'
+                'href','short_description','name','role_id','added_date','status'
             ])));
         } else {
             // Remove status="Removed" if present
@@ -757,7 +696,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                         'href','short_description','name','status'
                     ])),\array_diff_key($roleappend,array_flip([
                         'href','short_description','name','role_id','added_date'
-                    ])));
+                    ])),[
+                        'status' => 'Active'
+                    ]);
                 }
                 return $r;
             }, $account['roles']);
