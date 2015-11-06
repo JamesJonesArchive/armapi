@@ -30,8 +30,12 @@ trait UsfARMimport {
      * 
      * @return \MongoCollection
      */
-    public function getARMtracking() {
-        return $this->getARMdb()->tracking;
+    public function getARMtracking($uniquesuffix = "") {
+        if(!empty($uniquesuffix)) {
+            $this->getARMdb()->selectCollection("tracking".$uniquesuffix);
+        } else {
+            return $this->getARMdb()->tracking;            
+        }
     }
     /**
      * Returns the logs mongo collection (logging changes)
@@ -98,8 +102,8 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function buildAccountComparison() {
-        $compares = $this->getARMtracking();
+    public function buildAccountComparison($uniquesuffix = "") {
+        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);
         $compares->drop();
         $result = [];
         foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
@@ -113,8 +117,8 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function buildRoleComparison() {
-        $compares = $this->getARMtracking();
+    public function buildRoleComparison($uniquesuffix = "") {        
+        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);
         $compares->drop();
         $result = [];
         foreach ($this->getAllRoles()->getData() as $type => $roles) {
@@ -129,8 +133,8 @@ trait UsfARMimport {
      * @param string $href
      * @return JSendResponse
      */
-    public function removeHrefFromTracking($href) {
-        $compares = $this->getARMtracking();        
+    public function removeHrefFromTracking($href,$uniquesuffix = "") {
+        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);       
         $delete_status = $compares->remove(['href' => $href], ["justOne" => true]);
         if($delete_status['n'] < 1) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
@@ -147,8 +151,8 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function getTrackingHrefList() {
-        $compares = $this->getARMtracking();
+    public function getTrackingHrefList($uniquesuffix = "") {
+        $compares = (empty($uniquesuffix))?$this->getARMtracking():$this->getARMtracking($uniquesuffix);
         return new JSendResponse('success', [
             'hrefs' => $compares->distinct("href",[ "href" => [ '$exists' => true ] ])
         ]);
