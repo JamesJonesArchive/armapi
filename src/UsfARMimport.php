@@ -166,7 +166,7 @@ trait UsfARMimport {
         if($delete_status['n'] < 1) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['TRACKING_ACCOUNT_DELETE_FAILED'] 
-            ])); 
+            ]),"Internal Server Error",500); 
         } else {
             return new JSendResponse('success', [
                 "href" => $href
@@ -204,7 +204,7 @@ trait UsfARMimport {
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['LOG_CREATE_ERROR'] 
-            ])); 
+            ]),"Internal Server Error",500); 
         } else {
             return new JSendResponse('success', [
                 "error" => $error

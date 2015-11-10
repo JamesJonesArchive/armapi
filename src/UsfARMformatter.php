@@ -122,7 +122,7 @@ trait UsfARMformatter {
             case 'error':
                 return \array_merge($output, [
                     "status" => 500,
-                    "statusText" => "Internal Server Errod"
+                    "statusText" => "Internal Server Error"
                 ]);
                 break;
         }

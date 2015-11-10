@@ -52,7 +52,7 @@ trait UsfARMaudit {
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['AUDITLOG_ENTRY_ERROR'] 
-            ])); 
+            ]),"Internal Server Error",500); 
         } else {
             return new JSendResponse('success', [
                 "audit" => $armMethod

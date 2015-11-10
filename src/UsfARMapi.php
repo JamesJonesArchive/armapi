@@ -182,7 +182,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [ 
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_CREATE_ERROR'] 
-            ])); 
+            ]),"Internal Server Error",500); 
         } else {
             $this->auditLog([ "type" => $type, "account" => $account ], $accountattributes);
             return new JSendResponse('success', [
@@ -239,7 +239,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-            ])); 
+            ]),"Internal Server Error",500); 
         }
     }
     /**
@@ -411,7 +411,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_CREATE_ERROR']
-            ]));
+            ]),"Internal Server Error",500);
         } else {
             $this->auditLog([ "role" => $newrole ], $roleattributes);
             return new JSendResponse('success', [
@@ -507,7 +507,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_UPDATE_ERROR']
-            ]));
+            ]),"Internal Server Error",500);
         }
     }
     /**
@@ -546,7 +546,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_DELETE_ERROR']
-            ])); 
+            ]),"Internal Server Error",500); 
         }
     }
     /**
@@ -580,7 +580,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR']
-            ])); 
+            ]),"Internal Server Error",500); 
         }
     }
     /**
@@ -640,7 +640,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR']
-            ])); 
+            ]),"Internal Server Error",500); 
         }
     }
     /**
@@ -711,7 +711,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR']
-            ])); 
+            ]),"Internal Server Error",500); 
         }
     }
 }

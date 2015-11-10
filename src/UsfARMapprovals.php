@@ -69,7 +69,7 @@ trait UsfARMapprovals {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-            ])); 
+            ]),"Internal Server Error",500); 
         }
     }
     /**
@@ -132,7 +132,7 @@ trait UsfARMapprovals {
         } else {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-            ]));
+            ]),"Internal Server Error",500);
         }        
     }
     /**
@@ -358,7 +358,7 @@ trait UsfARMapprovals {
         if (!$status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-            ]));
+            ]),"Internal Server Error",500);
         } else {
             $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             foreach ($managersattributes as $managerattributes) {
@@ -514,7 +514,7 @@ trait UsfARMapprovals {
         if (!$status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-            ]));
+            ]),"Internal Server Error",500);
         } else {
             $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             return $this->getAccountByTypeAndIdentifier($type,$identifier);
@@ -573,7 +573,7 @@ trait UsfARMapprovals {
                 if (!$status) {
                     return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
                         "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-                    ]));
+                    ]),"Internal Server Error",500);
                 } else {  
                     $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                     $roles = $this->getARMroles(); 
