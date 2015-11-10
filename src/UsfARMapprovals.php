@@ -598,7 +598,7 @@ trait UsfARMapprovals {
                             "description" => $e->getMessage()
                         ]));
                     }              
-                    return $this->setAccountRoleState($type, $identifier, $account['href'], '');
+                    return $this->setAccountState($type, $identifier, '', $managerattributes);
                 }
             } else {
                 return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [

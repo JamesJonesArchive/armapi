@@ -379,7 +379,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
-
+        
         // Confirming that the function succeeded by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the confirm key exists
