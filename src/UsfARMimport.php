@@ -111,12 +111,27 @@ trait UsfARMimport {
                 $result[$type] = count($accounts);
                 $compares->batchInsert($accounts);
             }
-        } else {
-            $accounts = \array_map(function($a) { 
-                return ['href' => $a['href']];                 
-            }, $this->getAccountsByType($type)->getData()['accounts']);
-            $compares->batchInsert($accounts);
-            $result[$type] = count($accounts);
+        } else {            
+            $accounts = $this->getARMaccounts()->find(['type' => $type ],[ 'href' => true, '_id' => false ]);
+            $counter = 0;
+            $batch = [];
+            foreach ($accounts as $account) {
+                $batch[] = $account;
+                if(count($batch) > 200) {
+                    $compares->batchInsert($batch);
+                    $batch = [];
+                }
+                $counter++;
+            }
+            if(count($batch) > 0) {
+                $compares->batchInsert($batch);
+            }
+            $result[$type] = $counter;
+//            $accounts = \array_map(function($a) { 
+//                return ['href' => $a['href']];                 
+//            }, $this->getAccountsByType($type)->getData()['accounts']);
+//            $compares->batchInsert($accounts);
+//            $result[$type] = count($accounts);
         }
         return new JSendResponse('success', $result);
     }
@@ -126,6 +141,7 @@ trait UsfARMimport {
      * @return JSendResponse
      */
     public function buildRoleComparison($type) {
+        $roles = $this->getARMroles();
         $compares = $this->getARMtracking();
         $compares->drop();
         $result = [];
