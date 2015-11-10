@@ -102,13 +102,21 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function buildAccountComparison() {
+    public function buildAccountComparison($type) {
         $compares = $this->getARMtracking();
         $compares->drop();
         $result = [];
-        foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
-            $result[$type] = count($accounts);
+        if(is_null($type)) {
+            foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
+                $result[$type] = count($accounts);
+                $compares->batchInsert($accounts);
+            }
+        } else {
+            $accounts = \array_map(function($a) { 
+                return ['href' => $a['href']];                 
+            }, $this->getAccountsByType($type)->getData()['accounts']);
             $compares->batchInsert($accounts);
+            $result[$type] = count($accounts);
         }
         return new JSendResponse('success', $result);
     }
@@ -117,13 +125,21 @@ trait UsfARMimport {
      * 
      * @return JSendResponse
      */
-    public function buildRoleComparison() {
+    public function buildRoleComparison($type) {
         $compares = $this->getARMtracking();
         $compares->drop();
         $result = [];
-        foreach ($this->getAllRoles()->getData() as $type => $roles) {
-            $result[$type] = count($roles);
+        if(is_null($type)) {
+            foreach ($this->getAllRoles()->getData() as $type => $roles) {
+                $result[$type] = count($roles);
+                $compares->batchInsert($roles);
+            }
+        } else {
+            $roles = \array_map(function($a) { 
+                return ['href' => $a['href']];                 
+            }, $this->getAllRolesByType($type)->getData()['roles']);
             $compares->batchInsert($roles);
+            $result[$type] = count($roles);
         }
         return new JSendResponse('success', $result);
     }

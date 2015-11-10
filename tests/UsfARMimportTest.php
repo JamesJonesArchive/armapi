@@ -127,7 +127,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
      * @covers \USF\IdM\UsfARMimport::buildAccountComparison
      */
     public function testBuildAccountComparison() {
-        $response = $this->usfARMapi->buildAccountComparison();
+        $response = $this->usfARMapi->buildAccountComparison('FAST');
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the FAST key exists
@@ -136,6 +136,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         $this->assertNotEmpty($response->getData()['FAST']);
         // Check the FAST
         $this->assertEquals(1,$response->getData()['FAST']);
+        $response = $this->usfARMapi->buildAccountComparison('GEMS');
         // Confirming the GEMS key exists
         $this->assertArrayHasKey('GEMS',$response->getData());
         // Confirming the value of GEMS is not empty
@@ -147,7 +148,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
      * @covers \USF\IdM\UsfARMimport::buildRoleComparison
      */
     public function testBuildRoleComparison() {
-        $response = $this->usfARMapi->buildRoleComparison();
+        $response = $this->usfARMapi->buildRoleComparison('FAST');
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the FAST key exists
@@ -156,6 +157,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         $this->assertNotEmpty($response->getData()['FAST']);
         // Check the FAST
         $this->assertEquals(1,$response->getData()['FAST']);
+        $response = $this->usfARMapi->buildRoleComparison('GEMS');
         // Confirming the GEMS key exists
         $this->assertArrayHasKey('GEMS',$response->getData());
         // Confirming the value of GEMS is not empty
