@@ -317,7 +317,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             }
         }
         // Refresh the account roles after delete(s)
-        $account['roles'] = $accounts->findOne([ "type" => $type, "identifier" => $identifier ])['roles'];   
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);   
         foreach ($rolechanges['role_list'] as $roleupdate) {
             $resp = $this->addAccountRole($account['href'],$roleupdate);
             if(!$resp->isSuccess()) {
@@ -325,7 +325,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             }
         }
         // Refresh the account roles after add(s)
-        $account['roles'] = $accounts->findOne([ "type" => $type, "identifier" => $identifier ])['roles']; 
+        $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]); 
         return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account,\array_keys($account,\array_flip(['type','identifier','roles']))));
     }
     /**
