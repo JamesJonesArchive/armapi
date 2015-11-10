@@ -127,11 +127,6 @@ trait UsfARMimport {
                 $compares->batchInsert($batch);
             }
             $result[$type] = $counter;
-//            $accounts = \array_map(function($a) { 
-//                return ['href' => $a['href']];                 
-//            }, $this->getAccountsByType($type)->getData()['accounts']);
-//            $compares->batchInsert($accounts);
-//            $result[$type] = count($accounts);
         }
         return new JSendResponse('success', $result);
     }
