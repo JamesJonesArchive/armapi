@@ -325,7 +325,7 @@ trait UsfARMapprovals {
         }         
         $visor = $this->getVisor($account['identity']);
         if(!$visor->isSuccess()) {
-            return visor;
+            return $visor;
         }        
         \error_log(\json_encode($visor->getData()['directory_info'], JSON_PRETTY_PRINT), 3, "/tmp/armapi-errors.log");
         $supervisors = $visor->getData()['directory_info']['supervisors'];
