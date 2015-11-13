@@ -633,6 +633,84 @@ trait UsfARMapprovals {
         }
         return $this->getAccountsForIdentity($identity);
     }
-    
+    /**
+     * Gets confirmed account within the past specified minutes
+     * 
+     * @param int $minutes
+     * @return JSendResponse
+     */
+    public function getConfirmedAccountsByInterval($minutes) {
+        $sec = \time() - $minutes*60;        
+        $accounts = $this->getARMaccounts();
+        
+        $confirmaccounts=$accounts->find([
+            'confirm' =>  ['$elemMatch' => ['timestamp' => ['$gte' => new \MongoDate($sec) ]] ],
+            'status' => 'Active'
+        ],[
+            '_id' => 0,'identity' => 1,'href' => 1,'identifier' => 1, 'confirm' => 1, 'type'=> 1, 'roles' => 1
+        ]);
+        return new JSendResponse('success',[ 
+            "confirmed_since" => date('Y/m/d H:i:s', $sec), 
+            'accounts' => $this->formatMongoAccountsListToAPIListing(\array_map(function($a) use($sec) {
+                $filteredconfirms = \array_values(\array_filter($a['confirm'], function($c) use($sec) {
+                    return ($c['timestamp']->toDateTime()->getTimestamp() >= $sec);
+                }));        
+                $usfids = \array_unique(\array_map(function($c) { return $c['usfid']; }, $a['confirm']));
+                $confirms = [];
+                foreach ($usfids as $usfid) {
+                    $managerconfirms = \array_filter($filteredconfirms, function($c) use($usfid) {
+                        return ($c['usfid'] == $usfid);
+                    });
+                    if(\count($managerconfirms) > 0) {
+                        \usort($managerconfirms, function($c1,$c2) {
+                            if($c1['timestamp']->toDateTime()->getTimestamp() == $c2['timestamp']->toDateTime()->getTimestamp()) {
+                                return 0;
+                            }
+                            return ($c1['timestamp']->toDateTime()->getTimestamp() < $c2['timestamp']->toDateTime()->getTimestamp()) ? 1 : -1;
+                        });
+                        $confirms[] = \array_shift($managerconfirms);
+                    }
+                }
+                $a['confirm'] = $confirms;
+                if(isset($a['roles'])) {                
+                    $a['roles'] = \array_map(function($r) use($usfids) {
+                        if(isset($r['confirm'])) {
+                            $filteredconfirms = \array_values(\array_filter($r['confirm'], function($c) use($usfids) {
+                                return \in_array($c['usfid'],$usfids);
+                            }));
+                            $confirms = [];
+                            foreach ($usfids as $usfid) {
+                                $managerconfirms = \array_filter($filteredconfirms, function($c) use($usfid) {
+                                    return ($c['usfid'] == $usfid);
+                                });
+                                if(\count($managerconfirms) > 0) {
+                                    \usort($managerconfirms, function($c1,$c2) {
+                                        if($c1['timestamp']->toDateTime()->getTimestamp() == $c2['timestamp']->toDateTime()->getTimestamp()) {
+                                            return 0;
+                                        }
+                                        return ($c1['timestamp']->toDateTime()->getTimestamp() < $c2['timestamp']->toDateTime()->getTimestamp()) ? 1 : -1;
+                                    });
+                                    $confirms[] = \array_shift($managerconfirms);
+                                }
+                            }
+                            $r['confirm'] = $confirms;
+                        }
+                        unset($r['state']);
+                        return $r;
+                        // return \array_diff_key($r,\array_diff($r, \array_flip(['role_id','arm_created_date','confirm'])));
+                    }, \array_filter($a['roles'], function($r) use($usfids) {
+                        if((isset($r['status']))?($r['status'] != 'Active'):false) {
+                            return false;
+                        }
+                        if(!isset($r['confirm'])) {
+                            return false;
+                        }
+                        return (\count(\array_intersect($usfids, \array_map(function($c) { return $c['usfid']; }, $r['confirm']))) > 0);
+                    }));
+                }
+                return $a;
+            }, \iterator_to_array($confirmaccounts)))
+        ]);
+    }
     
 }
