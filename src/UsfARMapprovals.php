@@ -585,10 +585,6 @@ trait UsfARMapprovals {
                                 if(!$resp->isSuccess()) {
                                     return $resp;
                                 }
-                                $rolestateresp = $this->setAccountRoleState($type, $identifier, $accountRole['href'], '', $managerattributes);
-                                if(!$rolestateresp->isSuccess()) {
-                                    return $rolestateresp;
-                                }
                             } else {
                                 throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']);                                
                             }
@@ -597,8 +593,8 @@ trait UsfARMapprovals {
                         return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                             "description" => $e->getMessage()
                         ]));
-                    }              
-                    return $this->setAccountState($type, $identifier, '', $managerattributes);
+                    }         
+                    return $this->getAccountByTypeAndIdentifier($type, $identifier);
                 }
             } else {
                 return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
