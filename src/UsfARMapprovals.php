@@ -473,7 +473,7 @@ trait UsfARMapprovals {
         // $mail->addAddress($supervisor['email'], $supervisor['name']); 
         $mail->addAddress('james@mail.usf.edu', $supervisor['name']); 
         $mail->isHTML(true); // Set email format to HTML
-        $mail->Subject = 'ARM Review Notification for:' . $userinfo['name'];
+        $mail->Subject = 'ARM Review Pending Notification for Employee:' . $userinfo['name'];
         
         $smarty = new \Smarty();
         $smarty->template_dir = __DIR__ . "/../templates"; 

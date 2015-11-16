@@ -1,12 +1,12 @@
-An account review has been created for an employee under your supervision: 
+<p>An account review has been created for an employee under your supervision:</p>
 
-{$userinfo.name}
+<p>{$userinfo.name}</p>
 
-The account under review is as follows:
+<p>The account under review is as follows:</p>
 
-System: {$account.type}
-Account Identifier: {$account.identifier}
+<p>System: {$account.type}<br />
+Account Identifier: {$account.identifier}</p>
 
-Please login to ARM and complete your review in a timely mannor. Thank you!
+<p>Please login to ARM and complete your review in a timely mannor. Thank you!</p>
 
-This is a ARM automated system message
+<p>This is a ARM automated system message</p>
