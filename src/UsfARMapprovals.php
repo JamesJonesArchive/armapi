@@ -385,7 +385,7 @@ trait UsfARMapprovals {
                 // Send email notifications
                 foreach ($supervisors as $supervisor) {
                     if(isset($supervisor['email'])) {
-                        $this->sendReviewNotification($supervisor['email'], $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
+                        $this->sendReviewNotification($supervisor, $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
                     }
                 }
             }
@@ -458,12 +458,38 @@ trait UsfARMapprovals {
     /**
      * Sends a notification to a supervisor that the account is under review
      * 
-     * @param string $email
+     * @param array $supervisor
      * @param array $account
      * @param array $userinfo
      */
-    public function sendReviewNotification($email,$account,$userinfo) {
+    public function sendReviewNotification($supervisor,$account,$userinfo) {
+        //Create a new PHPMailer instance
+        $mail = new \PHPMailer;
+        if(!empty($this->smtpServer)) {
+            $mail->isSMTP();  // Set mailer to use SMTP
+            $mail->Host = $this->smtpServer;
+        }
+        $mail->setFrom('noreply@arm.us', 'ARM Automated Service');
+        // $mail->addAddress($supervisor['email'], $supervisor['name']); 
+        $mail->addAddress('james@mail.usf.edu', $supervisor['name']); 
+        $mail->isHTML(true); // Set email format to HTML
+        $mail->Subject = 'ARM Review Notification for:' . $userinfo['name'];
         
+        $smarty = new Smarty();
+        $smarty->template_dir = __DIR__ . "/../templates"; 
+        
+        $smarty->assign('supervisor', $supervisor);
+        $smarty->assign('userinfo', $userinfo);
+        $smarty->assign('account', $account);
+
+        $mail->msgHTML($smarty->fetch('reviewnotification.tpl'));
+        //msgHTML also sets AltBody, but if you want a custom one, set it afterwards
+        $mail->AltBody = 'To view the message, please use an HTML compatible email viewer!';
+        if(!$mail->send()) {
+            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $mail->ErrorInfo ]);
+        } else {
+            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'message' => $smarty->fetch('reviewnotification.tpl') ]);
+        }
     }
     /**
      * Updates account role on account to the confirmed state

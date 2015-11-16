@@ -36,9 +36,11 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     
     private $version = "0.0.1";
     private $auditInfo;
+    private $smtpServer;
     
-    public function __construct($request = ['armuser' => [ 'usf_id' => '', 'name' => '', 'role' => 'Batch' ]]) {         
+    public function __construct($request = ['armuser' => [ 'usf_id' => '', 'name' => '', 'role' => 'Batch' ]],$smtpServer = '') {         
         $this->auditInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
+        $this->smtpServer = $smtpServer;
     }
     /**
      * Returns the current API version
