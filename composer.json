@@ -26,7 +26,8 @@
         "usf-it/usf-idm-database": "dev-master",
         "usf-it/usf-idm-common": "dev-master",
         "shkm/jsend": ">1.2.0",
-        "usf-it/usf-visor-client-api": "dev-master"
+        "usf-it/usf-visor-client-api": "dev-master",
+        "phpmailer/phpmailer": "~5.2"
     },
     "require-dev": {
         "phpunit/phpunit": "@stable",
