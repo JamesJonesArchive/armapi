@@ -475,7 +475,7 @@ trait UsfARMapprovals {
         $mail->isHTML(true); // Set email format to HTML
         $mail->Subject = 'ARM Review Notification for:' . $userinfo['name'];
         
-        $smarty = new Smarty();
+        $smarty = new \Smarty();
         $smarty->template_dir = __DIR__ . "/../templates"; 
         
         $smarty->assign('supervisor', $supervisor);
