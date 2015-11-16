@@ -470,10 +470,9 @@ trait UsfARMapprovals {
             $mail->Host = $this->smtpServer;
         }
         $mail->setFrom('noreply@arm.us', 'ARM Automated Service');
-        // $mail->addAddress($supervisor['email'], $supervisor['name']); 
-        $mail->addAddress('james@mail.usf.edu', $supervisor['name']); 
+        $mail->addAddress($supervisor['email'], $supervisor['name']); 
         $mail->isHTML(true); // Set email format to HTML
-        $mail->Subject = 'ARM Review Pending Notification for Employee:' . $userinfo['name'];
+        $mail->Subject = 'ARM Review Pending Notification for Employee: ' . $userinfo['name'];
         
         $smarty = new \Smarty();
         $smarty->template_dir = __DIR__ . "/../templates"; 
