@@ -360,7 +360,7 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
             ]),"Internal Server Error",500);
         } else {
-            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+            $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);            
             foreach ($managersattributes as $managerattributes) {
                 // Set the empty state for the account by the manager
                 $stateresp = $this->setAccountState($type, $identifier, '', $managerattributes);
@@ -380,7 +380,16 @@ trait UsfARMapprovals {
                     }
                 }
             }
-            return $this->getAccountByTypeAndIdentifier($type,$identifier);
+            $updatedaccount = $this->getAccountByTypeAndIdentifier($type,$identifier);
+            if($updatedaccount->isSuccess()) {
+                // Send email notifications
+                foreach ($supervisors as $supervisor) {
+                    if(isset($supervisor['email'])) {
+                        $this->sendReviewNotification($supervisor['email'], $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
+                    }
+                }
+            }
+            return $updatedaccount;
         }
     }
     /**
@@ -445,6 +454,16 @@ trait UsfARMapprovals {
             $resp['reviewCount']++;
         }
         return new JSendResponse('success', $resp);
+    }
+    /**
+     * Sends a notification to a supervisor that the account is under review
+     * 
+     * @param string $email
+     * @param array $account
+     * @param array $userinfo
+     */
+    public function sendReviewNotification($email,$account,$userinfo) {
+        
     }
     /**
      * Updates account role on account to the confirmed state
