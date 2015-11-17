@@ -327,7 +327,6 @@ trait UsfARMapprovals {
         if(!$visor->isSuccess()) {
             return $visor;
         }        
-        \error_log(\json_encode($visor->getData()['directory_info'], JSON_PRETTY_PRINT), 3, "/tmp/armapi-errors.log");
         $supervisors = $visor->getData()['directory_info']['supervisors'];
         
         if(empty($supervisors)) {
@@ -595,6 +594,26 @@ trait UsfARMapprovals {
         if(!isset($account['review'])) {
             $account['review'] = [];
         }
+        // Detect if the passed manager is a supervisor of any of any of the open reviews
+        if(!UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
+            $visor = $this->getVisor($managerattributes['usfid']);
+            if(!$visor->isSuccess()) {
+                return $visor;
+            }        
+            $employees = \array_map(function($e) { return $e['usf_id']; }, $visor->getData()['directory_info']['employees']);
+            $matched_review_employees = \array_filter($account['review'], function($rev) use($employees) { 
+                return (\in_array($rev['usfid'], $employees) && $rev['review'] == 'open');
+            });
+            if(!empty($matched_review_employees)) {
+                foreach ($matched_review_employees as $empl_review) {
+                    // Close all reviews of employees of the supervisors who are managers
+                    $account['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', [ 'usfid' => $empl_review['usfid'] ]);
+                }
+                // Create an open review for the supervisor of those managers
+                $account['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'open', $managerattributes);
+            }
+        }
+        // Test to see if review can be processed and, if so, process it
         if(UsfARMapi::hasStateForManager($account['state'], $managerattributes['usfid'])) {
             $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
             $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
@@ -646,6 +665,9 @@ trait UsfARMapprovals {
                 ]));
             }
         } else {
+            // Check to see if this is a manager
+            
+            
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
             ]));
