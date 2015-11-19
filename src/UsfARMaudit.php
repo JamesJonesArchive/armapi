@@ -85,6 +85,7 @@ trait UsfARMaudit {
             'isGet' => $request->isGet(),
             'armuser' => [
                 'usf_id' => $request->headers->get('ARMusfid'),
+                'emplid' => $request->headers->get('ARMemplid'),
                 'name' => $request->headers->get('ARMname'),
                 'role' => $request->headers->get('ARMrole')
             ]

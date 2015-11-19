@@ -38,7 +38,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     private $auditInfo;
     private $smtpServer;
     
-    public function __construct($request = ['armuser' => [ 'usf_id' => '', 'name' => '', 'role' => 'Batch' ]],$smtpServer = '') {         
+    public function __construct($request = ['armuser' => [ 'usf_id' => '', 'name' => '', 'role' => 'Batch' ]],$smtpServer = '') { 
         $this->auditInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
         $this->smtpServer = $smtpServer;
     }
