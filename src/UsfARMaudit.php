@@ -91,4 +91,7 @@ trait UsfARMaudit {
             ]
         ];
     }
+    public function isAdmin() {
+        return \in_array($needle, ['Admin','Batch']);
+    }
 }

@@ -55,6 +55,7 @@ trait UsfARMErrorMessages {
         'ROLES_CONTAINS_INVALID' => 'Role list contains invalid roles!',
         'TRACKING_ACCOUNT_DELETE_FAILED' => 'Removing the account from the tracking collection failed!',
         'LOG_CREATE_ERROR' => 'Log entry creation could not be performed!',
-        'AUDITLOG_ENTRY_ERROR' => 'Audit Log entry creation could not be performed!'
+        'AUDITLOG_ENTRY_ERROR' => 'Audit Log entry creation could not be performed!',
+        'VISOR_PROXY_LOOKUP_ERROR' => 'Visor does not permit this lookup!'
     );
 }

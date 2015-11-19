@@ -298,11 +298,13 @@ trait UsfARMapprovals {
      * @param string $id
      * @return JSendResponse
      */
-    public function getVisor($id) {
-        if(\in_array($this->auditInfo['armuser']['ARMrole'], ['Admin','Batch'])) {
+    public function getVisor($id,$proxyemplid = '') {        
+        if(\in_array($this->auditInfo['armuser']['ARMrole'], ['Admin','Batch']) && empty($proxyemplid)) {
             $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig);
-        } else {
+        } elseif(empty($proxyemplid)) {
             $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$this->auditInfo['armuser']['emplid']);
+        } else {
+            $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$proxyemplid);
         }
         return $usfVisorAPI->getVisor($id);
     }
@@ -598,25 +600,6 @@ trait UsfARMapprovals {
         if(!isset($account['review'])) {
             $account['review'] = [];
         }
-        // Detect if the passed manager is a supervisor of any of any of the open reviews
-        if(!UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
-            $visor = $this->getVisor($managerattributes['usfid']);
-            if(!$visor->isSuccess()) {
-                return $visor;
-            }        
-            $employees = \array_map(function($e) { return $e['usf_id']; }, $visor->getData()['directory_info']['employees']);
-            $matched_review_employees = \array_filter($account['review'], function($rev) use($employees) { 
-                return (\in_array($rev['usfid'], $employees) && $rev['review'] == 'open');
-            });
-            if(!empty($matched_review_employees)) {
-                foreach ($matched_review_employees as $empl_review) {
-                    // Close all reviews of employees of the supervisors who are managers
-                    $account['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', [ 'usfid' => $empl_review['usfid'] ]);
-                }
-                // Create an open review for the supervisor of those managers
-                $account['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'open', $managerattributes);
-            }
-        }
         // Test to see if review can be processed and, if so, process it
         if(UsfARMapi::hasStateForManager($account['state'], $managerattributes['usfid'])) {
             $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
@@ -674,6 +657,92 @@ trait UsfARMapprovals {
             
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
+            ]));
+        }
+    }
+    /**
+     * Delegates an existing open review to another manager
+     * 
+     * @param string $delegateidentity
+     * @param string $identity
+     * @param string $href
+     * @return JSendResponse
+     */
+    public function delegateReview($delegateidentity,$identity,$href) {
+        $accounts = $this->getARMaccounts();
+        $account = $accounts->findOne(["href" => $href]);
+        if (is_null($account)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
+            ]));
+        }
+        if($account['status'] === "Locked") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+            ]));
+        } 
+        if(UsfARMapi::hasReviewForManager($account['review'], $identity)) {
+            // Check the delegate to see if they are allowed up the org chart
+            // Get the emplid for the delegate supervisor
+            $delegatevisor = $this->getVisor($delegateidentity);
+            if(!$delegatevisor->isSuccess()) {
+                return $delegatevisor;
+            }
+            $visorcheck = $this->getVisor($account['identity'],$delegatevisor->getData()['employee_id']);
+            if(!$visorcheck->isSuccess()) {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['VISOR_PROXY_LOOKUP_ERROR']
+                ]));
+            }
+            $updatedattributes = [ 'review' => $account['review'] ];
+            $managerattributes = [
+                'name' => $delegatevisor->getData()['directory_info']['self']['name'],
+                'usfid' => $delegatevisor->getData()['directory_info']['self']['usf_id']
+            ];
+            $adminattributes = [
+                'admin_role' => $this->auditInfo['armuser']['role'],
+                'admin_name' => $this->auditInfo['armuser']['name'],
+                'admin_usfid' => $this->auditInfo['armuser']['usf_id']
+            ];
+            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity) {
+                if($r['usfid'] == $identity) {
+                    $r['review'] = 'closed';
+                }
+                return $r;
+            }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes));
+            // Update the account with review changes and move on to the state changes
+            $status = $accounts->update([ "href" => $href ], [ '$set' => $updatedattributes ]);
+            if (!$status) {
+                return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+                ]),"Internal Server Error",500);
+            } else {
+                $this->auditLog([ "delegate_identity" => $delegateidentity, "target_identity" => $identity, "account_href" => $href ], [ '$set' => $updatedattributes ]);   
+                // Set the empty state for the account by the manager
+                $stateresp = $this->setAccountState($account['type'], $account['identifier'], '', $managerattributes);
+                if(!$stateresp->isSuccess()) {
+                    return $stateresp;
+                }
+                if(!isset($account['roles'])) {
+                    $account['roles'] = [];
+                }
+                $roles = $this->getARMroles();
+                foreach (\array_filter($account['roles'], function($r) { return (!((isset($r['dynamic_role']))?$r['dynamic_role']:false && !((isset($r['status']))?($r['status'] == "Removed"):false))); }) as $role) {
+                    $rolestateresp = $this->setAccountRoleState($account['type'], $account['identifier'], $roles->findOne([ "_id" => $role['role_id'] ])['href'], '', $managerattributes);
+                    if(!$rolestateresp->isSuccess()) {
+                        return $rolestateresp;
+                    }
+                }
+                $updatedaccount = $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
+                if($updatedaccount->isSuccess()) {
+                    // Send email notifications
+                    $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
+                }
+                return $updatedaccount;
+            }            
+        } else {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER']
             ]));
         }
     }

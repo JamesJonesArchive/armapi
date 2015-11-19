@@ -279,6 +279,69 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(3, \array_filter($response->getData()['accounts'], function($a) { return UsfARMapi::getStateForManager($a['state'], 'U99999999') == ''; }));        
     }
     /**
+     * @covers \USF\IdM\UsfARMapprovals::delegateReview
+     */
+    public function testDelegateReview() {
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL')->isSuccess());
+        // Delegate the open review from Rocky Bull to Gold Greeny
+        $response = $this->usfARMapi->delegateReview('U98767543','U99999999','/accounts/GEMS/RBULL');
+        
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the type key exists
+        $this->assertArrayHasKey('type',$response->getData());
+        // Confirming that the value of the type key is not empty
+        $this->assertNotEmpty($response->getData()['type']);
+        // Confirming the value of the type key is FAST
+        $this->assertEquals('GEMS', $response->getData()['type']);
+        // Confirming the identifier key exists
+        $this->assertArrayHasKey('identifier',$response->getData());
+        // Confirming that the value of the identifier key is not empty
+        $this->assertNotEmpty($response->getData()['identifier']);
+        // Confirming the value of the identifier key is U12345678
+        $this->assertEquals('RBULL', $response->getData()['identifier']);
+        
+        // Confirming the review key exists
+        $this->assertArrayHasKey('review',$response->getData());
+        // Confirming that the value of the review key is not empty
+        $this->assertNotEmpty($response->getData()['review']);
+        // Confirm a review is set for the specified manager original identity
+        $this->assertTrue(UsfARMapi::hasReviewForManager($response->getData()['review'], 'U99999999'));
+        // Make sure that review is set to closed now
+        $this->assertEquals('closed', UsfARMapi::getReviewForManager($response->getData()['review'], 'U99999999'));
+
+        // Confirm a review is set for the specified manager delegate identity
+        $this->assertTrue(UsfARMapi::hasReviewForManager($response->getData()['review'], 'U98767543'));
+        // Make sure the delegated review is set to open
+        $this->assertEquals('open', UsfARMapi::getReviewForManager($response->getData()['review'], 'U98767543'));
+
+        foreach ($response->getData()['roles'] as $role) {
+            // Confirming the identifier key exists
+            $this->assertArrayHasKey('state',$role);
+            // Confirming that the value of the identifier key is not empty
+            $this->assertNotEmpty($role['state']);
+            // Confirming the state for the specified original manager is 'open'
+            $this->assertEquals('',UsfARMapi::getStateForManager($role['state'], 'U99999999'));
+            // Confirming the state for the specified delegate manager is 'open'
+            $this->assertEquals('',UsfARMapi::getStateForManager($role['state'], 'U98767543'));
+        }
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapprovals::delegateReview
+     */
+    public function testDelegateReviewAccountNotExists() {
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL')->isSuccess());
+        // Delegate the open review from Rocky Bull to Gold Greeny
+        $response = $this->usfARMapi->delegateReview('U98767543','U99999999','/accounts/GEMS/RBULLY');
+        
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertFalse($response->isSuccess());
+        // Confirming the value of the account key is the error message
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']); 
+    }
+    /**
      * @covers \USF\IdM\UsfARMapprovals::setReviewAll
      */
     public function testSetReviewAll() {
