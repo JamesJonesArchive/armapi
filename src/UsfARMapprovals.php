@@ -299,7 +299,7 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function getVisor($id,$proxyemplid = '') {        
-        if(\in_array($this->auditInfo['armuser']['ARMrole'], ['Admin','Batch']) && empty($proxyemplid)) {
+        if(\in_array($this->auditInfo['armuser']['role'], ['Admin','Batch']) && empty($proxyemplid)) {
             $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig);
         } elseif(empty($proxyemplid)) {
             $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$this->auditInfo['armuser']['emplid']);
