@@ -665,6 +665,19 @@ trait UsfARMapprovals {
      * 
      * @param string $delegateidentity
      * @param string $identity
+     * @param string $type
+     * @param string $identifier
+     * @return JSendResponse
+     */
+    public function delegateReviewByTypeAndIdentifier($delegateidentity,$identity,$type,$identifier) {
+        $href = "/accounts/{$type}/{$identifier}";
+        return $this->delegateReview($delegateidentity, $identity, $href);
+    }
+    /**
+     * Delegates an existing open review to another manager
+     * 
+     * @param string $delegateidentity
+     * @param string $identity
      * @param string $href
      * @return JSendResponse
      */
