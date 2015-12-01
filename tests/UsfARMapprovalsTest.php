@@ -265,10 +265,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setReviewByIdentity
      */
     public function testSetReviewByIdentity() {
-        $response = $this->usfARMapi->setReviewByIdentity('U12345678',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ]);
+        $response = $this->usfARMapi->setReviewByIdentity('U12345678',-1);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirm 3 accounts had reviews set
@@ -345,22 +342,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setReviewAll
      */
     public function testSetReviewAll() {
-        $response = $this->usfARMapi->setReviewAll(function ($id) {
-            // Mock Visor Data
-            return [
-                'status' => 'success',
-                'data' => [
-                    'directory_info' => [
-                        'supervisors' => [
-                            [
-                                'name' => 'Rocky Bull',
-                                'usf_id' => 'U99999999'
-                            ]
-                        ]
-                    ]
-                ]
-            ];
-        });
+        $response = $this->usfARMapi->setReviewAll(-1);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the reviewCount key exists
@@ -384,22 +366,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     public function testSetReviewAll_Identities_NoneFound() {
         // Removing all accounts so the function will fail
         $this->usfARMapi->getARMaccounts()->remove([]);
-        $response = $this->usfARMapi->setReviewAll(function ($id) {
-            // Mock Visor Data
-            return [
-                'status' => 'success',
-                'data' => [
-                    'directory_info' => [
-                        'supervisors' => [
-                            [
-                                'name' => 'Rocky Bull',
-                                'usf_id' => 'U99999999'
-                            ]
-                        ]
-                    ]
-                ]
-            ];
-        });
+        $response = $this->usfARMapi->setReviewAll(-1);
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the identity key exists
@@ -589,10 +556,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      */
     public function testSetConfirm() {
         // STEP1: Open review
-        $this->assertTrue($this->usfARMapi->setReviewByIdentity('U12345678',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ])->isSuccess());        
+        $this->assertTrue($this->usfARMapi->setReviewByIdentity('U12345678',-1)->isSuccess());        
         // STEP2: Set the state for each account
         $this->assertTrue($this->usfARMapi->setAccountState('FAST', 'U12345678', 'removal_pending', [
             'usfid' => 'U99999999',
@@ -687,10 +651,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      */
     public function testgetConfirmedAccountsByInterval() {
         // STEP1: Open review
-        $this->assertTrue($this->usfARMapi->setReviewByIdentity('U12345678',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ])->isSuccess());        
+        $this->assertTrue($this->usfARMapi->setReviewByIdentity('U12345678',-1)->isSuccess());        
         // STEP2: Set the state for each account
         $this->assertTrue($this->usfARMapi->setAccountState('FAST', 'U12345678', 'removal_pending', [
             'usfid' => 'U99999999',

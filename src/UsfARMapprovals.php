@@ -257,20 +257,30 @@ trait UsfARMapprovals {
      * @param array $reviews
      * @param string $reviewcode
      * @param array $managerattributes
+     * @param int $days 
      * @return array
      */
-    public static function getUpdatedReviewArray($reviews,$reviewcode,$managerattributes) {
+    public static function getUpdatedReviewArray($reviews,$reviewcode,$managerattributes,$days = -1) {
         if(UsfARMapi::hasReviewForManager($reviews, $managerattributes['usfid'])) {
-            return \array_map(function($rv) use($managerattributes,$reviewcode) {
+            return \array_map(function($rv) use($managerattributes,$reviewcode,$days) {
                 if($rv['usfid'] == $managerattributes['usfid']) {
-                    return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);
+                    if($days < 0) {
+                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);                        
+                    } else {
+                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate(), 'reviewend' => new \MongoDate(\strtotime("+{$days} day")) ]);                        
+                    }
                 } else {
                     return $rv;
                 }
             },((isset($reviews))?$reviews:[]));
         } else {
-            return \call_user_func(function($r) use($reviewcode,$managerattributes) {
-                $r[] = \array_merge($managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);
+            return \call_user_func(function($r) use($reviewcode,$managerattributes,$days) {
+                if($days < 0) {
+                    $r[] = \array_merge($managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);
+                } else {
+                    print_r($days);
+                    $r[] = \array_merge($managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate(), 'reviewend' => new \MongoDate(\strtotime("+{$days} day")) ]);
+                }
                 return $r;
             },(isset($reviews))?$reviews:[]);
         }
@@ -313,10 +323,10 @@ trait UsfARMapprovals {
      * 
      * @param string $type
      * @param string $identifier
-     * @param array $managerattributes
+     * @param int $days
      * @return JSendResponse
      */
-    public function setReviewByAccount($type,$identifier) {
+    public function setReviewByAccount($type,$identifier,$days = -1) {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
         if (is_null($account)) {
@@ -356,7 +366,7 @@ trait UsfARMapprovals {
             'admin_usfid' => $this->auditInfo['armuser']['usf_id']
         ];
         foreach ($managersattributes as $managerattributes) {
-            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($updatedattributes['review'], 'open', \array_merge($managerattributes, $adminattributes), $managerattributes);
+            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($updatedattributes['review'], 'open', \array_merge($managerattributes, $adminattributes),$days);
         }
         // Update the account with review changes and move on to the state changes
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
@@ -401,14 +411,14 @@ trait UsfARMapprovals {
      * Updates accounts for an identity to the review state
      * 
      * @param string $identity
-     * @param array $managerattributes
+     * @param int $days
      * @return JSendResponse
      */
-    public function setReviewByIdentity($identity) {
+    public function setReviewByIdentity($identity,$days = -1) {
         $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->find([ "identity" => $identity, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
-            $resp = $this->setReviewByAccount($account['type'],$account['identifier']);
+            $resp = $this->setReviewByAccount($account['type'],$account['identifier'],$days);
             if(!$resp->isSuccess()) {
                 return $resp;
             }
@@ -420,13 +430,14 @@ trait UsfARMapprovals {
      * 
      * @param string $type
      * @param string $identity
+     * @param int $days
      * @return JSendResponse
      */
-    public function setReviewByTypeAndIdentity($type,$identity) {
+    public function setReviewByTypeAndIdentity($type,$identity,$days = -1) {
         $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->find([ "identity" => $identity, "type" => $type, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
-            $resp = $this->setReviewByAccount($account['type'],$account['identifier']);
+            $resp = $this->setReviewByAccount($account['type'],$account['identifier'],$days);
             if(!$resp->isSuccess()) {
                 return $resp;
             }
@@ -436,10 +447,10 @@ trait UsfARMapprovals {
     /**
      * Sets the review for ALL accounts
      * 
-     * @param closure $func Anonymous function for Visor to run in to gather the managers
+     * @param int $days 
      * @return JSendResponse
      */
-    public function setReviewAll() {
+    public function setReviewAll($days = -1) {
         $accounts = $this->getARMaccounts();
         $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ], "status" => [ '$ne' => 'Locked' ] ]);
         if(empty($reviewaccounts)) {
@@ -452,7 +463,7 @@ trait UsfARMapprovals {
             'reviewCount' => 0
         ];
         foreach ($resp['usfids'] as $usfid) {
-            $response = $this->setReviewByIdentity($usfid);
+            $response = $this->setReviewByIdentity($usfid,$days);
             if(!$response->isSuccess()) {
                 return $response;
             }  
@@ -669,9 +680,9 @@ trait UsfARMapprovals {
      * @param string $identifier
      * @return JSendResponse
      */
-    public function delegateReviewByTypeAndIdentifier($delegateidentity,$identity,$type,$identifier) {
+    public function delegateReviewByTypeAndIdentifier($delegateidentity,$identity,$type,$identifier,$days = -1) {
         $href = "/accounts/{$type}/{$identifier}";
-        return $this->delegateReview($delegateidentity, $identity, $href);
+        return $this->delegateReview($delegateidentity, $identity, $href,$days);
     }
     /**
      * Delegates an existing open review to another manager
@@ -681,7 +692,7 @@ trait UsfARMapprovals {
      * @param string $href
      * @return JSendResponse
      */
-    public function delegateReview($delegateidentity,$identity,$href) {
+    public function delegateReview($delegateidentity,$identity,$href,$days = -1) {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne(["href" => $href]);
         if (is_null($account)) {
@@ -722,7 +733,7 @@ trait UsfARMapprovals {
                     $r['review'] = 'closed';
                 }
                 return $r;
-            }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes));
+            }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes),$days);
             // Update the account with review changes and move on to the state changes
             $status = $accounts->update([ "href" => $href ], [ '$set' => $updatedattributes ]);
             if (!$status) {
