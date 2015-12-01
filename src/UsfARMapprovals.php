@@ -400,7 +400,7 @@ trait UsfARMapprovals {
                 // Send email notifications
                 foreach ($supervisors as $supervisor) {
                     if(isset($supervisor['email'])) {
-                        $this->sendReviewNotification($supervisor, $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
+                        // $this->sendReviewNotification($supervisor, $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
                     }
                 }
             }
@@ -763,7 +763,7 @@ trait UsfARMapprovals {
                 $updatedaccount = $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
                 if($updatedaccount->isSuccess()) {
                     // Send email notifications
-                    $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
+                    // $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
                 }
                 return $updatedaccount;
             }            
