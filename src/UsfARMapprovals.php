@@ -680,9 +680,9 @@ trait UsfARMapprovals {
      * @param string $identifier
      * @return JSendResponse
      */
-    public function delegateReviewByTypeAndIdentifier($delegateidentity,$identity,$type,$identifier,$days = -1) {
+    public function delegateReviewByTypeAndIdentifier($delegateidentity,$identity,$type,$identifier,$days = -1,$note = "") {
         $href = "/accounts/{$type}/{$identifier}";
-        return $this->delegateReview($delegateidentity, $identity, $href,$days);
+        return $this->delegateReview($delegateidentity, $identity, $href,$days,$note);
     }
     /**
      * Delegates an existing open review to another manager
@@ -692,7 +692,7 @@ trait UsfARMapprovals {
      * @param string $href
      * @return JSendResponse
      */
-    public function delegateReview($delegateidentity,$identity,$href,$days = -1) {
+    public function delegateReview($delegateidentity,$identity,$href,$days = -1,$note = "") {
         $accounts = $this->getARMaccounts();
         $account = $accounts->findOne(["href" => $href]);
         if (is_null($account)) {
@@ -728,6 +728,9 @@ trait UsfARMapprovals {
                 'admin_name' => $this->auditInfo['armuser']['name'],
                 'admin_usfid' => $this->auditInfo['armuser']['usf_id']
             ];
+            if(!empty($note)) {
+                $adminattributes['admin_note'] = $note;
+            }
             $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity) {
                 if($r['usfid'] == $identity) {
                     $r['review'] = 'closed';
