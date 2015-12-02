@@ -744,7 +744,7 @@ trait UsfARMapprovals {
                     "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
                 ]),"Internal Server Error",500);
             } else {
-                $this->auditLog([ "delegate_identity" => $delegateidentity, "target_identity" => $identity, "account_href" => $href ], [ '$set' => $updatedattributes ]);   
+                $this->auditLog([ "delegate_identity" => $delegateidentity, "target_identity" => $identity, "account_href" => $href, "days" => $days, "note" => $note ], [ '$set' => $updatedattributes ]);   
                 // Set the empty state for the account by the manager
                 $stateresp = $this->setAccountState($account['type'], $account['identifier'], '', $managerattributes);
                 if(!$stateresp->isSuccess()) {
