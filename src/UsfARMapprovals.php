@@ -763,11 +763,11 @@ trait UsfARMapprovals {
                 }
                 $updatedaccount = $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
                 // $this->auditLog([ "debug" => "DelegateOutput", "purpose" => "Intercepting output", "account_href" => $href, "days" => $days, "note" => $note ], [ '$set' => $updatedaccount ]);   
-                print_r($updatedaccount);
                 if($updatedaccount->isSuccess()) {
                     // Send email notifications
                     // $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
-                }
+                }                
+                \error_log(\json_encode($updatedaccount, JSON_PRETTY_PRINT), 3, "/var/tmp/my-errors.log");
                 return $updatedaccount;
             }            
         } else {
