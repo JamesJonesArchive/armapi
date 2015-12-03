@@ -762,6 +762,8 @@ trait UsfARMapprovals {
                     }
                 }
                 $updatedaccount = $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
+                $this->auditLog([ "debug" => "DelegateOutput", "purpose" => "Intercepting output", "account_href" => $href, "days" => $days, "note" => $note ], [ '$set' => $updatedaccount ]);   
+                
                 if($updatedaccount->isSuccess()) {
                     // Send email notifications
                     // $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
