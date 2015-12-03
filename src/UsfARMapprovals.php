@@ -734,6 +734,7 @@ trait UsfARMapprovals {
             $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity) {
                 if($r['usfid'] == $identity) {
                     $r['review'] = 'closed';
+                    $r['timestamp'] = new \MongoDate(); 
                 }
                 return $r;
             }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes),$days);
