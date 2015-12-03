@@ -404,7 +404,8 @@ trait UsfARMapprovals {
 //                    }
 //                }
 //            }
-            \error_log(\json_encode($updatedaccount), 3, "/var/tmp/my-errors.log");
+            
+            \error_log(\print_r($updatedaccount,TRUE), 3, "/var/tmp/my-errors.log");
             return $updatedaccount;
         }
     }
