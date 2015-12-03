@@ -396,14 +396,14 @@ trait UsfARMapprovals {
                 }
             }
             $updatedaccount = $this->getAccountByTypeAndIdentifier($type,$identifier);
-            if($updatedaccount->isSuccess()) {
-                // Send email notifications
-                foreach ($supervisors as $supervisor) {
-                    if(isset($supervisor['email'])) {
-                        // $this->sendReviewNotification($supervisor, $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
-                    }
-                }
-            }
+//            if($updatedaccount->isSuccess()) {
+//                // Send email notifications
+//                foreach ($supervisors as $supervisor) {
+//                    if(isset($supervisor['email'])) {
+//                        // $this->sendReviewNotification($supervisor, $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
+//                    }
+//                }
+//            }
             \error_log(\json_encode($updatedaccount, JSON_PRETTY_PRINT), 3, "/var/tmp/my-errors.log");
             return $updatedaccount;
         }
