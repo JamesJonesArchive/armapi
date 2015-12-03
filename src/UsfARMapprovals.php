@@ -403,9 +403,7 @@ trait UsfARMapprovals {
 //                        // $this->sendReviewNotification($supervisor, $updatedaccount->getData(),$visor->getData()['directory_info']['self']);
 //                    }
 //                }
-//            }
-            
-            \error_log(\print_r($updatedaccount,TRUE), 3, "/var/tmp/my-errors.log");
+//            }            
             return $updatedaccount;
         }
     }
@@ -769,7 +767,6 @@ trait UsfARMapprovals {
                     // Send email notifications
                     // $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
                 }                
-                \error_log(\json_encode($updatedaccount, JSON_PRETTY_PRINT), 3, "/var/tmp/my-errors.log");
                 return $updatedaccount;
             }            
         } else {
