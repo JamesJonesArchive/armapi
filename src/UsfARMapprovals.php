@@ -278,7 +278,6 @@ trait UsfARMapprovals {
                 if($days < 0) {
                     $r[] = \array_merge($managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);
                 } else {
-                    print_r($days);
                     $r[] = \array_merge($managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate(), 'reviewend' => new \MongoDate(\strtotime("+{$days} day")) ]);
                 }
                 return $r;
