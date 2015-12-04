@@ -717,6 +717,9 @@ trait UsfARMapprovals {
                     "description" => UsfARMapi::$ARM_ERROR_MESSAGES['VISOR_PROXY_LOOKUP_ERROR']
                 ]));
             }
+            if(!isset($account['review'])) {
+                $account['review'] = [];
+            }
             $updatedattributes = [ 'review' => $account['review'] ];
             $managerattributes = [
                 'name' => $delegatevisor->getData()['directory_info']['self']['name'],
