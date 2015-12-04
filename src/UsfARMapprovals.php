@@ -47,6 +47,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         }
+        if($account['status'] === "Removed") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+            ]));
+        }         
         if(!isset($account['state'])) {
             $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
         } else {
@@ -96,6 +101,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         } 
+        if($account['status'] === "Removed") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+            ]));
+        }         
         if(!isset($account['roles'])) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'] 
@@ -420,7 +430,7 @@ trait UsfARMapprovals {
      */
     public function setReviewByIdentity($identity,$days = -1) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->find([ "identity" => $identity, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
+        $reviewaccounts = $accounts->find([ "identity" => $identity, "status" => [ '$eq' => "Active" ] ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
             $resp = $this->setReviewByAccount($account['type'],$account['identifier'],$days);
             if(!$resp->isSuccess()) {
@@ -439,7 +449,7 @@ trait UsfARMapprovals {
      */
     public function setReviewByTypeAndIdentity($type,$identity,$days = -1) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->find([ "identity" => $identity, "type" => $type, "status" => [ '$ne' => "Locked" ] ],[ "identifier" => true,'type' => true ]);
+        $reviewaccounts = $accounts->find([ "identity" => $identity, "type" => $type, "status" => [ '$eq' => "Active" ] ],[ "identifier" => true,'type' => true ]);
         foreach ($reviewaccounts as $account) {
             $resp = $this->setReviewByAccount($account['type'],$account['identifier'],$days);
             if(!$resp->isSuccess()) {
@@ -456,7 +466,7 @@ trait UsfARMapprovals {
      */
     public function setReviewAll($days = -1) {
         $accounts = $this->getARMaccounts();
-        $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ], "status" => [ '$ne' => 'Locked' ] ]);
+        $reviewaccounts = $accounts->distinct("identity",[ "identity" => [ '$exists' => true ], "status" => [ '$eq' => 'Active' ] ]);
         if(empty($reviewaccounts)) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['IDENTITIES_NONE_FOUND']
@@ -532,6 +542,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         } 
+        if($account['status'] === "Removed") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+            ]));
+        }                 
         $updatedattributes = [];
         if(!isset($account['roles'])) {
             $updatedattributes['roles'] = [];
@@ -605,6 +620,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         } 
+        if($account['status'] === "Removed") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+            ]));
+        }                 
         $updatedattributes = [];
         if(!isset($account['confirm'])) {
             $account['confirm'] = [];
@@ -643,7 +663,7 @@ trait UsfARMapprovals {
                     $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                     $roles = $this->getARMroles(); 
                     try {
-                        foreach(\array_filter($account['roles'], function($r) { return (isset($r['dynamic_role']))?!$r['dynamic_role']:true; }) as $r) {
+                        foreach(\array_filter($account['roles'], function($r) { return (isset($r['dynamic_role']))?!$r['dynamic_role']:true && (isset($r['status']))?($r['status'] !== "Removed"):true; }) as $r) {
                             $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
                             if (!is_null($accountRole)) {
                                 $resp = $this->setConfirmByAccountRole($type,$identifier, $accountRole['href'],$managerattributes);
@@ -709,6 +729,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         } 
+        if($account['status'] === "Removed") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+            ]));
+        }                         
         if(UsfARMapi::hasReviewForManager($account['review'], $identity)) {
             // Check the delegate to see if they are allowed up the org chart
             // Get the emplid for the delegate supervisor
@@ -792,7 +817,7 @@ trait UsfARMapprovals {
     public function setConfirm($identity,$managerattributes=[]) {
         $accounts = $this->getARMaccounts();
         $identifiers = $accounts->aggregate([
-            [ '$match' => [ 'identity' => $identity, 'status' => [ '$ne' => 'Locked' ] ] ],
+            [ '$match' => [ 'identity' => $identity, 'status' => [ '$eq' => 'Active' ] ] ],
             [ '$group' => [ '_id' => [ 'identifier' => '$identifier', 'type' => '$type' ] ] ]
         ]);
         if(empty($identifiers['result'])) {
