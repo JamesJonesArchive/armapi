@@ -40,6 +40,7 @@ trait UsfARMErrorMessages {
         'ACCOUNT_ROLE_STATE_UNSET_BY_MANAGER' => 'Account role does not have a state set by current manager!',
         'ACCOUNT_HAS_UNAPPROVED_ROLE_STATES' => 'Account has unapproved role states',
         'ACCOUNT_LOCKED' => 'Account is locked!',
+        'ACCOUNT_REMOVED' => 'Account has been removed!',
         'ACCOUNT_REVIEW_NO_SUPERVISORS' => 'Account has no supervisors for review',
         'IDENTITY_NO_ACCOUNTS_EXIST' => 'No accounts found for identity!',
         'IDENTITIES_NONE_FOUND' => 'No identities found!',

@@ -338,6 +338,11 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
             ]));
         }         
+        if($account['status'] === "Removed") {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+            ]));
+        }         
         $visor = $this->getVisor($account['identity']);
         if(!$visor->isSuccess()) {
             return $visor;
