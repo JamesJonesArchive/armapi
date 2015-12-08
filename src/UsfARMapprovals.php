@@ -765,6 +765,8 @@ trait UsfARMapprovals {
             $delegatevisor = $this->getVisor($delegateidentity);
             if(!$delegatevisor->isSuccess()) {
                 return $delegatevisor;
+            } else {
+                \error_log("Unproxied Visor: " . $delegatevisor->encode()."\n", 3,  '/tmp/issues.log');
             }
             $visorcheck = (new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$delegatevisor->getData()['employee_id']))->getVisor($account['identity']);
             // $visorcheck = $this->getVisor($account['identity'],$delegatevisor->getData()['employee_id']);
