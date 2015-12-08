@@ -331,6 +331,9 @@ trait UsfARMapprovals {
         }
         return $usfVisorAPI->getVisor($id);
     }
+    public function getVisorDelegated($id,$proxyemplid) {
+        
+    }
     /**
      * Updates account to the review state
      * 
@@ -763,7 +766,8 @@ trait UsfARMapprovals {
             if(!$delegatevisor->isSuccess()) {
                 return $delegatevisor;
             }
-            $visorcheck = $this->getVisor($account['identity'],$delegatevisor->getData()['employee_id']);
+            $visorcheck = (new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$delegatevisor->getData()['employee_id']))->getVisor($account['identity']);
+            // $visorcheck = $this->getVisor($account['identity'],$delegatevisor->getData()['employee_id']);
             if(!$visorcheck->isSuccess()) {
                 return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                     "description" => UsfARMapi::$ARM_ERROR_MESSAGES['VISOR_PROXY_LOOKUP_ERROR']
