@@ -42,16 +42,18 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
-        if($account['status'] === "Locked") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
-            ]));
+        if(isset($account['status'])) {
+            if($account['status'] === "Locked") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+                ]));
+            }
+            if($account['status'] === "Removed") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+                ]));
+            }         
         }
-        if($account['status'] === "Removed") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
-            ]));
-        }         
         if(!isset($account['state'])) {
             $updatedattributes['state'] = [ array_merge($managerattributes,[ 'state' => $state, 'timestamp' => new \MongoDate() ]) ];
         } else {
@@ -96,16 +98,18 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
-        if($account['status'] === "Locked") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
-            ]));
-        } 
-        if($account['status'] === "Removed") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
-            ]));
-        }         
+        if(isset($account['status'])) {
+            if($account['status'] === "Locked") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+                ]));
+            } 
+            if($account['status'] === "Removed") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+                ]));
+            }         
+        }
         if(!isset($account['roles'])) {
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NO_ROLES_EXIST'] 
@@ -343,16 +347,18 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
-        if($account['status'] === "Locked") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
-            ]));
-        }         
-        if($account['status'] === "Removed") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
-            ]));
-        }         
+        if(isset($account['status'])) {
+            if($account['status'] === "Locked") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+                ]));
+            }         
+            if($account['status'] === "Removed") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+                ]));
+            }         
+        }
         $visor = $this->getVisor($account['identity']);
         if(!$visor->isSuccess()) {
             return $visor;
@@ -537,16 +543,18 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
-        if($account['status'] === "Locked") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
-            ]));
-        } 
-        if($account['status'] === "Removed") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
-            ]));
-        }                 
+        if(isset($account['status'])) {
+            if($account['status'] === "Locked") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+                ]));
+            } 
+            if($account['status'] === "Removed") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+                ]));
+            }                 
+        }
         $updatedattributes = [];
         if(!isset($account['roles'])) {
             $updatedattributes['roles'] = [];
@@ -615,16 +623,18 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
-        if($account['status'] === "Locked") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
-            ]));
-        } 
-        if($account['status'] === "Removed") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
-            ]));
-        }                 
+        if(isset($account['status'])) {
+            if($account['status'] === "Locked") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+                ]));
+            } 
+            if($account['status'] === "Removed") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+                ]));
+            }                 
+        }
         $updatedattributes = [];
         if(!isset($account['confirm'])) {
             $account['confirm'] = [];
@@ -663,7 +673,17 @@ trait UsfARMapprovals {
                     $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                     $roles = $this->getARMroles(); 
                     try {
-                        foreach(\array_filter($account['roles'], function($r) { return (isset($r['dynamic_role']))?!$r['dynamic_role']:true && (isset($r['status']))?($r['status'] !== "Removed"):true; }) as $r) {
+                        $filtered_roles = \array_filter($account['roles'], function($r) {
+                            $check = true;
+                            if(isset($r['dynamic_role']) && $check) {
+                                $check = !$r['dynamic_role'];
+                            }
+                            if(isset($r['status']) && $check) {
+                                $check = ($r['status'] !== "Removed");
+                            }
+                            return $check;
+                        });
+                        foreach ($filtered_roles as $r) {
                             $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
                             if (!is_null($accountRole)) {
                                 $resp = $this->setConfirmByAccountRole($type,$identifier, $accountRole['href'],$managerattributes);
@@ -724,16 +744,18 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS']
             ]));
         }
-        if($account['status'] === "Locked") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
-            ]));
-        } 
-        if($account['status'] === "Removed") {
-            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
-            ]));
-        }                         
+        if(isset($account['status'])) {
+            if($account['status'] === "Locked") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_LOCKED']
+                ]));
+            } 
+            if($account['status'] === "Removed") {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REMOVED']
+                ]));
+            }                         
+        }
         if(UsfARMapi::hasReviewForManager($account['review'], $identity)) {
             // Check the delegate to see if they are allowed up the org chart
             // Get the emplid for the delegate supervisor
