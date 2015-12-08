@@ -322,17 +322,14 @@ trait UsfARMapprovals {
      * @return JSendResponse
      */
     public function getVisor($id,$proxyemplid = '') {        
+        $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig);
         if(\in_array($this->auditInfo['armuser']['role'], ['Admin','Batch']) && empty($proxyemplid)) {
-            $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig);
+            return $usfVisorAPI->getVisor($id);
         } elseif(empty($proxyemplid)) {
-            $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$this->auditInfo['armuser']['emplid']);
+            return $usfVisorAPI->getVisor($id,$this->auditInfo['armuser']['emplid']);
         } else {
-            $usfVisorAPI = new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$proxyemplid);
+            return $usfVisorAPI->getVisor($id,$proxyemplid);
         }
-        return $usfVisorAPI->getVisor($id);
-    }
-    public function getVisorDelegated($id,$proxyemplid) {
-        
     }
     /**
      * Updates account to the review state
@@ -768,8 +765,7 @@ trait UsfARMapprovals {
             } else {
                 \error_log("Unproxied Visor: " . $delegatevisor->encode()."\n", 3,  '/tmp/issues.log');
             }
-            $visorcheck = (new \USF\IdM\USFVisorAPI((new \USF\IdM\UsfConfig())->visorConfig,$delegatevisor->getData()['employee_id']))->getVisor($account['identity']);
-            // $visorcheck = $this->getVisor($account['identity'],$delegatevisor->getData()['employee_id']);
+            $visorcheck = $this->getVisor($account['identity'],$delegatevisor->getData()['employee_id']);
             if(!$visorcheck->isSuccess()) {
                 return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                     "description" => UsfARMapi::$ARM_ERROR_MESSAGES['VISOR_PROXY_LOOKUP_ERROR']
