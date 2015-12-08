@@ -768,6 +768,8 @@ trait UsfARMapprovals {
                 return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                     "description" => UsfARMapi::$ARM_ERROR_MESSAGES['VISOR_PROXY_LOOKUP_ERROR']
                 ]));
+            } else {                
+                \error_log("Target Account Identity: ".$account['identity'] .", Delegate (identity: " . $delegateidentity . ",emplid: " .$delegatevisor->getData()['employee_id'] .  ") -> Visor: " . \json_encode($visorcheck, JSON_PRETTY_PRINT) . "\n", 3, '/tmp/issues.log');                
             }
             if(!isset($account['review'])) {
                 $account['review'] = [];
