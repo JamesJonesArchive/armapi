@@ -19,7 +19,7 @@
         },
         {
             "type": "vcs",
-            "url": "https://github.com/jamjon3/VisorClientAPI.git"
+            "url": "https://github.com/USF-IT/VisorClientAPI.git"
         }
     ],
     "require": {
