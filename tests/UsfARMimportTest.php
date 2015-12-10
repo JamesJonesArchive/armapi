@@ -26,7 +26,7 @@ use \USF\IdM\UsfARMapi;
 class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
     use UsfARMmongomock;
     /**
-     * @covers UsfARMapi::importAccount
+     * @covers \USF\IdM\UsfARMimport::importAccount
      */
     public function testImportAccount() {
         $response = $this->usfARMapi->importAccount([
@@ -50,7 +50,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         $this->assertTrue($this->usfARMapi->getAccountByTypeAndIdentifier("FAST","ROCKYBULL")->isSuccess());
     }
     /**
-     * @covers UsfARMapi::importAccountRoles
+     * @covers \USF\IdM\UsfARMimport::importAccountRoles
      */
     public function testImportAccountRoles() {
         // The specified account has many roles. This should reduce that to one role
@@ -71,10 +71,14 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirming that the value of the roles key is not empty
         $this->assertNotEmpty($response->getData()['roles']);
         // Confirming the count of the roles is 1
-        $this->assertCount(1, $response->getData()['roles']);
+        // Confirming the count of the values in the roles key for non deleted roles
+        $this->assertCount(1,\array_filter($response->getData()['roles'], function($r) { return (isset($r['status']))?($r['status'] != "Removed"):true;  }));
+        // Confirming the count of the values in the roles key for deleted roles
+        $this->assertCount(5,\array_filter($response->getData()['roles'], function($r) { return (isset($r['status']))?($r['status'] == "Removed"):false;  }));
+        
     }
     /**
-     * @covers UsfARMapi::importAccountRoles
+     * @covers \USF\IdM\UsfARMimport::importAccountRoles
      */
     public function testImportAccountRoles_MissingAccountData() {
         $response = $this->usfARMapi->importAccountRoles([
@@ -90,16 +94,16 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirming that the function failed by the JSendResponse isFail method
         $this->assertTrue($response->isFail());
         // Confirming the account key exists
-        $this->assertArrayHasKey('account',$response->getData());
+        $this->assertArrayHasKey('description',$response->getData());
         // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['account']);
+        $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the identity key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['account']); 
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['description']); 
     }
     /**
-     * @covers UsfARMapi::importRole
+     * @covers \USF\IdM\UsfARMimport::importRole
      */
-    public function testimportRole() {
+    public function testImportRole() {
         $response = $this->usfARMapi->importRole([
             "name" => "Test Role",
             "account_type" => "FAST",
@@ -119,4 +123,47 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirm the account was created
         $this->assertTrue($this->usfARMapi->getRoleByTypeAndName("FAST","Test Role")->isSuccess());
     }
+    /**
+     * @covers \USF\IdM\UsfARMimport::buildAccountComparison
+     */
+    public function testBuildAccountComparison() {
+        $response = $this->usfARMapi->buildAccountComparison('FAST');
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the FAST key exists
+        $this->assertArrayHasKey('FAST',$response->getData());
+        // Confirming the value of FAST is not empty
+        $this->assertNotEmpty($response->getData()['FAST']);
+        // Check the FAST
+        $this->assertEquals(1,$response->getData()['FAST']);
+        $response = $this->usfARMapi->buildAccountComparison('GEMS');
+        // Confirming the GEMS key exists
+        $this->assertArrayHasKey('GEMS',$response->getData());
+        // Confirming the value of GEMS is not empty
+        $this->assertNotEmpty($response->getData()['GEMS']);
+        // Check the GEMS
+        $this->assertEquals(2,$response->getData()['GEMS']);
+    }
+    /**
+     * @covers \USF\IdM\UsfARMimport::buildRoleComparison
+     */
+    public function testBuildRoleComparison() {
+        $response = $this->usfARMapi->buildRoleComparison('FAST');
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the FAST key exists
+        $this->assertArrayHasKey('FAST',$response->getData());
+        // Confirming the value of FAST is not empty
+        $this->assertNotEmpty($response->getData()['FAST']);
+        // Check the FAST
+        $this->assertEquals(1,$response->getData()['FAST']);
+        $response = $this->usfARMapi->buildRoleComparison('GEMS');
+        // Confirming the GEMS key exists
+        $this->assertArrayHasKey('GEMS',$response->getData());
+        // Confirming the value of GEMS is not empty
+        $this->assertNotEmpty($response->getData()['GEMS']);
+        // Check the GEMS
+        $this->assertEquals(8,$response->getData()['GEMS']);
+    }
+
 }

@@ -37,6 +37,7 @@ trait UsfARMmongomock {
      * Get the mongo connection for this test.
      *
      * @return Zumba\PHPUnit\Extensions\Mongo\Client\Connector
+     * @coversNothing
      */
     protected function getMongoConnection() {
         // return new \MongoClient();
@@ -65,6 +66,7 @@ trait UsfARMmongomock {
      * Get the dataset to be used for this test.
      *
      * @return Zumba\PHPUnit\Extensions\Mongo\DataSet\DataSet
+     * @coversNothing
      */
     protected function getMongoDataSet() {
         if (empty($this->dataSet)) {
@@ -75,11 +77,11 @@ trait UsfARMmongomock {
     }
     /**
      * Prepares the environment for mocking the mongo connection and the modified collection access functions
-     * 
+     * @coversNothing
      */
     public function setUp() {
         $this->usfARMapi = $this->getMockBuilder('\USF\IdM\UsfARMapi')
-        ->setMethods(array('getARMdb','getARMaccounts','getARMroles'))
+        ->setMethods(array('getARMdb','getARMaccounts','getARMroles','getARMtracking','getARMlogs','getARMaudits','getVisor'))
         ->getMock();
         
         $this->usfARMapi->expects($this->any())
@@ -94,14 +96,66 @@ trait UsfARMmongomock {
         ->method('getARMroles')
         ->will($this->returnValue($this->getMongoConnection()->collection('roles')));
         
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMtracking')
+        ->will($this->returnValue($this->getMongoConnection()->collection('tracking')));
+
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMlogs')
+        ->will($this->returnValue($this->getMongoConnection()->collection('logs')));
+        
+        $this->usfARMapi->expects($this->any())
+        ->method('getARMaudits')
+        ->will($this->returnValue($this->getMongoConnection()->collection('audits')));
+        
+        $this->usfARMapi->expects($this->any())
+        ->method('getVisor')
+        ->will($this->returnValue(new \JSend\JSendResponse('success', [
+            "employee_id" => "00000065432",
+            "supervisors" => ["00000023456"],
+            "employees" => [],
+            "directory_info" => [
+                "self" => [
+                    "name" => "Gold, Greeny",
+                    "usf_id" => "U98767543",
+                    "email" => "someguy@usf.edu",
+                    "eppa" => "Staff",
+                    "phone" => "987 654-3210",
+                    "mailstop" => "XYX 100",
+                    "affiliations" => ["Some Affiliation : Some Department"]
+                ],
+                "supervisors" => [
+                    [
+                        "employee_id" => "00000023456",
+                        "usf_id" => "U99999999",
+                        "name" => "Rocky Bull",
+                        "email" => "user@usf.edu",
+                        "eppa"=> "Staff",
+                        "mailstop" => "AAA123",
+                        "phone" => "123 456-7899",
+                        "affiliations" => [
+                            "Assistant Director : Some Department",
+                            "Grad Student : Information Systems/Decision Sciences"
+                        ],
+                    ]
+                ],
+                "employees" => []                
+            ]
+        ])));
+
         parent::setUp();
     }
     
     /**
      * Test data for armapi testing
+     * 
+     * @return array An array of the test data for the fixture
+     * @codeCoverageIgnore
      */
     public static function getFixture() {
         return [
+            'logs' => [],
+            'tracking' => [],
             'accounts' => [
                 [
                     "employeeID" => "00000012345",
