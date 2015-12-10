@@ -756,6 +756,11 @@ trait UsfARMapprovals {
                 ]));
             }                         
         }
+        if($account['identity'] == $delegateidentity) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_DELEGATED_TO_SELF']
+            ]));
+        }
         if(UsfARMapi::hasReviewForManager($account['review'], $identity)) {
             // Check the delegate to see if they are allowed up the org chart
             // Get the emplid for the delegate supervisor
