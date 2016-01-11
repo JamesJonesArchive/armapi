@@ -82,7 +82,7 @@ trait UsfARMformatter {
         if((isset($mongoaccount['roles']))?  \is_array($mongoaccount['roles']):false) {
             $mongoaccount['roles'] = \array_map(function($a) use(&$roles) { 
                 if(isset($a['role_id'])) {
-                    $role = $roles->findOne([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, '_id' => false ]);
+                    $role = $roles->findOne([ "_id" => $a['role_id'] ],[ 'name' => true, 'short_description' => true, 'href' => true, 'type' => true, '_id' => false ]);
                     if (!is_null($role)) {
                         unset($a['role_id']);
                         return self::convertMongoDatesToUTCstrings(\array_merge($a,$role));
