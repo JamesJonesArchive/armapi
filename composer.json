@@ -19,14 +19,18 @@
         },
         {
             "type": "vcs",
+            "url": "https://github.com/USF-IT/usf-idm-common/"
+        },
+        {
+            "type": "vcs",
             "url": "https://github.com/USF-IT/VisorClientAPI.git"
         }
     ],
     "require": {
         "usf-it/usf-idm-database": "dev-master",
         "usf-it/usf-idm-common": "dev-master",
-        "shkm/jsend": ">1.2.0",
-        "usf-it/usf-visor-client-api": "dev-master",
+        "NanneHuiges/JSend": "2.1.0",
+        "usf-it/usf-visor-client-api": "~1.0",
         "phpmailer/phpmailer": "~5.2",
         "smarty/smarty": "~3.1"
     },
