@@ -30,7 +30,7 @@
         "usf-it/usf-idm-database": "dev-master",
         "usf-it/usf-idm-common": "dev-master",
         "NanneHuiges/JSend": "2.1.0",
-        "usf-it/usf-visor-client-api": "~1.0",
+        "usf-it/usf-visor-client-api": "1.0.1",
         "phpmailer/phpmailer": "~5.2",
         "smarty/smarty": "~3.1"
     },
