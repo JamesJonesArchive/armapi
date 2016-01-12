@@ -52,13 +52,19 @@ trait UsfARMimport {
      * @return JSendResponse
      */
     public function importAccount($account) {
-        $currentaccount = $this->getAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier']);
-        if($currentaccount->isSuccess()) {
-            // Update existing account
-            return $this->modifyAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier'],$account);
+        if(!empty($account)) {
+            $currentaccount = $this->getAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier']);
+            if($currentaccount->isSuccess()) {
+                // Update existing account
+                return $this->modifyAccountByTypeAndIdentifier($account['account_type'],$account['account_identifier'],$account);
+            } else {
+                // Create new account
+                return $this->createAccountByType($account['account_type'], $account); 
+            }
         } else {
-            // Create new account
-            return $this->createAccountByType($account['account_type'], $account); 
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
+            ]));
         }
     }
     /**
@@ -88,13 +94,19 @@ trait UsfARMimport {
      * @return JSendResponse
      */
     public function importRole($role) {
-        $currentrole = $this->getRoleByTypeAndName($role['account_type'],$role['name']);
-        if($currentrole->isSuccess()) {
-            // Update existing role
-            return $this->modifyRoleByTypeAndName($role['account_type'],$role['name'],$role);
+        if(!empty($role)) {
+            $currentrole = $this->getRoleByTypeAndName($role['account_type'],$role['name']);
+            if($currentrole->isSuccess()) {
+                // Update existing role
+                return $this->modifyRoleByTypeAndName($role['account_type'],$role['name'],$role);
+            } else {
+                // Create new role
+                return $this->createRoleByType($role);
+            }            
         } else {
-            // Create new role
-            return $this->createRoleByType($role);
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_INFO_MISSING']
+            ]));            
         }
     }
     /**
