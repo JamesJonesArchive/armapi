@@ -121,7 +121,9 @@ trait UsfARMimport {
         if(is_null($type)) {
             foreach ($this->getAllAccounts()->getData() as $type => $accounts) {
                 $result[$type] = count($accounts);
-                $compares->batchInsert($accounts);
+                if($result[$type] > 0) {
+                    $compares->batchInsert($accounts);
+                }
             }
         } else {            
             $accounts = $this->getARMaccounts()->find(['type' => $type ],[ 'href' => true, '_id' => false ]);
@@ -155,14 +157,18 @@ trait UsfARMimport {
         if(is_null($type)) {
             foreach ($this->getAllRoles()->getData() as $type => $roles) {
                 $result[$type] = count($roles);
-                $compares->batchInsert($roles);
+                if($result[$type] > 0) {
+                    $compares->batchInsert($roles);
+                }
             }
         } else {
             $roles = \array_map(function($a) { 
                 return ['href' => $a['href']];                 
             }, $this->getAllRolesByType($type)->getData()['roles']);
-            $compares->batchInsert($roles);
             $result[$type] = count($roles);
+            if($result[$type] > 0) {
+                $compares->batchInsert($roles);
+            }
         }
         return new JSendResponse('success', $result);
     }
