@@ -283,5 +283,16 @@ trait UsfARMimport {
             ]);
         }
     }
+    /**
+     * Ensures the indexes on the collections are setup
+     */
+    public function ensureIndexes() {
+        // Indexes for accounts (1 is ascending)
+        $this->getARMdb()->accounts->createIndex(['href' => 1]);
+        $this->getARMdb()->accounts->createIndex(['identity' => 1]);
+        $this->getARMdb()->accounts->createIndex(['type' => 1,'identifier' => 1]);
+        // Indexes for roles (1 is ascending)
+        $this->getARMdb()->roles->createIndex(['href' => 1]);
+    }
 
 }
