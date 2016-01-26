@@ -171,8 +171,8 @@ trait UsfARMimport {
             $this->current_accounts[$type] = [];
             $this->current_accounts_hash[$type] = [];
             foreach ($accounts as $account) {
-                $this->current_accounts[$type][] = $accounts[$href];
-                $this->current_roles_hash[$type][] = $role['hash'];
+                if (isset($account['href'])) $this->current_accounts[$type][] = $account[$href];
+                if (isset($account['hash'])) $this->current_accounts_hash[$type][] = $account['hash'];
             }
             $result[$type] = count($accounts);
         }
@@ -203,8 +203,8 @@ trait UsfARMimport {
             }, $this->getAllRolesByType($type)->getData()['roles']);
             $result[$type] = count($roles);
             foreach ($roles as $role) {
-              $this->current_roles[$type][] = $role['href'];
-              $this->current_roles_hash[$type][] = $role['hash'];
+              if (isset($role['href'])) $this->current_roles[$type][] = $role['href'];
+              if (isset($role['hash'])) $this->current_roles_hash[$type][] = $role['hash'];
             }
         }
         return new JSendResponse('success', $result);
