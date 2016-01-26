@@ -171,7 +171,7 @@ trait UsfARMimport {
             $this->current_accounts[$type] = [];
             $this->current_accounts_hash[$type] = [];
             foreach ($accounts as $account) {
-                if (isset($account['href'])) $this->current_accounts[$type][] = $account[$href];
+                if (isset($account['href'])) $this->current_accounts[$type][] = $account['href'];
                 if (isset($account['hash'])) $this->current_accounts_hash[$type][] = $account['hash'];
             }
             $result[$type] = count($accounts);
