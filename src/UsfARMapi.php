@@ -37,10 +37,20 @@ class UsfARMapi extends UsfAbstractMongoConnection {
     private $version = "0.0.1";
     private $auditInfo;
     private $smtpServer;
+    private $armdbName;
 
     public function __construct($request = ['armuser' => [ 'usf_id' => '', 'name' => '', 'role' => 'Batch' ]],$smtpServer = '') {
         $this->auditInfo = ($request instanceof \Slim\Http\Request)?UsfARMapi::getRequestAuditInfo($request):$request;
         $this->smtpServer = $smtpServer;
+        $this->armdbName = "arm";
+    }
+    /**
+     * Overrides the default arm collection name
+     * 
+     * @param string $armdbName
+     */
+    public function setARMdbName($armdbName) {
+        $this->armdbName = $armdbName;
     }
     /**
      * Returns the current API version
@@ -56,7 +66,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      * @return \MongoDB
      */
     public function getARMdb() {
-        return parent::getMongoConnection()->arm;
+        return parent::getMongoConnection()->{$this->armdbName};
     }
     /**
      * Returns the accounts mongo collection
