@@ -500,30 +500,38 @@ trait UsfARMapprovals {
      */
     public function sendReviewNotification($supervisor,$account,$userinfo) {
         //Create a new PHPMailer instance
-        $mail = new \PHPMailer;
-        if(!empty($this->smtpServer)) {
-            $mail->isSMTP();  // Set mailer to use SMTP
-            $mail->Host = $this->smtpServer;
-        }
-        $mail->setFrom('noreply@arm.us', 'ARM Automated Service');
-        $mail->addAddress($supervisor['email'], $supervisor['name']); 
-        $mail->isHTML(true); // Set email format to HTML
-        $mail->Subject = 'ARM Review Pending Notification for Employee: ' . $userinfo['name'];
-        
-        $smarty = new \Smarty();
-        $smarty->template_dir = __DIR__ . "/../templates"; 
-        
-        $smarty->assign('supervisor', $supervisor);
-        $smarty->assign('userinfo', $userinfo);
-        $smarty->assign('account', $account);
+        $mail = new \PHPMailer(true);
+        try {
+            if(!empty($this->smtpServer)) {
+                $mail->isSMTP();  // Set mailer to use SMTP
+                $mail->Host = $this->smtpServer;
+            }
+            $mail->setFrom('noreply@arm.us', 'ARM Automated Service');
+            $mail->addAddress($supervisor['email'], $supervisor['name']); 
+            $mail->isHTML(true); // Set email format to HTML
+            $mail->Subject = 'ARM Review Pending Notification for Employee: ' . $userinfo['name'];
 
-        $mail->msgHTML($smarty->fetch('reviewnotification.tpl'));
-        //msgHTML also sets AltBody, but if you want a custom one, set it afterwards
-        $mail->AltBody = 'To view the message, please use an HTML compatible email viewer!';
-        if(!$mail->send()) {
-            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $mail->ErrorInfo ]);
-        } else {
-            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'message' => $smarty->fetch('reviewnotification.tpl') ]);
+            $smarty = new \Smarty();
+            $smarty->template_dir = __DIR__ . "/../templates"; 
+
+            $smarty->assign('supervisor', $supervisor);
+            $smarty->assign('userinfo', $userinfo);
+            $smarty->assign('account', $account);
+
+            $mail->msgHTML($smarty->fetch('reviewnotification.tpl'));
+            //msgHTML also sets AltBody, but if you want a custom one, set it afterwards
+            $mail->AltBody = 'To view the message, please use an HTML compatible email viewer!';
+            if(!$mail->send()) {
+                $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $mail->ErrorInfo ]);
+            } else {
+                $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'message' => $smarty->fetch('reviewnotification.tpl') ]);
+            }
+        } catch (\phpmailerException $e) {
+            //Pretty error messages from PHPMailer
+            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $e->errorMessage() ]);
+        } catch (\Exception $e) {
+            // Boring error messages from anything else!
+            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $e->getMessage() ]);
         }
     }
     /**
