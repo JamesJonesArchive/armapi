@@ -724,6 +724,7 @@ trait UsfARMapprovals {
         }
     }
     /**
+     * Delegates any matching open reviews for a manager to a another manager
      * 
      * @param string $delegateidentity
      * @param string $identity
