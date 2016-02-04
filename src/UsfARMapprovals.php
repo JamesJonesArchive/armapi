@@ -739,17 +739,22 @@ trait UsfARMapprovals {
         } else {
             $matchingaccounts = $accounts->find(["review" => ['$elemMatch' => ['review' => 'open', 'usfid' => $identity ]], "type" => $type ],["type" => true,"identifier" => true,"_id" => false]);
         }
-        $response = [];
+        $response = ["summary" => []];
         foreach ($matchingaccounts as $account) {
-            if(!isset($response[$account['type']])) {
-                $response[$account['type']] = ["succeeded" => 0,"failed" => 0];
+            if(!isset($response["summary"][$account['type']])) {
+                $response["summary"][$account['type']] = ["succeeded" => 0,"failed" => 0];
             }
             if($this->delegateReviewByTypeAndIdentifier($delegateidentity, $identity, $account['type'], $account['identifier'], $days, $note)->isSuccess()) {
-                $response[$account['type']]["succeeded"]++;
+                $response["summary"][$account['type']]["succeeded"]++;
             } else {
-                $response[$account['type']]["failed"]++;
+                $response["summary"][$account['type']]["failed"]++;
             }            
         }
+        $successcount = 0;
+        foreach($response["summary"] as $key => $summary) {
+            $successcount += $summary["succeeded"];
+        }
+        $response['count'] = $successcount;
         return new JSendResponse('success',$response);
     }
     /**
