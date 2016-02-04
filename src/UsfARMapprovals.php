@@ -724,6 +724,34 @@ trait UsfARMapprovals {
         }
     }
     /**
+     * 
+     * @param string $delegateidentity
+     * @param string $identity
+     * @param string $days
+     * @param string $note
+     * @return JSendResponse
+     */
+    public function delegateAllReviews($delegateidentity,$identity,$type='',$days = -1,$note = "") {
+        $accounts = $this->getARMaccounts();
+        if(empty($type)) {
+            $matchingaccounts = $accounts->find(["review" => ['$elemMatch' => ['review' => 'open', 'usfid' => $identity ]] ],["type" => true,"identifier" => true,"_id" => false]);
+        } else {
+            $matchingaccounts = $accounts->find(["review" => ['$elemMatch' => ['review' => 'open', 'usfid' => $identity ]], "type" => $type ],["type" => true,"identifier" => true,"_id" => false]);
+        }
+        $response = [];
+        foreach ($matchingaccounts as $account) {
+            if(!isset($response[$account['type']])) {
+                $response[$account['type']] = ["succeeded" => 0,"failed" => 0];
+            }
+            if($this->delegateReviewByTypeAndIdentifier($delegateidentity, $identity, $account['type'], $account['identifier'], $days, $note)->isSuccess()) {
+                $response[$account['type']]["succeeded"]++;
+            } else {
+                $response[$account['type']]["failed"]++;
+            }            
+        }
+        return new JSendResponse('success',$response);
+    }
+    /**
      * Delegates an existing open review to another manager
      * 
      * @param string $delegateidentity
