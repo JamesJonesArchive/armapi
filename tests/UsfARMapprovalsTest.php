@@ -276,6 +276,37 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(3, \array_filter($response->getData()['accounts'], function($a) { return UsfARMapi::getStateForManager($a['state'], 'U99999999') == ''; }));        
     }
     /**
+     * @covers \USF\IdM\UsfARMapprovals::delegateAllReviews
+     */
+    public function testDelegateAllReviews() {
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL')->isSuccess());
+        // Delegate open reviews for Rocky Bull to Gold Greeny
+        $response = $this->usfARMapi->delegateAllReviews('U98767543','U99999999');
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the count key exists
+        $this->assertArrayHasKey('count',$response->getData());
+        // Confirming the value of the count key is 1
+        $this->assertEquals(1, $response->getData()['count']);
+        // Confirming the summary key exists
+        $this->assertArrayHasKey('summary',$response->getData());
+        // Confirming that there is only 1 type in the summary data to be processed
+        $this->assertCount(1,$response->getData()['summary']);
+        // Confirming the summary key exists
+        $this->assertArrayHasKey('GEMS',$response->getData()['summary']);
+        // Confirming that there is only 2 keys in the GEMS summary data to be processed
+        $this->assertCount(2,$response->getData()['summary']['GEMS']);
+        // Confirming the succeeded key exists
+        $this->assertArrayHasKey('succeeded',$response->getData()['summary']['GEMS']);
+        // Confirming the failed key exists
+        $this->assertArrayHasKey('failed',$response->getData()['summary']['GEMS']);
+        // Confirming the value of the succeeded key is 1
+        $this->assertEquals(1, $response->getData()['summary']['GEMS']['succeeded']);
+        // Confirming the value of the failed key is 1
+        $this->assertEquals(0, $response->getData()['summary']['GEMS']['failed']);
+    }
+    /**
      * @covers \USF\IdM\UsfARMapprovals::delegateReview
      */
     public function testDelegateReview() {
