@@ -346,12 +346,14 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
 
         // Update the roles hash
-        $account = $accounts->findAndModify(
-            [ "type" => $type, "identifier" => $identifier ],
-            ['$set' => ['roles_hash' => $rolechanges['role_hash']]],
-            null,
-            ["new" => true]
-        );
+        if(isset($rolechanges['role_hash'])) {
+            $account = $accounts->findAndModify(
+                [ "type" => $type, "identifier" => $identifier ],
+                ['$set' => ['roles_hash' => $rolechanges['role_hash']]],
+                null,
+                ["new" => true]
+            );
+        }
 
         // Refresh the account roles after add(s)
         $account = $accounts->findOne([ "type" => $type, "identifier" => $identifier ]);
