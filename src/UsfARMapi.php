@@ -197,14 +197,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             ],
             (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[]
         );
-        if(!isset($accountattributes['confirm'])) {
-            $accountattributes['confirm'] = [
-                'name' => 'SOR',
-                'usfid' => 'U99999999',
-                'state' => '',
-                'timestamp' => new \MongoDate()
-            ];
-        }
         $insert_status = $accounts->insert($accountattributes);
         if(!$insert_status) {
             return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
@@ -724,13 +716,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             $account['roles'][] = \array_merge([
                 "role_id" => $roles->findOne([ 'href' => $roleappend['href'] ])['_id'],
                 "added_date" => new \MongoDate(),
-                "status" => "Active",
-                "confirm" => [
-                    'name' => 'SOR',
-                    'usfid' => 'U99999999',
-                    'state' => '',
-                    'timestamp' => new \MongoDate()                    
-                ]
+                "status" => "Active"
             ], \array_diff_key($roleappend,array_flip([
                 'href','short_description','name','role_id','added_date','status'
             ])));
