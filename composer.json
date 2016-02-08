@@ -27,10 +27,10 @@
         }
     ],
     "require": {
-        "usf-it/usf-idm-database": "dev-master",
-        "usf-it/usf-idm-common": "dev-master",
+        "usf-it/usf-idm-database": "1.0.0",
+        "usf-it/usf-idm-common": "0.5.0",
         "NanneHuiges/JSend": "2.1.0",
-        "usf-it/usf-visor-client-api": "1.0.1",
+        "usf-it/usf-visor-client-api": "1.0.3",
         "phpmailer/phpmailer": "~5.2",
         "smarty/smarty": "~3.1"
     },

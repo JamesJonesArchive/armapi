@@ -142,7 +142,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirming the value of GEMS is not empty
         $this->assertNotEmpty($response->getData()['GEMS']);
         // Check the GEMS
-        $this->assertEquals(2,$response->getData()['GEMS']);
+        $this->assertEquals(1,$response->getData()['GEMS']);
     }
     /**
      * @covers \USF\IdM\UsfARMimport::buildRoleComparison

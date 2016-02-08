@@ -500,30 +500,38 @@ trait UsfARMapprovals {
      */
     public function sendReviewNotification($supervisor,$account,$userinfo) {
         //Create a new PHPMailer instance
-        $mail = new \PHPMailer;
-        if(!empty($this->smtpServer)) {
-            $mail->isSMTP();  // Set mailer to use SMTP
-            $mail->Host = $this->smtpServer;
-        }
-        $mail->setFrom('noreply@arm.us', 'ARM Automated Service');
-        $mail->addAddress($supervisor['email'], $supervisor['name']); 
-        $mail->isHTML(true); // Set email format to HTML
-        $mail->Subject = 'ARM Review Pending Notification for Employee: ' . $userinfo['name'];
-        
-        $smarty = new \Smarty();
-        $smarty->template_dir = __DIR__ . "/../templates"; 
-        
-        $smarty->assign('supervisor', $supervisor);
-        $smarty->assign('userinfo', $userinfo);
-        $smarty->assign('account', $account);
+        $mail = new \PHPMailer(true);
+        try {
+            if(!empty($this->smtpServer)) {
+                $mail->isSMTP();  // Set mailer to use SMTP
+                $mail->Host = $this->smtpServer;
+            }
+            $mail->setFrom('noreply@arm.us', 'ARM Automated Service');
+            $mail->addAddress($supervisor['email'], $supervisor['name']); 
+            $mail->isHTML(true); // Set email format to HTML
+            $mail->Subject = 'ARM Review Pending Notification for Employee: ' . $userinfo['name'];
 
-        $mail->msgHTML($smarty->fetch('reviewnotification.tpl'));
-        //msgHTML also sets AltBody, but if you want a custom one, set it afterwards
-        $mail->AltBody = 'To view the message, please use an HTML compatible email viewer!';
-        if(!$mail->send()) {
-            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $mail->ErrorInfo ]);
-        } else {
-            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'message' => $smarty->fetch('reviewnotification.tpl') ]);
+            $smarty = new \Smarty();
+            $smarty->template_dir = __DIR__ . "/../templates"; 
+
+            $smarty->assign('supervisor', $supervisor);
+            $smarty->assign('userinfo', $userinfo);
+            $smarty->assign('account', $account);
+
+            $mail->msgHTML($smarty->fetch('reviewnotification.tpl'));
+            //msgHTML also sets AltBody, but if you want a custom one, set it afterwards
+            $mail->AltBody = 'To view the message, please use an HTML compatible email viewer!';
+            if(!$mail->send()) {
+                $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $mail->ErrorInfo ]);
+            } else {
+                $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'message' => $smarty->fetch('reviewnotification.tpl') ]);
+            }
+        } catch (\phpmailerException $e) {
+            //Pretty error messages from PHPMailer
+            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $e->errorMessage() ]);
+        } catch (\Exception $e) {
+            // Boring error messages from anything else!
+            $this->auditLog([ "supervisor" => $supervisor, "accountuser" => $userinfo ], [ 'error' => $e->getMessage() ]);
         }
     }
     /**
@@ -714,6 +722,40 @@ trait UsfARMapprovals {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
             ]));
         }
+    }
+    /**
+     * Delegates any matching open reviews for a manager to a another manager
+     * 
+     * @param string $delegateidentity
+     * @param string $identity
+     * @param string $days
+     * @param string $note
+     * @return JSendResponse
+     */
+    public function delegateAllReviews($delegateidentity,$identity,$type='',$days = -1,$note = "") {
+        $accounts = $this->getARMaccounts();
+        if(empty($type)) {
+            $matchingaccounts = $accounts->find(["review" => ['$elemMatch' => ['review' => 'open', 'usfid' => $identity ]] ],["type" => true,"identifier" => true,"_id" => false]);
+        } else {
+            $matchingaccounts = $accounts->find(["review" => ['$elemMatch' => ['review' => 'open', 'usfid' => $identity ]], "type" => $type ],["type" => true,"identifier" => true,"_id" => false]);
+        }
+        $response = ["summary" => []];
+        foreach ($matchingaccounts as $account) {
+            if(!isset($response["summary"][$account['type']])) {
+                $response["summary"][$account['type']] = ["succeeded" => 0,"failed" => 0];
+            }
+            if($this->delegateReviewByTypeAndIdentifier($delegateidentity, $identity, $account['type'], $account['identifier'], $days, $note)->isSuccess()) {
+                $response["summary"][$account['type']]["succeeded"]++;
+            } else {
+                $response["summary"][$account['type']]["failed"]++;
+            }            
+        }
+        $successcount = 0;
+        foreach($response["summary"] as $key => $summary) {
+            $successcount += $summary["succeeded"];
+        }
+        $response['count'] = $successcount;
+        return new JSendResponse('success',$response);
     }
     /**
      * Delegates an existing open review to another manager
