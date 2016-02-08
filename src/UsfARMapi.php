@@ -193,7 +193,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 'type' => $account['account_type'],
                 'identifier' => $account['account_identifier'],
                 'created_date' => new \MongoDate(),
-                'modified_date' => new \MongoDate()
+                'modified_date' => new \MongoDate(),
+                'state' => []
             ],
             (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[]
         );
@@ -716,7 +717,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             $account['roles'][] = \array_merge([
                 "role_id" => $roles->findOne([ 'href' => $roleappend['href'] ])['_id'],
                 "added_date" => new \MongoDate(),
-                "status" => "Active"
+                "status" => "Active",
+                "state" => []
             ], \array_diff_key($roleappend,array_flip([
                 'href','short_description','name','role_id','added_date','status'
             ])));
