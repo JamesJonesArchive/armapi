@@ -505,30 +505,6 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER'], $response->getData()['description']);                        
     }
     /**
-     * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
-     */
-    public function testSetConfirmByAccount_ReviewUnset() {
-        // Set the state first
-        // Confirming that the function executed successfully by the JSendResponse isSuccess method
-        $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', '', [
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ])->isSuccess());
-        // Now run the setConfirmByAccount to test the result
-        $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
-            'usfid' => 'U99999999',
-            'name' => 'Rocky Bull'
-        ]);
-        // Confirming that the function failed by the JSendResponse isFail method
-        $this->assertTrue($response->isFail());
-        // Confirming the account key exists
-        $this->assertArrayHasKey('description',$response->getData());
-        // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['description']);
-        // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER'], $response->getData()['description']);                        
-    }
-    /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccountRole
      */
     public function testSetConfirmByAccount_NoAccount() {
