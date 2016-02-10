@@ -663,14 +663,14 @@ trait UsfARMapprovals {
             if(!isset($account['roles'])) {
                 $account['roles'] = [];
             }
-            if(UsfARMapi::hasUnapprovedRoleState($account['roles'], $managerattributes)) {
-                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
-                ]));
-            }
             if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
                 // Set the account review closed
                 $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes);
+                if(UsfARMapi::hasUnapprovedRoleState($account['roles'], $managerattributes)) {
+                    return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
+                    ]));
+                }
             } 
             // Update the account
             $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
