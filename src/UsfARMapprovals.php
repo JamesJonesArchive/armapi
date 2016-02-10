@@ -660,64 +660,57 @@ trait UsfARMapprovals {
                 'state' => UsfARMapi::getStateForManager($account['state'], $managerattributes['usfid']), 
                 'timestamp' => new \MongoDate() 
             ]);
+            if(!isset($account['roles'])) {
+                $account['roles'] = [];
+            }
+            if(UsfARMapi::hasUnapprovedRoleState($account['roles'], $managerattributes)) {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
+                ]));
+            }
             if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
                 // Set the account review closed
                 $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes);
-                if(!isset($account['roles'])) {
-                    $account['roles'] = [];
-                }
-                if(UsfARMapi::hasUnapprovedRoleState($account['roles'], $managerattributes)) {
-                    return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
-                    ]));
-                }
-                // Update the account
-                $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
-                if (!$status) {
-                    return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
-                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
-                    ]),"Internal Server Error",500);
-                } else {  
-                    $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
-                    $roles = $this->getARMroles(); 
-                    try {
-                        $filtered_roles = \array_filter($account['roles'], function($r) {
-                            $check = true;
-                            if(isset($r['dynamic_role']) && $check) {
-                                $check = !$r['dynamic_role'];
-                            }
-                            if(isset($r['status']) && $check) {
-                                $check = ($r['status'] !== "Removed");
-                            }
-                            return $check;
-                        });
-                        foreach ($filtered_roles as $r) {
-                            $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
-                            if (!is_null($accountRole)) {
-                                $resp = $this->setConfirmByAccountRole($type,$identifier, $accountRole['href'],$managerattributes);
-                                if(!$resp->isSuccess()) {
-                                    return $resp;
-                                }
-                            } else {
-                                throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']);                                
-                            }
-                        }                        
-                    } catch (\Exception $e) {
-                        return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                            "description" => $e->getMessage()
-                        ]));
-                    }         
-                    return $this->getAccountByTypeAndIdentifier($type, $identifier);
-                }
-            } else {
-                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_REVIEW_UNSET_BY_MANAGER']
-                ]));
+            } 
+            // Update the account
+            $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
+            if (!$status) {
+                return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                    "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_UPDATE_ERROR']
+                ]),"Internal Server Error",500);
+            } else {  
+                $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
             }
+            $roles = $this->getARMroles(); 
+            try {
+                $filtered_roles = \array_filter($account['roles'], function($r) {
+                    $check = true;
+                    if(isset($r['dynamic_role']) && $check) {
+                        $check = !$r['dynamic_role'];
+                    }
+                    if(isset($r['status']) && $check) {
+                        $check = ($r['status'] !== "Removed");
+                    }
+                    return $check;
+                });
+                foreach ($filtered_roles as $r) {
+                    $accountRole = $roles->findOne([ "_id" => $r['role_id'] ]);
+                    if (!is_null($accountRole)) {
+                        $resp = $this->setConfirmByAccountRole($type,$identifier, $accountRole['href'],$managerattributes);
+                        if(!$resp->isSuccess()) {
+                            return $resp;
+                        }
+                    } else {
+                        throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']);                                
+                    }
+                }                        
+            } catch (\Exception $e) {
+                return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                    "description" => $e->getMessage()
+                ]));
+            }         
+            return $this->getAccountByTypeAndIdentifier($type, $identifier);
         } else {
-            // Check to see if this is a manager
-            
-            
             return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER']
             ]));
