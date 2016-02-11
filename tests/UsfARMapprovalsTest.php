@@ -490,19 +490,33 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
      */
-    public function testSetConfirmByAccount_StateUnset() {
+    public function testSetConfirmByAccount_StateUnsetWithoutReview() {
+        // STEP1: Set the review first
         $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
-        // Confirming that the function failed by the JSendResponse isFail method
-        $this->assertTrue($response->isFail());
-        // Confirming the account key exists
-        $this->assertArrayHasKey('description',$response->getData());
-        // Confirming the value of account is not empty
-        $this->assertNotEmpty($response->getData()['description']);
-        // Confirming the value of the account key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_STATE_UNSET_BY_MANAGER'], $response->getData()['description']);                        
+        // Confirming that the function failed by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Confirming the state key exists
+        $this->assertArrayHasKey('state',$response->getData());
+        // Confirm the state was set anyway since the account isn't under review
+        $this->assertTrue(UsfARMapi::hasStateForManager($response->getData()['state'], 'U99999999'));
+        // Confirming the review key not exists
+        $this->assertArrayNotHasKey('review',$response->getData());
+        // Confirming the confirm key exists
+        $this->assertArrayHasKey('confirm',$response->getData());
+        // Confirming the count of the accounts is 3
+        $this->assertCount(1, $response->getData()['confirm']);
+        // Confirming the usfid we expect in the confirm
+        $this->assertEquals($response->getData()['confirm'][0]['usfid'],'U99999999');
+        // Confirming the roles key not exists
+        $this->assertArrayHasKey('roles',$response->getData());
+        // Confirming unapproved role states were created (which is appropriate when a confirm happens outside a review where no role states existed prior for the supervisor
+        $this->assertTrue(UsfARMapi::hasUnapprovedRoleState($response->getData()['roles'], [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]));
     }
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccountRole
