@@ -572,7 +572,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 }
             }
         }
-        $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
+        $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed", 'modified_date' => new \MongoDate() ] ]);
         if ($status) {
             $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
             return $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
@@ -662,6 +662,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             'roles' => \array_map(function($r) use(&$role) {
                 if($role['_id'] == $r['role_id']) {
                     $r['status'] = "Removed";
+                    $r['modified_date'] = new \MongoDate();
                 }
                 return $r;
             }, $account['roles'])
@@ -717,10 +718,11 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             $account['roles'][] = \array_merge([
                 "role_id" => $roles->findOne([ 'href' => $roleappend['href'] ])['_id'],
                 "added_date" => new \MongoDate(),
+                "modified_date" => new \MongoDate(),
                 "status" => "Active",
                 "state" => []
             ], \array_diff_key($roleappend,array_flip([
-                'href','short_description','name','role_id','added_date','status'
+                'href','short_description','name','role_id','added_date','modified_date','status'
             ])));
         } else {
             // Remove status="Removed" if present
@@ -729,9 +731,10 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     return \array_merge(\array_diff_key($r,array_flip([
                         'href','short_description','name','status'
                     ])),\array_diff_key($roleappend,array_flip([
-                        'href','short_description','name','role_id','added_date'
+                        'href','short_description','name','role_id','added_date','modified_date'
                     ])),[
-                        'status' => 'Active'
+                        'status' => 'Active',
+                        'modified_date' => new \MongoDate()
                     ]);
                 }
                 return $r;
