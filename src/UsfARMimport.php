@@ -135,6 +135,7 @@ trait UsfARMimport {
             $hash = md5(serialize($role));
             $role['role_data']['hash'] = $hash;
             if (isset($this->current_roles[$role['account_type']]) && in_array($href, $this->current_roles[$role['account_type']])) {
+                unset($this->current_roles[$role['account_type']][\array_search($href, $this->current_roles[$role['account_type']])]);
                 if (! in_array($hash, $this->current_roles_hash[$role['account_type']])) {
                     // Update existing role
                     return $this->modifyRoleByTypeAndName($role['account_type'], $role['name'], $role);
