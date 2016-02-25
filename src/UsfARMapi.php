@@ -606,7 +606,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
             ]));
         }
-        $status = $roles->update([ 'href' => $href ], ['$set' => [ "status" => "Removed" ] ]);
+        $status = $roles->update([ 'href' => $href ], ['$set' => [ "status" => "Removed", 'modified_date' => new \MongoDate() ] ]);
         if ($status) {
             $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
             return $this->getRoleByTypeAndName($role['type'], $role['name']);
