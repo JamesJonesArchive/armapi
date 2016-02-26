@@ -99,8 +99,8 @@ trait UsfARMimport {
             $hash = md5(serialize($accountroles));
             $key = array_search($hash, $this->current_mapping_hash);
             if ($key === false) {
-                $currentaccount = $this->getAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier']);
-                if ($currentaccount->isSuccess()) {
+                $resp = $this->getAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier']);
+                if ($resp->isSuccess()) {
                     return $this->modifyRolesForAccountByTypeAndIdentifier($accountroles['account_type'],$accountroles['account_identifier'],[
                         'account_type' => $accountroles['account_type'],
                         'account_identifier' => $accountroles['account_identifier'],
@@ -109,9 +109,7 @@ trait UsfARMimport {
                     ]);
 
                 } else {
-                    return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
-                        "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING']
-                    ]));
+                    return $resp;
                 }
             } else {
                 unset($this->current_mapping_hash[$key]);
