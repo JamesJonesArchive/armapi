@@ -190,7 +190,7 @@ trait UsfARMimport {
             foreach ($this->getAllRoles()->getData() as $type => $roles) {
               $this->current_roles[$type] = [];
               $this->current_roles_hash[$type] = [];
-              foreach ($roles as $role) {
+              foreach (\array_filter($roles, function($r) { return ($r['status'] !== "Orphaned"); }) as $role) {
                 if (isset($role['href'])) $this->current_roles[$type][] = $role['href'];
                 if (isset($role['hash'])) $this->current_roles_hash[$type][] = $role['hash'];
               }
@@ -201,7 +201,7 @@ trait UsfARMimport {
           $this->current_roles_hash[$type] = [];
             $roles = \array_map(function($a) {
                 return ['href' => $a['href']];
-            }, $this->getAllRolesByType($type)->getData()['roles']);
+            }, \array_filter($this->getAllRolesByType($type)->getData()['roles'], function($r) { return ($r['status'] !== "Orphaned"); }));
             $result[$type] = count($roles);
             foreach ($roles as $role) {
               if (isset($role['href'])) $this->current_roles[$type][] = $role['href'];
