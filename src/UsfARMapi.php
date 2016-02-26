@@ -305,8 +305,31 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
 
         if (!isset($account['roles'])) $account['roles'] = [];
-
-        // Look for invalid roles
+        
+        // Find any orphaned account roles and add them to the roles collection
+        foreach (\array_filter($rolechanges['role_list'],function($r) use(&$roles) { return is_null($roles->findOne([ 'href' => $r['href'] ])); }) as $r) {
+            $elements = \explode('/', \rtrim($r['href'], '/'));
+            $name = \str_replace("+"," ",\array_pop($elements));
+            $type = \array_pop($elements);
+            $resp = $this->createRoleByType([
+                "name" => $name,
+                "account_type" => $type,
+                "role_data" => \array_merge(\array_diff_key($r,\array_flip(["href"])),[
+                    "description" => "ORPHANED",
+                    "long_description" => ""                    
+                ])
+            ]);
+            if($resp->isSuccess()) {
+                $resp = $this->orphanRole($r['href']);
+                if(!$resp->isSuccess()) {
+                    return $resp;
+                }
+            } else {
+                return $resp;
+            }
+        }
+        
+        // Look for any remaining invalid roles
         if(count(\array_filter($rolechanges['role_list'],function($r) use(&$roles) {
             return is_null($roles->findOne([ 'href' => $r['href'] ]));
         })) > 0) {
@@ -591,6 +614,30 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public function removeAccountByTypeAndIdentifier($type,$identifier) {
         return $this->removeAccount("/accounts/{$type}/{$identifier}");
+    }
+    /**
+     * Orphan a role in the roles collection
+     *
+     * @param string $href
+     * @return JSendResponse
+     */
+    public function orphanRole($href) {
+        $roles = $this->getARMroles();
+        $role = $roles->findOne([ 'href' => $href ]);
+        if (is_null($role)) {
+            return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_NOT_EXISTS']
+            ]));
+        }
+        $status = $roles->update([ 'href' => $href ], ['$set' => [ "status" => "Orphaned", 'modified_date' => new \MongoDate() ] ]);
+        if ($status) {
+            $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
+            return $this->getRoleByTypeAndName($role['type'], $role['name']);
+        } else {
+            return new JSendResponse('error', UsfARMapi::errorWrapper('error', [
+                "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ROLE_DELETE_ERROR']
+            ]),"Internal Server Error",500);
+        }
     }
     /**
      * Removes an role from the roles
