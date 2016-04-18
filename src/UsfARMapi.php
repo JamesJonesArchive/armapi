@@ -196,7 +196,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 'modified_date' => new \MongoDate(),
                 'state' => []
             ],
-            (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[]
+            (isset($account["account_identity"]))?["identity" => $account["account_identity"]]:[],
+            (isset($account["account_data"]['status']))?['status_history' => UsfARMapi::getUpdatedStatusHistoryArray([], $account["account_data"]['status']) ]:[]
         );
         $insert_status = $accounts->insert($accountattributes);
         if(!$insert_status) {
@@ -227,6 +228,32 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         return new JSendResponse('success', $this->formatMongoAccountToAPIaccount($account));
     }
+    /**
+     * Returns an updated status history array based on the new passed status
+     * 
+     * @param array $status_histories
+     * @param string $current_status
+     * @return array
+     */
+    public static function getUpdatedStatusHistoryArray($status_histories,$current_status) {
+        if((!isset($status_histories))?true:empty($status_histories)) {
+            return [ [ "status" => $current_status, "modified_date" => new \MongoDate() ] ];
+        } else {
+            $status = "Active";
+            $currentDate = "";
+            foreach ($status_histories as $status_history) {
+                if((empty($currentDate))?true:($currentDate->toDateTime()->getTimestamp() < $status_history['modified_date']->toDateTime()->getTimestamp())) {
+                    $status = $status_history['status'];
+                    $currentDate = $status_history['modified_date'];
+                }
+            }
+            if($current_status != $status) {
+                return \array_merge($status_histories,[ [ "status" => $current_status, "modified_date" => new \MongoDate() ] ]);
+            } else {
+                return $status_histories;
+            }               
+        }
+    }
     // May need some revisions
     /**
      * Modify an account by type and identity (using the identifier)
@@ -253,6 +280,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         $href = "/accounts/{$type}/{$identifier}";
         $updatedattributes = \array_merge(array_diff_key(UsfARMapi::convertUTCstringsToMongoDates($accountmods["account_data"],["password_change","last_used","last_update"]),array_flip(['type','identifier'])),["href" => $href ]);
+        if(isset($updatedattributes['status'])) {
+            $updatedattributes['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($updatedattributes['status_history'], $updatedattributes['status']);
+        }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' =>  $updatedattributes ]);
         if ($status) {
             $this->auditLog([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
@@ -595,7 +625,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 }
             }
         }
-        $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed", 'modified_date' => new \MongoDate() ] ]);
+        $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed", 'modified_date' => new \MongoDate(), 'status_history' => UsfARMapi::getUpdatedStatusHistoryArray($account['status_history'], "Removed") ] ]);
         if ($status) {
             $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
             return $this->getAccountByTypeAndIdentifier($account['type'], $account['identifier']);
@@ -710,6 +740,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 if($role['_id'] == $r['role_id']) {
                     $r['status'] = "Removed";
                     $r['modified_date'] = new \MongoDate();
+                    $r['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($r['status_history'], "Removed");
                 }
                 return $r;
             }, $account['roles'])
@@ -767,7 +798,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 "added_date" => new \MongoDate(),
                 "modified_date" => new \MongoDate(),
                 "status" => "Active",
-                "state" => []
+                "state" => [],
+                'status_history' => UsfARMapi::getUpdatedStatusHistoryArray([],"Active")
             ], \array_diff_key($roleappend,array_flip([
                 'href','short_description','name','role_id','added_date','modified_date','status'
             ])));
@@ -781,7 +813,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                         'href','short_description','name','role_id','added_date','modified_date'
                     ])),[
                         'status' => 'Active',
-                        'modified_date' => new \MongoDate()
+                        'modified_date' => new \MongoDate(),
+                        'status_history' => UsfARMapi::getUpdatedStatusHistoryArray($r['status_history'],"Active")
                     ]);
                 }
                 return $r;
