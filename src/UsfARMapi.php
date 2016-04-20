@@ -810,6 +810,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
             // Remove status="Removed" if present
             $account['roles'] = \array_map(function($r) use(&$roles,$roleappend) {
                 if($roles->findOne([ 'href' => $roleappend['href']])['_id'] == $r['role_id']) {
+                    if(!isset($r['status_history'])) {
+                        $r['status_history'] = [];
+                    }
                     return \array_merge(\array_diff_key($r,array_flip([
                         'href','short_description','name','status'
                     ])),\array_diff_key($roleappend,array_flip([
