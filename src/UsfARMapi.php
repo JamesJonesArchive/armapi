@@ -248,7 +248,8 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 }
             }
             if($current_status != $status) {
-                return \array_merge($status_histories,[ [ "status" => $current_status, "modified_date" => new \MongoDate() ] ]);
+                $status_histories[] = [ "status" => $current_status, "modified_date" => new \MongoDate() ];
+                return $status_histories;
             } else {
                 return $status_histories;
             }               
