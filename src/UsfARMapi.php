@@ -237,6 +237,7 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public static function getUpdatedStatusHistoryArray($status_histories,$current_status) {
         if((!isset($status_histories))?true:empty($status_histories)) {
+            echo "This is where I'm at\n";
             return [ [ "status" => $current_status, "modified_date" => new \MongoDate() ] ];
         } else {
             $status = "Active";
