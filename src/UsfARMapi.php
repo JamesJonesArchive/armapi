@@ -283,11 +283,11 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         $href = "/accounts/{$type}/{$identifier}";
         $updatedattributes = \array_merge(array_diff_key(UsfARMapi::convertUTCstringsToMongoDates($accountmods["account_data"],["password_change","last_used","last_update"]),array_flip(['type','identifier'])),["href" => $href ]);
-        if(!isset($updatedattributes['status_history'])) {
-            $updatedattributes['status_history'] = [];
-        }
-        if(isset($updatedattributes['status'])) {
-            $updatedattributes['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($updatedattributes['status_history'], $updatedattributes['status']);
+        if(isset($updatedattributes['status'])) {            
+            if(!isset($account['status_history'])) {
+                $account['status_history'] = [];
+            }
+            $updatedattributes['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($account['status_history'], $updatedattributes['status']);
         }
         $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], ['$set' =>  $updatedattributes ]);
         if ($status) {
