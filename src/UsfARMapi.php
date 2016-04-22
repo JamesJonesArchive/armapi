@@ -631,6 +631,9 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                 }
             }
         }
+        if(!isset($account['status_history'])) {
+            $account['status_history'] = [];
+        }
         $status = $accounts->update([ 'href' => $href ], ['$set' => [ "status" => "Removed", 'modified_date' => new \MongoDate(), 'status_history' => UsfARMapi::getUpdatedStatusHistoryArray($account['status_history'], "Removed") ] ]);
         if ($status) {
             $this->auditLog([ 'href' => $href ], [ 'href' => $href ]);
@@ -743,10 +746,15 @@ class UsfARMapi extends UsfAbstractMongoConnection {
         }
         $updatedattributes = [
             'roles' => \array_map(function($r) use(&$role) {
+                if(!isset($r['status_history'])) {
+                    $r['status_history'] = [];
+                }
                 if($role['_id'] == $r['role_id']) {
                     $r['status'] = "Removed";
                     $r['modified_date'] = new \MongoDate();
                     $r['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($r['status_history'], "Removed");
+                } else if(isset($r['status'])) {            
+                    $r['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($r['status_history'], $r['status']);
                 }
                 return $r;
             }, $account['roles'])
