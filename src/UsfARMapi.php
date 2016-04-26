@@ -751,8 +751,6 @@ class UsfARMapi extends UsfAbstractMongoConnection {
                     $r['status'] = "Removed";
                     $r['modified_date'] = new \MongoDate();
                     $r['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($r['status_history'], "Removed");
-                } else if(isset($r['status'])) {            
-                    $r['status_history'] = UsfARMapi::getUpdatedStatusHistoryArray($r['status_history'], $r['status']);
                 }
                 return $r;
             }, $account['roles'])
