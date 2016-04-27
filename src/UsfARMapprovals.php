@@ -233,13 +233,30 @@ trait UsfARMapprovals {
      * @return string
      */
     public static function getReviewForManager($reviews,$id) {
+//        $managerreview = \array_values(\array_filter($reviews, function($r) use(&$id) {
+//            return ($r['usfid'] == $id);
+//        }));
+//        if(!empty($managerreview)) {
+//            return $managerreview[0]['review'];
+//        }
+//        return '';
+        return UsfARMapi::getReviewObjectForManager($reviews, $id)['review'];
+    }
+    /**
+     * Returns the review 'object' for the specified manager
+     * 
+     * @param string $reviews
+     * @param string $id
+     * @return array
+     */
+    public static function getReviewObjectForManager($reviews,$id) {
         $managerreview = \array_values(\array_filter($reviews, function($r) use(&$id) {
             return ($r['usfid'] == $id);
         }));
         if(!empty($managerreview)) {
-            return $managerreview[0]['review'];
+            return $managerreview[0];
         }
-        return '';
+        return ['review' => ''];
     }
     /**
      * Returns an updated state array based on the new passed state and the manager attributes
@@ -569,9 +586,12 @@ trait UsfARMapprovals {
         } else {
             $updatedattributes['roles'] = $account['roles'];
         }
+        if(!isset($account['review'])) {
+            $account['review'] = [];
+        }
         $roles = $this->getARMroles();        
         try {
-            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$roles,$href) {
+            $updatedattributes['roles'] = \array_map(function($r) use($managerattributes,$roles,$href,$account) {
                 if((isset($r['dynamic_role']))?$r['dynamic_role']:false) {
                     return $r;
                 }
@@ -587,8 +607,9 @@ trait UsfARMapprovals {
                                 }
                                 $r['confirm'][] = \array_merge($managerattributes,[ 
                                     'state' => UsfARMapi::getStateForManager($r['state'],$managerattributes['usfid']), 
-                                    'timestamp' => new \MongoDate() ]
-                                );
+                                    'timestamp' => new \MongoDate(),
+                                    'review' => UsfARMapi::getReviewObjectForManager(UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes),$managerattributes['usfid'])
+                                ]);
                             } else {
                                 throw new \Exception(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_ROLE_STATE_UNSET_BY_MANAGER']);
                             }
@@ -664,7 +685,7 @@ trait UsfARMapprovals {
                 return new JSendResponse('fail', UsfARMapi::errorWrapper('fail', [
                     "description" => UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_HAS_UNAPPROVED_ROLE_STATES']
                 ]));
-            } else {
+            } else {                
                 // Update the account
                 $status = $accounts->update([ "type" => $type, "identifier" => $identifier ], [ '$set' => $updatedattributes ]);
                 if (!$status) {
@@ -715,8 +736,9 @@ trait UsfARMapprovals {
         $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
         $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
             'state' => UsfARMapi::getStateForManager($account['state'], $managerattributes['usfid']), 
-            'timestamp' => new \MongoDate() 
-        ]);
+            'timestamp' => new \MongoDate(),
+            'review' => UsfARMapi::getReviewObjectForManager(UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes),$managerattributes['usfid'])
+        ]);                        
         if(UsfARMapi::hasReviewForManager($account['review'], $managerattributes['usfid'])) {
             // Set the account review closed
             $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray($account['review'], 'closed', $managerattributes);
@@ -937,10 +959,11 @@ trait UsfARMapprovals {
             if(!empty($note)) {
                 $adminattributes['admin_note'] = $note;
             }
-            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity) {
+            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity,$managerattributes,$adminattributes,$account) {
                 if($r['usfid'] == $identity) {
-                    $r['review'] = 'closed';
+                    $r['review'] = 'delegated';
                     $r['timestamp'] = new \MongoDate(); 
+                    $r['review'] = UsfARMapi::getReviewObjectForManager(UsfARMapi::getUpdatedReviewArray($account['review'], 'delegated', \array_merge($managerattributes, $adminattributes)),$managerattributes['usfid']);
                 }
                 return $r;
             }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes),$days);
