@@ -169,13 +169,24 @@ trait UsfARMapprovals {
      * @return string
      */
     public static function getStateForManager($states,$id) {
+        return UsfARMapi::getStateObjectForManager($states, $id)['state'];
+    }
+    /**
+     * Returns the state object for the specified manager
+     * 
+     * @param type $states
+     * @param type $id
+     * @return type
+     */
+    public static function getStateObjectForManager($states,$id) {
         $managerstate = \array_values(\array_filter($states, function($s) use(&$id) {
             return ($s['usfid'] == $id);
         }));
         if(!empty($managerstate)) {
-            return $managerstate[0]['state'];
+            return $managerstate[0];
         }
-        return '';
+        return ['state' => '','usfid' => $id];
+        
     }
     /**
      * Checks to see if there is a matching
@@ -968,7 +979,7 @@ trait UsfARMapprovals {
             }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes),$days);
             
             $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
-            $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
+            $updatedattributes['confirm'][] = \array_merge(UsfARMapi::getStateObjectForManager($account['state'], $identity),[ 
                 'state' => UsfARMapi::getStateForManager($account['state'], $identity), 
                 'timestamp' => new \MongoDate(),
                 'review' => UsfARMapi::getReviewObjectForManager($updatedattributes['review'],$identity)
