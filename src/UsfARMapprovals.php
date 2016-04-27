@@ -959,14 +959,21 @@ trait UsfARMapprovals {
             if(!empty($note)) {
                 $adminattributes['admin_note'] = $note;
             }
-            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity,$managerattributes,$adminattributes,$account) {
+            $updatedattributes['review'] = UsfARMapi::getUpdatedReviewArray(\array_map(function($r) use($identity) {
                 if($r['usfid'] == $identity) {
                     $r['review'] = 'delegated';
                     $r['timestamp'] = new \MongoDate(); 
-                    $r['review'] = UsfARMapi::getReviewObjectForManager(UsfARMapi::getUpdatedReviewArray($account['review'], 'delegated', \array_merge($managerattributes, $adminattributes)),$managerattributes['usfid']);
                 }
                 return $r;
             }, $updatedattributes['review']), 'open', \array_merge($managerattributes, $adminattributes),$days);
+            
+            $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
+            $updatedattributes['confirm'][] = \array_merge($managerattributes,[ 
+                'state' => UsfARMapi::getStateForManager($account['state'], $identity), 
+                'timestamp' => new \MongoDate(),
+                'review' => UsfARMapi::getReviewObjectForManager($updatedattributes['review'],$identity)
+            ]);              
+            
             // Update the account with review changes and move on to the state changes
             $status = $accounts->update([ "href" => $href ], [ '$set' => $updatedattributes ]);
             if (!$status) {
