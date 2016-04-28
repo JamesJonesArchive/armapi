@@ -199,8 +199,8 @@ trait UsfARMimport {
           $this->current_roles_hash[$type] = [];
             $roles = \array_map(function($a) {
                 return ['href' => $a['href']];
-            }, \array_filter($this->getAllRolesByType($type)->getData()['roles'], function($r) { return ($r['status'] !== "Orphaned"); }));
-            $result[$type] = count($roles);
+            }, \array_filter($this->getAllRolesByType($type)->getData()['roles'], function($r) { return isset($r['status'])?($r['status'] !== "Orphaned"):true; }));
+            $result[$type] = count($roles);            
             foreach ($roles as $role) {
               if (isset($role['href'])) $this->current_roles[$type][] = $role['href'];
               if (isset($role['hash'])) $this->current_roles_hash[$type][] = $role['hash'];

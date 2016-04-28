@@ -980,9 +980,12 @@ trait UsfARMapprovals {
             
             $updatedattributes['confirm'] = (isset($account['confirm']))?$account['confirm']:[];
             $updatedattributes['confirm'][] = \array_merge(UsfARMapi::getStateObjectForManager($account['state'], $identity),[ 
-                'state' => UsfARMapi::getStateForManager($account['state'], $identity), 
+                'state' => 'delegated', 
                 'timestamp' => new \MongoDate(),
-                'review' => UsfARMapi::getReviewObjectForManager($updatedattributes['review'],$identity)
+                'review' => \array_merge(UsfARMapi::getReviewObjectForManager($updatedattributes['review'],$identity), [
+                    'delegated_usfid' => $delegateidentity,
+                    'delegated_name' => $managerattributes['name']
+                ])
             ]);              
             
             // Update the account with review changes and move on to the state changes

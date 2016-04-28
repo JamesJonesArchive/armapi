@@ -98,7 +98,7 @@ class UsfARMimportTest extends \PHPUnit_Framework_TestCase  {
         // Confirming the value of account is not empty
         $this->assertNotEmpty($response->getData()['description']);
         // Confirming the value of the identity key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_INFO_MISSING'], $response->getData()['description']); 
+        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ACCOUNT_NOT_EXISTS'], $response->getData()['description']); 
     }
     /**
      * @covers \USF\IdM\UsfARMimport::importRole

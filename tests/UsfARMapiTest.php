@@ -509,14 +509,16 @@ class UsfARMapiTest extends \PHPUnit_Framework_TestCase {
                 'href' => '/roles/GEMS/INVALID_ROLE_THAT_DOESNT_EXIST'
             ]
         ]]);
-        // Confirming that the function failed by the JSendResponse isFail method
-        $this->assertTrue($response->isFail());
-        // Confirming the account key exists
-        $this->assertArrayHasKey('description',$response->getData());
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess()); 
+        // The "role" should have been auto created
+        $response = $this->usfARMapi->getRoleByTypeAndName('GEMS','INVALID_ROLE_THAT_DOESNT_EXIST');
+        // Confirming the role_data key exists
+        $this->assertArrayHasKey('role_data',$response->getData());
         // Confirming the value of role_list is not empty
-        $this->assertNotEmpty($response->getData()['description']);
-        // Confirming the value of the role_list key is the error message
-        $this->assertEquals(UsfARMapi::$ARM_ERROR_MESSAGES['ROLES_CONTAINS_INVALID'], $response->getData()['description']);
+        $this->assertNotEmpty($response->getData()['role_data']['status']);
+        // Confirming the value of the status key is Orphaned
+        $this->assertEquals("Orphaned", $response->getData()['role_data']['status']);
     }
     /**
      * @covers \USF\IdM\UsfARMapi::getAccountsByTypeAndIdentity

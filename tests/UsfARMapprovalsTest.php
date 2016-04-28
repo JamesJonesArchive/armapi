@@ -337,13 +337,13 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         // Confirm a review is set for the specified manager original identity
         $this->assertTrue(UsfARMapi::hasReviewForManager($response->getData()['review'], 'U99999999'));
         // Make sure that review is set to closed now
-        $this->assertEquals('closed', UsfARMapi::getReviewForManager($response->getData()['review'], 'U99999999'));
+        $this->assertEquals('delegated', UsfARMapi::getReviewForManager($response->getData()['review'], 'U99999999'));
 
         // Confirm a review is set for the specified manager delegate identity
         $this->assertTrue(UsfARMapi::hasReviewForManager($response->getData()['review'], 'U98767543'));
         // Make sure the delegated review is set to open
         $this->assertEquals('open', UsfARMapi::getReviewForManager($response->getData()['review'], 'U98767543'));
-
+        
         foreach ($response->getData()['roles'] as $role) {
             // Confirming the identifier key exists
             $this->assertArrayHasKey('state',$role);
@@ -440,7 +440,6 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ]);
-        
         // Confirming that the function succeeded by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the confirm key exists
