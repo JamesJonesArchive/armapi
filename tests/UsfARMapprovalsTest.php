@@ -199,7 +199,7 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
      */
     public function testSetReviewByAccount() {
-        $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL');
+        $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL',10);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());
         // Confirming the type key exists
@@ -311,9 +311,9 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
      */
     public function testDelegateReview() {
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
-        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL')->isSuccess());
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL',10)->isSuccess());
         // Delegate the open review from Rocky Bull to Gold Greeny
-        $response = $this->usfARMapi->delegateReview('U98767543','U99999999','/accounts/GEMS/RBULL');
+        $response = $this->usfARMapi->delegateReview('U98767543','U99999999','/accounts/GEMS/RBULL',10);
         
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
         $this->assertTrue($response->isSuccess());

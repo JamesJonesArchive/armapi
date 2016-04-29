@@ -237,18 +237,18 @@ class UsfARMapi extends UsfAbstractMongoConnection {
      */
     public static function getUpdatedStatusHistoryArray($status_histories,$current_status) {
         if((!isset($status_histories))?true:empty($status_histories)) {
-            return [ [ "status" => $current_status, "modified_date" => new \MongoDate() ] ];
+            return [ [ "status" => $current_status, "timestamp" => new \MongoDate() ] ];
         } else {
             $status = "Active";
             $currentDate = "";
             foreach ($status_histories as $status_history) {
-                if((empty($currentDate))?true:($currentDate->toDateTime()->getTimestamp() < $status_history['modified_date']->toDateTime()->getTimestamp())) {
+                if((empty($currentDate))?true:($currentDate->toDateTime()->getTimestamp() < $status_history['timestamp']->toDateTime()->getTimestamp())) {
                     $status = $status_history['status'];
-                    $currentDate = $status_history['modified_date'];
+                    $currentDate = $status_history['timestamp'];
                 }
             }
             if($current_status != $status) {
-                $status_histories[] = [ "status" => $current_status, "modified_date" => new \MongoDate() ];
+                $status_histories[] = [ "status" => $current_status, "timestamp" => new \MongoDate() ];
                 return $status_histories;
             } else {
                 return $status_histories;
