@@ -457,6 +457,8 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals($rsresponse->getData()['review'][0]['timestamp'],$response->getData()['confirm'][0]['review']['timestamp']);
         // Make sure the current review value matches what was copied over to the confirm record
         $this->assertEquals($response->getData()['review'][0]['timestamp'],$response->getData()['confirm'][0]['review']['timestamp']);
+        // Make sure the date of the confirm does not equal the timestamp of the review
+        $this->assertNotEquals($response->getData()['confirm'][0]['review']['timestamp'], $response->getData()['confirm'][0]['timestamp']);
     }    
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
