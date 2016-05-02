@@ -307,9 +307,9 @@ trait UsfARMapprovals {
             return \array_map(function($rv) use($managerattributes,$reviewcode,$days) {
                 if($rv['usfid'] == $managerattributes['usfid']) {
                     if($days < 0) {
-                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate() ]);                        
+                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode ]);                        
                     } else {
-                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'timestamp' => new \MongoDate(), 'reviewend' => new \MongoDate(\strtotime("+{$days} day")) ]);                        
+                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'reviewend' => new \MongoDate(\strtotime("+{$days} day")) ]);                        
                     }
                 } else {
                     return $rv;

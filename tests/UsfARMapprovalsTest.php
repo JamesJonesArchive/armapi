@@ -431,10 +431,13 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
         ])->isSuccess());
-        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/INQUIRE_ROLE', 'removal_pending', [
+        $rsresponse = $this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/INQUIRE_ROLE', 'removal_pending', [
             'usfid' => 'U99999999',
             'name' => 'Rocky Bull'
-        ])->isSuccess());
+        ]);
+        $this->assertTrue($rsresponse->isSuccess());
+        // Create a tiny delay before confirming (.10 sec) so the dates can be compared
+        \usleep(100000);
         // STEP 3: Then confirm last
         $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
             'usfid' => 'U99999999',
@@ -450,6 +453,10 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
         $this->assertCount(1, $response->getData()['confirm']);
         // Check the last confirm state
         $this->assertEquals('removal_pending',UsfARMapi::getLastConfirm($response->getData()['confirm'], 'U99999999')['state']);
+        // Make sure the review timestamp did not change in the confirmation process
+        $this->assertEquals($rsresponse->getData()['review'][0]['timestamp'],$response->getData()['confirm'][0]['review']['timestamp']);
+        // Make sure the current review value matches what was copied over to the confirm record
+        $this->assertEquals($response->getData()['review'][0]['timestamp'],$response->getData()['confirm'][0]['review']['timestamp']);
     }    
     /**
      * @covers \USF\IdM\UsfARMapprovals::setConfirmByAccount
