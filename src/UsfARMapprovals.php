@@ -306,10 +306,24 @@ trait UsfARMapprovals {
         if(UsfARMapi::hasReviewForManager($reviews, $managerattributes['usfid'])) {
             return \array_map(function($rv) use($managerattributes,$reviewcode,$days) {
                 if($rv['usfid'] == $managerattributes['usfid']) {
+                    $reviewupdate = [ 'review' => $reviewcode ];
+                    if(isset($rv['review'])) {
+                        if($rv['review'] !== $reviewcode && $reviewcode == 'open') {
+                            $reviewupdate['timestamp'] = new \MongoDate();
+                            if($days < 0) {
+                                if(isset($rv['reviewend'])) {
+                                    unset($rv['reviewend']);
+                                }
+                            }
+                        }
+                    } else if($reviewcode == 'open'){
+                        $reviewupdate['timestamp'] = new \MongoDate();
+                    }
                     if($days < 0) {
-                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode ]);                        
+                        return \array_merge($rv,$managerattributes,$reviewupdate);                        
                     } else {
-                        return \array_merge($rv,$managerattributes,[ 'review' => $reviewcode, 'reviewend' => new \MongoDate(\strtotime("+{$days} day")) ]);                        
+                        $reviewupdate['reviewend'] = new \MongoDate(\strtotime("+{$days} day"));
+                        return \array_merge($rv,$managerattributes,$reviewupdate);                        
                     }
                 } else {
                     return $rv;

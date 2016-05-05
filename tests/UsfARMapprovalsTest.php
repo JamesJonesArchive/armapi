@@ -198,6 +198,43 @@ class UsfARMapprovalsTest extends \PHPUnit_Framework_TestCase {
     /**
      * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
      */
+    public function testSetReviewByAccount_priormanager_ReopendedReviewGetsNewTimestamp() {
+        // STEP1: Set the review first
+        $this->assertTrue($this->usfARMapi->setReviewByAccount('GEMS','RBULL',10)->isSuccess());
+        // STEP2: Set the state next
+        // Confirming that the function executed successfully by the JSendResponse isSuccess method
+        $this->assertTrue($this->usfARMapi->setAccountState('GEMS', 'RBULL', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/RPT2_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $this->assertTrue($this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/PeopleSoft+User', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ])->isSuccess());
+        $rsresponse = $this->usfARMapi->setAccountRoleState('GEMS', 'RBULL', '/roles/GEMS/INQUIRE_ROLE', 'removal_pending', [
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        $this->assertTrue($rsresponse->isSuccess());
+        // Create a tiny delay before confirming (.10 sec) so the dates can be compared
+        \usleep(100000);
+        // STEP 3: Then confirm last
+        $response = $this->usfARMapi->setConfirmByAccount('GEMS','RBULL',[
+            'usfid' => 'U99999999',
+            'name' => 'Rocky Bull'
+        ]);
+        // Confirming that the function succeeded by the JSendResponse isSuccess method
+        $this->assertTrue($response->isSuccess());
+        // Make sure the existing closed review object timestamp is updated when opened again
+        $this->assertNotEquals($response->getData()['review'][0]['timestamp'], $this->usfARMapi->setReviewByAccount('GEMS','RBULL',10)->getData()['review'][0]['timestamp']);
+    }
+    /**
+     * @covers \USF\IdM\UsfARMapprovals::setReviewByAccount
+     */
     public function testSetReviewByAccount() {
         $response = $this->usfARMapi->setReviewByAccount('GEMS','RBULL',10);
         // Confirming that the function executed successfully by the JSendResponse isSuccess method
