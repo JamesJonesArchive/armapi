@@ -1029,7 +1029,7 @@ trait UsfARMapprovals {
                 // $this->auditLog([ "debug" => "DelegateOutput", "purpose" => "Intercepting output", "account_href" => $href, "days" => $days, "note" => $note ], [ '$set' => $updatedaccount ]);   
                 if($updatedaccount->isSuccess()) {
                     // Send email notifications
-                    // $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
+                    $this->sendReviewNotification($delegatevisor->getData()['directory_info']['self'], $updatedaccount->getData(),$visorcheck->getData()['directory_info']['self']);
                 }                
                 return $updatedaccount;
             }            
